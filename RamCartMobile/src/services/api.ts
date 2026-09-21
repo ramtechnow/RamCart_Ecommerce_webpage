@@ -126,7 +126,7 @@ class ApiService {
       };
     } catch (error: any) {
       if (__DEV__) {
-        console.error(`[API Error] ${options.method || 'GET'} ${url}`, error);
+        console.warn(`[API Connection Warning] ${options.method || 'GET'} ${url}:`, error.message || error);
       }
 
       if (error.name === 'AbortError') {

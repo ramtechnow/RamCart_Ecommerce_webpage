@@ -1,27 +1,29 @@
 import { Platform } from 'react-native';
 
 /**
- * Backend API Configuration
- * 
- * Note for mobile testing:
- * - Android Emulator uses 'http://10.0.2.2:4000' to reach host localhost.
- * - iOS Simulator / Web uses 'http://localhost:4000'.
- * - Physical device testing requires setting EXPO_PUBLIC_API_URL to your local machine IP (e.g., http://192.168.1.5:4000).
+ * Backend API Configuration for RamCartMobile
+ *
+ * Defaults to the 24/7 Render Production Cloud Backend (https://frontend-project-jucn.onrender.com).
+ * Can be overridden via EXPO_PUBLIC_API_URL environment variable for local backend testing.
  */
 
+const PRODUCTION_CLOUD_BACKEND_URL = 'https://frontend-project-jucn.onrender.com';
+
 const getDevApiBaseUrl = (): string => {
-  if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:4000';
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    return process.env.EXPO_PUBLIC_API_URL;
   }
-  return 'http://localhost:4000';
+  // Default to 24/7 Render Cloud Backend for seamless mobile device testing without needing local PC server running
+  return PRODUCTION_CLOUD_BACKEND_URL;
 };
 
 export const API_CONFIG = {
-  BASE_URL: process.env.EXPO_PUBLIC_API_URL || getDevApiBaseUrl(),
+  BASE_URL: getDevApiBaseUrl(),
   TIMEOUT: 15000,
   ENDPOINTS: {
     LOGIN: '/login',
     SIGNUP: '/signup',
+    FIREBASE_SYNC: '/auth/firebase-sync',
     ALL_PRODUCTS: '/allproducts',
     NEW_COLLECTIONS: '/newcollections',
     POPULAR_IN_WOMEN: '/popularinwomen',
