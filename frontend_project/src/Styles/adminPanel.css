@@ -1546,9 +1546,29 @@
     padding-bottom: 0 !important;
   }
 
-  /* ── Sidebar becomes a STICKY TOP TAB BAR ── */
+  /* ── Topbar becomes fixed at the very top ── */
+  .admin-topbar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    z-index: 1000 !important;
+    background: var(--bg-secondary) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+    padding: 8px 12px !important;
+  }
+
+  .admin-topbar h4,
+  .admin-topbar span {
+    font-size: 13px !important;
+  }
+
+  /* ── Sidebar becomes a fixed horizontal tab bar under the topbar ── */
   .admin-sidebar {
-    position: sticky !important;
+    position: fixed !important;
     top: 48px !important;
     left: 0 !important;
     right: 0 !important;
@@ -1562,7 +1582,7 @@
     border-right: none !important;
     border-bottom: 1px solid var(--border-color) !important;
     border-top: none !important;
-    z-index: 400 !important;
+    z-index: 990 !important;
     background: var(--bg-secondary) !important;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
     overflow-x: auto !important;
@@ -1655,6 +1675,7 @@
   }
 
   .admin-content {
+    margin-top: 100px !important;
     padding: 12px !important;
     overflow-x: hidden !important;
   }
@@ -1813,3 +1834,39 @@
     min-width: 40px !important;
   }
 }
+
+/* ── Global Dark/Light Theme Inputs and Table overrides ── */
+.admin-panel input,
+.admin-panel select,
+.admin-panel textarea {
+  color: var(--text-primary) !important;
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+.admin-panel input:focus,
+.admin-panel select:focus,
+.admin-panel textarea:focus {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 0 0 1px var(--accent-color) !important;
+}
+
+.admin-panel input::placeholder,
+.admin-panel textarea::placeholder {
+  color: var(--text-muted) !important;
+  opacity: 0.75;
+}
+
+/* ── Sidebar Quick Action Button styling overrides ── */
+.quick-action-btn {
+  background-color: var(--accent-color) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px var(--accent-light) !important;
+  border-radius: 12px !important;
+  transition: var(--transition-smooth) !important;
+}
+
+.quick-action-btn:hover {
+  background-color: var(--accent-hover) !important;
+}
+

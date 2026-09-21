@@ -1,0 +1,23 @@
+# Node dependencies
+node_modules/
+
+# Expo files
+.expo/
+dist/
+web-build/
+
+# Native builds & keys
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Logs
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Environment
+.env*.local

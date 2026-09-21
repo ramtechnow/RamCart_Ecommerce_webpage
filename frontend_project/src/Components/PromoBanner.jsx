@@ -1,63 +1,92 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ShieldAlert, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Carousel } from "react-bootstrap";
 import { BACKEND_URL } from "../config";
 import "../Styles/theme.css";
 import "../Styles/promobanner.css";
 
+const DEFAULT_FALLBACK_BANNERS = [
+  {
+    _id: "default-1",
+    description: "Elevate Your Style, Experience Premium Comfort.",
+    image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1600&auto=format&fit=crop",
+    discountType: "percentage",
+    discountValue: 50,
+    targetLink: "/womens",
+    tag: "NEW SEASON ARRIVALS",
+  },
+  {
+    _id: "default-2",
+    description: "Exclusive Men's Fashion & Trendsetting Outerwear.",
+    image: "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?q=80&w=1600&auto=format&fit=crop",
+    discountType: "percentage",
+    discountValue: 40,
+    targetLink: "/mens",
+    tag: "FLAT 40% OFF MEGA SALE",
+  },
+  {
+    _id: "default-3",
+    description: "Kids & Baby Collection - Bright, Playful & Cozy.",
+    image: "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?q=80&w=1600&auto=format&fit=crop",
+    discountType: "fixed",
+    discountValue: 500,
+    targetLink: "/kids",
+    tag: "EXPLORE KIDS COLLECTION",
+  },
+];
+
 const PromoBanner = ({ page = "home" }) => {
-  const [banners, setBanners]     = useState([]);
-  const [loading, setLoading]     = useState(true);
-  const [current, setCurrent]     = useState(0);
-  const [transitioning, setTransitioning] = useState(false);
+  const [banners, setBanners] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+    let isMounted = true;
+    let retryTimer = null;
 
-    const fetchActiveBanners = async () => {
+    const fetchActiveBanners = async (attempt = 1) => {
       try {
-        const res  = await fetch(`${BACKEND_URL}/banners/active?page=${page}`, { signal: controller.signal });
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s timeout
+
+        const res = await fetch(`${BACKEND_URL}/banners/active?page=${page}`, { signal: controller.signal });
         clearTimeout(timeoutId);
+
         if (res.ok) {
           const data = await res.json();
-          setBanners(data);
+          if (isMounted && Array.isArray(data) && data.length > 0) {
+            setBanners(data);
+            setLoading(false);
+            return;
+          }
         }
       } catch (err) {
-        clearTimeout(timeoutId);
-        console.warn("Failed to fetch active promotional banners:", err);
-      } finally {
+        console.warn(`[PromoBanner] Attempt ${attempt} failed to fetch active banners:`, err);
+      }
+
+      if (isMounted) {
+        // Fallback to default carousel slides if fetch failed or returned empty
+        setBanners((prev) => (prev.length > 0 ? prev : DEFAULT_FALLBACK_BANNERS));
         setLoading(false);
+
+        // Auto-retry once after 4s in case backend server was waking up
+        if (attempt === 1) {
+          retryTimer = setTimeout(() => {
+            if (isMounted) fetchActiveBanners(2);
+          }, 4000);
+        }
       }
     };
-    fetchActiveBanners();
-    return () => { clearTimeout(timeoutId); controller.abort(); };
+
+    fetchActiveBanners(1);
+
+    return () => {
+      isMounted = false;
+      if (retryTimer) clearTimeout(retryTimer);
+    };
   }, [page]);
 
-  const goTo = useCallback((idx) => {
-    if (transitioning) return;
-    setTransitioning(true);
-    setTimeout(() => {
-      setCurrent(idx);
-      setTransitioning(false);
-    }, 400);
-  }, [transitioning]);
-
-  const next = useCallback(() => {
-    goTo((current + 1) % banners.length);
-  }, [current, banners.length, goTo]);
-
-  const prev = useCallback(() => {
-    goTo((current - 1 + banners.length) % banners.length);
-  }, [current, banners.length, goTo]);
-
-  // Auto-advance every 5 s
-  useEffect(() => {
-    if (banners.length <= 1) return;
-    const timer = setInterval(next, 5000);
-    return () => clearInterval(timer);
-  }, [banners.length, next]);
+  const activeSlides = banners.length > 0 ? banners : DEFAULT_FALLBACK_BANNERS;
 
   if (loading) {
     return (
@@ -76,73 +105,42 @@ const PromoBanner = ({ page = "home" }) => {
     );
   }
 
-  /* ── STATIC FALLBACK ─────────────────────────────────────────── */
-  if (banners.length === 0) {
-    if (page !== "home") return null;
-    return (
-      <div className="promo-wrapper">
-        <div
-          className="hero-slide"
-          style={{
-            background:
-              "linear-gradient(135deg, #0f1115 0%, #1a1f2e 40%, #2d1b3d 70%, #1a1f2e 100%)"
-          }}
-        >
-          <div className="hero-content">
-            <span className="hero-tag">NEW SEASON ARRIVALS</span>
-            <h1 className="hero-title">Elevate Your Style,<br />Experience Comfort.</h1>
-            <p className="hero-subtitle">
-              Premium curated shirts, jackets, linen blouses and warm outerwear. Made with organic fabrics.
-            </p>
-            <div className="hero-cta-row">
-              <Link to="/womens">
-                <button className="hero-btn hero-btn-primary">Shop Women <ArrowRight size={15} /></button>
-              </Link>
-              <Link to="/mens">
-                <button className="hero-btn hero-btn-ghost">Shop Men <ArrowRight size={15} /></button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  /* ── DB BANNER CAROUSEL (React Bootstrap Carousel) ──────────── */
   return (
     <div className="promo-wrapper">
-      <Carousel 
-        fade 
-        indicators={banners.length > 1} 
-        controls={banners.length > 1}
-        interval={5000}
+      <Carousel
+        fade
+        indicators={activeSlides.length > 1}
+        controls={activeSlides.length > 1}
+        interval={4500}
         style={{ overflow: "hidden" }}
       >
-        {banners.map((ban, idx) => (
+        {activeSlides.map((ban, idx) => (
           <Carousel.Item key={ban._id ?? idx}>
             <div
               className="hero-slide carousel-slide"
               style={{
-                backgroundImage: `linear-gradient(to right, rgba(15,17,21,0.88) 28%, rgba(15,17,21,0.22) 72%), url('${ban.image}')`,
+                backgroundImage: ban.image
+                  ? `linear-gradient(to right, rgba(15,17,21,0.88) 28%, rgba(15,17,21,0.22) 72%), url('${ban.image}')`
+                  : "linear-gradient(135deg, #0f1115 0%, #1a1f2e 40%, #2d1b3d 70%, #1a1f2e 100%)",
                 backgroundSize: "cover",
                 backgroundPosition: "center top",
                 display: "flex",
-                alignItems: "center"
+                alignItems: "center",
               }}
             >
               <div className="hero-content">
-                {ban.discountType && (
-                  <span className="hero-promo-tag">
-                    {ban.discountType === "percentage"
-                      ? `${ban.discountValue}% OFF PROMOTIONAL OFFER`
-                      : `₹${ban.discountValue} OFF PROMOTIONAL OFFER`}
-                  </span>
-                )}
+                <span className="hero-promo-tag">
+                  {ban.tag || (ban.discountType === "percentage"
+                    ? `${ban.discountValue}% OFF PROMOTIONAL OFFER`
+                    : ban.discountType === "fixed"
+                    ? `₹${ban.discountValue} OFF PROMOTIONAL OFFER`
+                    : "FEATURED PROMOTION")}
+                </span>
                 <h1 className="hero-title">{ban.description}</h1>
                 <div className="hero-cta-row">
-                  <Link to={ban.targetLink || "/"}>
+                  <Link to={ban.targetLink || "/womens"}>
                     <button className="hero-btn hero-btn-primary">
-                      Claim Offer Now <ArrowRight size={15} />
+                      Explore Collection <ArrowRight size={15} />
                     </button>
                   </Link>
                 </div>

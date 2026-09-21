@@ -111,7 +111,7 @@ export const AdminSidebar = ({
         <button 
           type="button"
           onClick={() => alert("⚡ Quick Admin console drawer coming soon!")}
-          className="w-full flex items-center justify-center gap-1.5 py-2 px-4 bg-[#db2b60] hover:bg-[#b80149] text-white rounded-xl transition-all duration-200 text-xs font-black cursor-pointer shadow-sm shadow-[#db2b60]/20 border-none"
+          className="quick-action-btn w-full flex items-center justify-center gap-1.5 py-2 px-4 text-xs font-black cursor-pointer border-none"
         >
           <Zap size={12} className="fill-current" />
           Quick Action
