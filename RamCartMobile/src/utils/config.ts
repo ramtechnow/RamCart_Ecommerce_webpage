@@ -19,7 +19,7 @@ const getDevApiBaseUrl = (): string => {
 
 export const API_CONFIG = {
   BASE_URL: getDevApiBaseUrl(),
-  TIMEOUT: 15000,
+  TIMEOUT: 45000,
   ENDPOINTS: {
     LOGIN: '/login',
     SIGNUP: '/signup',

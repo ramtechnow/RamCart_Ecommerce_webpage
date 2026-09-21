@@ -73,12 +73,14 @@ class ApiService {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    attempt = 1
   ): Promise<ApiResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
+    const method = options.method || 'GET';
 
     if (__DEV__) {
-      console.log(`[API Request] ${options.method || 'GET'} ${url}`);
+      console.log(`[API Request ${method}] ${url} (Attempt ${attempt})`);
     }
 
     try {
@@ -96,7 +98,7 @@ class ApiService {
       const responseData = await response.json();
 
       if (__DEV__) {
-        console.log(`[API Response] ${response.status} ${url}`, responseData);
+        console.log(`[API Response ${response.status}] ${url}`, responseData);
       }
 
       if (!response.ok || (responseData && responseData.success === false)) {
@@ -126,7 +128,16 @@ class ApiService {
       };
     } catch (error: any) {
       if (__DEV__) {
-        console.warn(`[API Connection Warning] ${options.method || 'GET'} ${url}:`, error.message || error);
+        console.log(`[API Request Info] ${method} ${url}: ${error.message || error}`);
+      }
+
+      // Auto retry GET requests once if server was sleeping on Render
+      if (attempt < 2 && method === 'GET') {
+        if (__DEV__) {
+          console.log(`[API Auto-Retry] Retrying ${url} after server wake-up delay...`);
+        }
+        await new Promise((res) => setTimeout(res, 1500));
+        return this.request<T>(endpoint, options, attempt + 1);
       }
 
       if (error.name === 'AbortError') {
