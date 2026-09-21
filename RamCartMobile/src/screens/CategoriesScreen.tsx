@@ -8,12 +8,16 @@ import {
   Image,
   ActivityIndicator,
   RefreshControl,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Header } from '../components/Header';
 import { apiService, MobileProduct } from '../services/api';
 import { COLORS, SPACING } from '../utils/constants';
+
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = (width - SPACING.md * 3) / 2;
 
 interface CategoryItem {
   id: string;
@@ -23,10 +27,22 @@ interface CategoryItem {
 }
 
 const CATEGORIES_LIST: CategoryItem[] = [
-  { id: '1', name: "Women's Collection", key: 'women', icon: 'woman-outline' },
-  { id: '2', name: "Men's Collection", key: 'men', icon: 'man-outline' },
+  { id: '1', name: "Women's", key: 'women', icon: 'woman-outline' },
+  { id: '2', name: "Men's", key: 'men', icon: 'man-outline' },
   { id: '3', name: "Kids & Baby", key: 'kid', icon: 'happy-outline' },
 ];
+
+const matchesCategory = (productCategory?: string, targetKey?: string): boolean => {
+  if (!productCategory || !targetKey) return false;
+  const cat = productCategory.toLowerCase().trim();
+  const key = targetKey.toLowerCase().trim();
+
+  if (cat === key) return true;
+  if (key === 'kid' && (cat === 'kids' || cat.includes('kid') || cat.includes('child'))) return true;
+  if (key === 'women' && (cat === 'womens' || cat.includes('women'))) return true;
+  if (key === 'men' && (cat === 'mens' || cat === 'men')) return true;
+  return cat.startsWith(key);
+};
 
 export const CategoriesScreen: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('women');
@@ -58,57 +74,60 @@ export const CategoriesScreen: React.FC = () => {
     loadCategoryProducts();
   }, [loadCategoryProducts]);
 
-  const filteredProducts = products.filter(
-    (p) => p.category?.toLowerCase() === selectedCategory.toLowerCase()
+  const filteredProducts = products.filter((p) =>
+    matchesCategory(p.category, selectedCategory)
   );
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <Header title="Shop Categories" />
 
-      {/* Top Category Selectors */}
+      {/* Category Selection Tabs */}
       <View style={styles.tabBar}>
         {CATEGORIES_LIST.map((cat) => {
           const isSelected = selectedCategory === cat.key;
-          const count = products.filter(
-            (p) => p.category?.toLowerCase() === cat.key.toLowerCase()
-          ).length;
+          const count = products.filter((p) => matchesCategory(p.category, cat.key)).length;
 
           return (
             <TouchableOpacity
               key={cat.id}
               style={[styles.tabItem, isSelected && styles.tabItemActive]}
               onPress={() => setSelectedCategory(cat.key)}
+              activeOpacity={0.7}
             >
               <Ionicons
                 name={cat.icon}
-                size={20}
+                size={18}
                 color={isSelected ? COLORS.primary : COLORS.textSecondary}
               />
               <Text style={[styles.tabText, isSelected && styles.tabTextActive]}>
-                {cat.name.split("'")[0]} ({count})
+                {cat.name} ({count})
               </Text>
             </TouchableOpacity>
           );
         })}
       </View>
 
-      {/* Product List */}
+      {/* Grid Product Display */}
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.loadingText}>Loading category items...</Text>
+          <Text style={styles.loadingText}>Loading category products...</Text>
         </View>
       ) : filteredProducts.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="folder-open-outline" size={56} color={COLORS.textLight} />
-          <Text style={styles.emptyTitle}>No items in this category</Text>
+          <Text style={styles.emptyTitle}>No products found in this category</Text>
+          <Text style={styles.emptySubtitle}>Try selecting a different category above.</Text>
         </View>
       ) : (
         <FlatList
+          key={selectedCategory}
           data={filteredProducts}
+          numColumns={2}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.listContainer}
+          columnWrapperStyle={styles.columnWrapper}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[COLORS.primary]} />
           }
@@ -116,13 +135,22 @@ export const CategoriesScreen: React.FC = () => {
             <View style={styles.productCard}>
               <View style={styles.imageContainer}>
                 {item.image ? (
-                  <Image source={{ uri: item.image }} style={styles.productImage} />
+                  <Image
+                    source={{ uri: item.image }}
+                    style={styles.productImage}
+                    resizeMode="cover"
+                  />
                 ) : (
-                  <Ionicons name="image-outline" size={32} color={COLORS.textLight} />
+                  <View style={styles.imagePlaceholder}>
+                    <Ionicons name="image-outline" size={32} color={COLORS.textLight} />
+                  </View>
                 )}
+                <View style={styles.categoryBadgeContainer}>
+                  <Text style={styles.categoryBadge}>{item.category}</Text>
+                </View>
               </View>
+
               <View style={styles.infoContainer}>
-                <Text style={styles.categoryBadge}>{item.category}</Text>
                 <Text style={styles.productName} numberOfLines={2}>
                   {item.name}
                 </Text>
@@ -167,13 +195,13 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: '600',
     color: COLORS.textSecondary,
     marginLeft: 6,
   },
   tabTextActive: {
     color: COLORS.primary,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   loadingContainer: {
     flex: 1,
@@ -189,62 +217,83 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: SPACING.xl,
   },
   emptyTitle: {
     fontSize: 16,
-    color: COLORS.textSecondary,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
     marginTop: SPACING.sm,
+  },
+  emptySubtitle: {
+    fontSize: 13,
+    color: COLORS.textSecondary,
+    marginTop: 4,
   },
   listContainer: {
     padding: SPACING.md,
   },
+  columnWrapper: {
+    justifyContent: 'space-between',
+    marginBottom: SPACING.md,
+  },
   productCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: CARD_WIDTH,
     backgroundColor: COLORS.surface,
-    padding: SPACING.sm,
-    borderRadius: 12,
-    marginBottom: SPACING.sm,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: COLORS.border,
+    overflow: 'hidden',
+    elevation: 2,
   },
   imageContainer: {
-    width: 70,
-    height: 70,
-    borderRadius: 8,
+    width: '100%',
+    height: CARD_WIDTH * 1.05,
     backgroundColor: '#f3f4f6',
     justifyContent: 'center',
     alignItems: 'center',
-    overflow: 'hidden',
+    position: 'relative',
   },
   productImage: {
     width: '100%',
     height: '100%',
   },
-  infoContainer: {
-    flex: 1,
-    marginLeft: SPACING.md,
+  imagePlaceholder: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  categoryBadgeContainer: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
   },
   categoryBadge: {
-    fontSize: 10,
-    color: COLORS.textLight,
+    fontSize: 9,
+    color: COLORS.surface,
+    fontWeight: '800',
     textTransform: 'uppercase',
-    fontWeight: '700',
+  },
+  infoContainer: {
+    padding: SPACING.sm,
   },
   productName: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     color: COLORS.textPrimary,
-    marginTop: 2,
+    height: 36,
   },
   priceRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 4,
+    marginTop: 6,
   },
   priceText: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '800',
     color: COLORS.primary,
     marginRight: 6,
   },

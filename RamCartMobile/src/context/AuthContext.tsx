@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { apiService } from '../services/api';
 import { storage } from '../utils/storage';
 import { STORAGE_KEYS } from '../utils/constants';
+import { parseJwtUser } from '../utils/jwt';
 
 export interface User {
   id?: string;
@@ -43,14 +44,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setToken(storedToken);
           apiService.setAuthToken(storedToken);
 
+          const jwtUser = parseJwtUser(storedToken);
+
           if (storedUserJson) {
             try {
-              setUser(JSON.parse(storedUserJson));
+              const parsedUser = JSON.parse(storedUserJson);
+              setUser({
+                ...parsedUser,
+                isAdmin: jwtUser?.isAdmin ?? parsedUser.isAdmin ?? false,
+              });
             } catch {
-              setUser({ email: 'user@ramcart.com', name: 'Shopper' });
+              setUser({
+                email: jwtUser?.email || 'user@ramcart.com',
+                name: jwtUser?.name || 'Shopper',
+                isAdmin: jwtUser?.isAdmin || false,
+              });
             }
+          } else if (jwtUser) {
+            setUser({
+              email: jwtUser.email || 'user@ramcart.com',
+              name: jwtUser.name || 'Shopper',
+              isAdmin: jwtUser.isAdmin || false,
+            });
           } else {
-            setUser({ email: 'user@ramcart.com', name: 'Shopper' });
+            setUser({ email: 'user@ramcart.com', name: 'Shopper', isAdmin: false });
           }
         }
       } catch (error) {
@@ -73,9 +90,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (response.success && response.token) {
         const authToken = response.token;
+        const jwtUser = parseJwtUser(authToken);
+
         const userData: User = {
-          email: email.trim(),
-          name: email.trim().split('@')[0],
+          email: response.user?.email || jwtUser?.email || email.trim(),
+          name: response.user?.name || jwtUser?.name || email.trim().split('@')[0],
+          isAdmin: response.user?.isAdmin ?? jwtUser?.isAdmin ?? false,
         };
 
         await storage.setItem(STORAGE_KEYS.AUTH_TOKEN, authToken);
@@ -113,9 +133,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (response.success && response.token) {
         const authToken = response.token;
+        const jwtUser = parseJwtUser(authToken);
+
         const userData: User = {
-          email: trimmedEmail,
-          name: trimmedUsername,
+          email: response.user?.email || jwtUser?.email || trimmedEmail,
+          name: response.user?.name || jwtUser?.name || trimmedUsername,
+          isAdmin: response.user?.isAdmin ?? jwtUser?.isAdmin ?? false,
         };
 
         await storage.setItem(STORAGE_KEYS.AUTH_TOKEN, authToken);
@@ -159,10 +182,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (response.success && response.token) {
         const authToken = response.token;
+        const jwtUser = parseJwtUser(authToken);
+
         const userData: User = {
-          email: response.user?.email || email,
-          name: response.user?.name || name || email.split('@')[0],
-          isAdmin: response.user?.isAdmin || false,
+          email: response.user?.email || jwtUser?.email || email,
+          name: response.user?.name || jwtUser?.name || name || email.split('@')[0],
+          isAdmin: response.user?.isAdmin ?? jwtUser?.isAdmin ?? false,
         };
 
         await storage.setItem(STORAGE_KEYS.AUTH_TOKEN, authToken);

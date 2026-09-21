@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { Header } from '../components/Header';
 import { CustomButton } from '../components/CustomButton';
@@ -8,6 +9,7 @@ import { useAuth } from '../context/AuthContext';
 import { COLORS, SPACING } from '../utils/constants';
 
 export const ProfileScreen: React.FC = () => {
+  const navigation = useNavigation<any>();
   const { user, logout } = useAuth();
 
   const handleLogout = () => {
@@ -28,7 +30,7 @@ export const ProfileScreen: React.FC = () => {
   };
 
   const CUSTOMER_MENU = [
-    { id: '1', title: 'My Orders', icon: 'bag-handle-outline' as const, badge: 'Active' },
+    { id: '1', title: 'My Orders', icon: 'bag-handle-outline' as const, badge: 'Active', route: 'Orders' },
     { id: '2', title: 'Shipping Address', icon: 'location-outline' as const },
     { id: '3', title: 'Payment Methods', icon: 'card-outline' as const },
     { id: '4', title: 'Wishlist', icon: 'heart-outline' as const },
@@ -37,10 +39,10 @@ export const ProfileScreen: React.FC = () => {
   ];
 
   const ADMIN_MENU = [
-    { id: 'a1', title: 'Manage Catalog Products', icon: 'cube-outline' as const, badge: 'Admin' },
-    { id: 'a2', title: 'Manage Hero Banners', icon: 'images-outline' as const, badge: 'Admin' },
-    { id: 'a3', title: 'User Roles & Permissions', icon: 'people-outline' as const, badge: 'Admin' },
-    { id: 'a4', title: 'Customer Orders Dashboard', icon: 'receipt-outline' as const, badge: 'Admin' },
+    { id: 'a1', title: 'Manage Catalog Products', icon: 'cube-outline' as const, badge: 'Admin', route: 'AdminDashboard' },
+    { id: 'a2', title: 'Manage Hero Banners', icon: 'images-outline' as const, badge: 'Admin', route: 'AdminDashboard' },
+    { id: 'a3', title: 'User Roles & Permissions', icon: 'people-outline' as const, badge: 'Admin', route: 'AdminDashboard' },
+    { id: 'a4', title: 'Customer Orders Dashboard', icon: 'receipt-outline' as const, badge: 'Admin', route: 'AdminDashboard' },
   ];
 
   return (
@@ -78,7 +80,7 @@ export const ProfileScreen: React.FC = () => {
                   key={item.id}
                   style={styles.menuItem}
                   activeOpacity={0.7}
-                  onPress={() => Alert.alert('Admin Control', `${item.title} dashboard`)}
+                  onPress={() => navigation.navigate('AdminDashboard')}
                 >
                   <View style={styles.menuLeft}>
                     <Ionicons name={item.icon} size={22} color={COLORS.primary} />
@@ -99,7 +101,18 @@ export const ProfileScreen: React.FC = () => {
           <Text style={styles.sectionHeaderTitle}>Account Settings</Text>
           <View style={styles.menuContainer}>
             {CUSTOMER_MENU.map((item) => (
-              <TouchableOpacity key={item.id} style={styles.menuItem} activeOpacity={0.7}>
+              <TouchableOpacity
+                key={item.id}
+                style={styles.menuItem}
+                activeOpacity={0.7}
+                onPress={() => {
+                  if (item.route) {
+                    navigation.navigate(item.route);
+                  } else {
+                    Alert.alert(item.title, `${item.title} section`);
+                  }
+                }}
+              >
                 <View style={styles.menuLeft}>
                   <Ionicons name={item.icon} size={22} color={COLORS.textPrimary} />
                   <Text style={styles.menuTitle}>{item.title}</Text>

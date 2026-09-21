@@ -215,6 +215,27 @@ class ApiService {
       body: JSON.stringify({ itemId }),
     });
   }
+
+  // --- Orders & Admin Endpoints ---
+
+  public async fetchUserOrders(): Promise<ApiResponse> {
+    return this.request('/userorders', {
+      method: 'GET',
+    });
+  }
+
+  public async fetchAllOrders(): Promise<ApiResponse> {
+    return this.request('/admin/orders', {
+      method: 'GET',
+    });
+  }
+
+  public async updateOrderStatus(orderId: string, status: string): Promise<ApiResponse> {
+    return this.request('/admin/orders/status', {
+      method: 'POST',
+      body: JSON.stringify({ orderId, status }),
+    });
+  }
 }
 
 export const apiService = new ApiService();
