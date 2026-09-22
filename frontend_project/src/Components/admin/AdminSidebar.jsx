@@ -44,20 +44,20 @@ export const AdminSidebar = ({
   ];
 
   return (
-    <aside className="admin-sidebar w-[230px] bg-[#FBFAFF] dark:bg-[#141428] border-r border-[#DDD6FE] dark:border-[#2A2A50] flex flex-col h-screen py-6 px-3.5 gap-2 shrink-0 transition-colors duration-200">
+    <aside className="admin-sidebar w-[230px] bg-white dark:bg-[#171622] border-r border-[#e2e4ed] dark:border-[#2e2d40] flex flex-col h-screen py-6 px-3.5 gap-2 shrink-0 transition-colors duration-200">
       {/* Brand Header */}
       <div className="sidebar-header px-2 mb-5 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#7C3AED] to-[#6D28D9] text-white flex items-center justify-center font-bold text-sm shadow-md shadow-[#7C3AED]/30">
+        <div className="w-8 h-8 rounded-xl bg-[#ff8906] text-[#fffffe] flex items-center justify-center font-black text-sm shadow-md shadow-[#ff8906]/30">
           R
         </div>
         <div>
-          <h1 className="text-sm font-extrabold text-[#1E1B4B] dark:text-white tracking-tight">RamCart Admin</h1>
-          <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wider">Management Console</p>
+          <h1 className="text-sm font-extrabold text-[#0f0e17] dark:text-[#fffffe] tracking-tight">RamCart Admin</h1>
+          <p className="text-[10px] font-bold text-[#717388] dark:text-[#a7a9be] uppercase tracking-wider">Management Console</p>
         </div>
       </div>
 
       {/* Navigation Menu */}
-      <nav className="sidebar-menu flex-1 flex flex-col gap-1 overflow-y-auto pr-1">
+      <nav className="sidebar-menu flex-1 flex flex-col gap-1.5 overflow-y-auto pr-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -67,26 +67,26 @@ export const AdminSidebar = ({
               key={item.id}
               type="button"
               onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 group cursor-pointer ${
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all duration-200 group cursor-pointer border-none ${
                 isActive 
-                  ? "active bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white font-bold shadow-md shadow-[#7C3AED]/30" 
-                  : "text-[#4B5563] dark:text-[#C4B5FD] hover:bg-[#EDE9FE] dark:hover:bg-[#1A1A35] hover:text-[#7C3AED]"
+                  ? "active bg-[#ff8906] text-[#fffffe] font-extrabold shadow-md shadow-[#ff8906]/30 hover:bg-[#e53170]" 
+                  : "text-[#2e2f3e] dark:text-[#a7a9be] hover:bg-[#e53170] hover:text-[#fffffe]"
               }`}
             >
               <div className="flex items-center gap-3">
                 <Icon 
-                  size={17} 
-                  className={`transition-transform duration-200 group-hover:scale-105 ${
-                    isActive ? "text-white" : "text-[#7C3AED] dark:text-[#A78BFA] opacity-70"
+                  size={18} 
+                  className={`transition-transform duration-200 group-hover:scale-105 group-hover:text-[#fffffe] ${
+                    isActive ? "text-[#fffffe]" : "text-[#717388] dark:text-[#a7a9be]"
                   }`} 
                 />
-                <span className="text-xs font-bold tracking-wide">{item.label}</span>
+                <span className="text-xs font-bold tracking-wide group-hover:text-[#fffffe]">{item.label}</span>
               </div>
               {item.count !== undefined && item.count > 0 && (
                 <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                   isActive 
-                    ? "bg-white/25 text-white" 
-                    : "bg-[#EDE9FE] dark:bg-[#1A1A35] text-[#7C3AED] dark:text-[#A78BFA] border border-[#DDD6FE] dark:border-[#2A2A50]"
+                    ? "bg-white/25 text-[#fffffe]" 
+                    : "bg-[#eff0f6] dark:bg-[#212030] text-[#0f0e17] dark:text-[#a7a9be] group-hover:bg-white/20 group-hover:text-[#fffffe] border border-[#e2e4ed] dark:border-[#2e2d40]"
                 }`}>
                   {item.count}
                 </span>
@@ -97,16 +97,16 @@ export const AdminSidebar = ({
       </nav>
 
       {/* Bottom Profile and Action Buttons */}
-      <div className="sidebar-footer mt-auto pt-4 border-t border-[#DDD6FE] dark:border-[#2A2A50] flex flex-col gap-3">
+      <div className="sidebar-footer mt-auto pt-4 border-t border-[#e2e4ed] dark:border-[#2e2d40] flex flex-col gap-3">
         <div className="flex items-center gap-3 px-1">
-          <div className="w-9 h-9 rounded-full bg-[#EDE9FE] dark:bg-[#EDE9FE]/10 text-[#7C3AED] dark:text-[#A78BFA] flex items-center justify-center font-bold text-xs border border-[#DDD6FE] dark:border-[#2A2A50]">
+          <div className="w-9 h-9 rounded-full bg-[#fff3e6] dark:bg-[#212030] text-[#ff8906] flex items-center justify-center font-bold text-xs border border-[#e2e4ed] dark:border-[#2e2d40]">
             {user?.name ? user.name.charAt(0).toUpperCase() : <UserIcon size={16} />}
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-xs font-bold text-[#1E1B4B] dark:text-[#F5F3FF] truncate">
+            <span className="text-xs font-bold text-[#0f0e17] dark:text-[#fffffe] truncate">
               {user?.name || 'Admin User'}
             </span>
-            <span className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-wider">
+            <span className="text-[9px] font-bold text-[#717388] dark:text-[#a7a9be] uppercase tracking-wider">
               {user?.role === 'admin' ? 'System Root' : 'Administrator'}
             </span>
           </div>
@@ -125,7 +125,7 @@ export const AdminSidebar = ({
         <button 
           type="button"
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-1.5 py-2 px-4 bg-[#EDE9FE] hover:bg-[#DDD6FE] dark:bg-white/5 dark:hover:bg-white/10 text-[#4B5563] dark:text-[#C4B5FD] rounded-xl transition-all duration-200 text-xs font-semibold cursor-pointer border border-[#DDD6FE] dark:border-[#2A2A50]"
+          className="w-full flex items-center justify-center gap-1.5 py-2 px-4 bg-[#eff0f6] hover:bg-[#e53170] hover:text-[#fffffe] dark:bg-[#212030] dark:hover:bg-[#e53170] text-[#2e2f3e] dark:text-[#a7a9be] rounded-xl transition-all duration-200 text-xs font-semibold cursor-pointer border border-[#e2e4ed] dark:border-[#2e2d40]"
         >
           <LogOut size={12} />
           Logout
