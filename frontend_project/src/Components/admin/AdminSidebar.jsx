@@ -46,7 +46,7 @@ export const AdminSidebar = ({
   ];
 
   return (
-    <aside className="admin-sidebar w-[240px] bg-white dark:bg-[#171622] border-r border-[#e2e4ed] dark:border-[#2e2d40] flex flex-col h-screen py-5 px-3.5 gap-2 shrink-0 transition-colors duration-200">
+    <aside className="admin-sidebar" aria-label="Admin navigation">
       {/* Brand Header — Crystal clear visibility with high contrast badge & title */}
       <div className="sidebar-header px-2 mb-4 pb-3 flex items-center gap-3 border-b border-[#e2e4ed] dark:border-[#2e2d40]">
         <div className="w-9 h-9 rounded-xl bg-[#ff8906] text-[#fffffe] flex items-center justify-center font-black text-base shadow-md shadow-[#ff8906]/35 shrink-0">
@@ -73,6 +73,8 @@ export const AdminSidebar = ({
               key={item.id}
               type="button"
               onClick={() => setActiveTab(item.id)}
+              aria-current={isActive ? 'page' : undefined}
+              aria-label={`${item.label}${item.count ? `, ${item.count}` : ''}`}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all duration-200 group cursor-pointer border-none ${
                 isActive 
                   ? "active bg-[#ff8906] text-[#fffffe] font-extrabold shadow-md shadow-[#ff8906]/30 hover:bg-[#e53170]" 
@@ -130,11 +132,11 @@ export const AdminSidebar = ({
         {/* Quick Action Button */}
         <button 
           type="button"
-          onClick={() => alert("⚡ Quick Admin console drawer coming soon!")}
+          onClick={() => setActiveTab('add')}
           className="quick-action-btn w-full flex items-center justify-center gap-1.5 py-2 px-4 text-xs font-black cursor-pointer border-none"
         >
           <Zap size={12} className="fill-current" />
-          Quick Action
+          Add product
         </button>
 
         <button 

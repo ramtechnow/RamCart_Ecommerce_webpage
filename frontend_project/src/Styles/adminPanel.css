@@ -1892,3 +1892,104 @@
   background: var(--accent-red) !important;
   box-shadow: 0 4px 16px rgba(229, 49, 112, 0.4) !important;
 }
+
+/* Admin shell polish: keep the console independent from storefront chrome. */
+.admin-shell {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255, 137, 6, 0.08), transparent 28rem),
+    var(--bg-primary);
+}
+
+.admin-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.admin-sidebar {
+  width: 248px;
+  min-width: 248px;
+  min-height: 100vh;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 22px 14px 16px;
+  gap: 14px;
+  background: color-mix(in srgb, var(--bg-secondary) 94%, var(--accent-color));
+  border-right: 1px solid var(--border-color);
+}
+
+.admin-sidebar .sidebar-header {
+  margin-bottom: 4px;
+}
+
+.admin-sidebar .sidebar-menu {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+}
+
+.admin-sidebar .sidebar-menu button {
+  min-height: 44px;
+}
+
+.admin-content {
+  flex: 1;
+  width: 100%;
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: clamp(20px, 3vw, 40px);
+}
+
+.admin-topbar {
+  min-height: 72px;
+  padding-inline: clamp(18px, 3vw, 40px);
+  background: color-mix(in srgb, var(--bg-secondary) 92%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+.admin-content > [style*="Database Fetch Error"],
+.admin-content > [style*="Syncing database collections"] {
+  max-width: 1100px;
+  margin-inline: auto;
+}
+
+@media (max-width: 768px) {
+  .admin-shell {
+    display: block;
+    min-height: 100dvh;
+  }
+
+  .admin-sidebar {
+    min-height: 52px;
+    height: 52px;
+    padding: 0 8px;
+  }
+
+  .admin-main {
+    display: block;
+  }
+
+  .admin-content {
+    min-height: calc(100dvh - 100px);
+    padding: 18px 14px 28px !important;
+  }
+
+  .admin-topbar {
+    min-height: 48px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-panel *,
+  .admin-panel *::before,
+  .admin-panel *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

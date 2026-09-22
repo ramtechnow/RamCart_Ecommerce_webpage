@@ -257,7 +257,7 @@ export const AdminPanel: React.FC = () => {
   }
 
   return (
-    <div className="admin-panel animate-fade-in" style={{ display: "flex", minHeight: "100vh", backgroundColor: "var(--bg-primary)" }}>
+    <div className="admin-panel admin-shell animate-fade-in">
       
       {/* 1. Sidebar */}
       <AdminSidebar 
@@ -271,7 +271,7 @@ export const AdminPanel: React.FC = () => {
       />
 
       {/* Primary Content Viewport */}
-      <div style={{ flexGrow: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+      <div className="admin-main">
         
         {/* 2. Topbar */}
         <AdminTopbar 
@@ -283,7 +283,7 @@ export const AdminPanel: React.FC = () => {
         />
 
         {/* 3. Tab Body Panel */}
-        <main className="admin-content" style={{ flexGrow: 1, padding: "32px" }}>
+        <main className="admin-content">
           
           {fetchingData && (
             <div style={{
