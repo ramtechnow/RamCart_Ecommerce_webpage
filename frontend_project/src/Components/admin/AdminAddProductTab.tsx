@@ -247,12 +247,12 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-6 animate-fade-in w-full text-[#191c1e] dark:text-[#ebf1ff]">
+    <div className="flex flex-col gap-6 animate-fade-in w-full text-[#1E1B4B] dark:text-[#F5F3FF]">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
         <div>
           <h2 className="text-xl font-bold tracking-tight">Add New Product</h2>
-          <p className="text-sm text-[#878787] mt-0.5">Create a new listing in the catalog</p>
+          <p className="text-sm text-[#9CA3AF] mt-0.5">Create a new listing in the catalog</p>
         </div>
       </div>
 
@@ -262,14 +262,14 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
           {/* Left Columns (Main Info) */}
           <div className="lg:col-span-2 flex flex-col gap-6">
             {/* General Info Card */}
-            <div className="bg-white dark:bg-[#12141c] rounded-2xl shadow-sm border border-[#e2bec2]/40 dark:border-white/10 p-6 flex flex-col gap-4">
-              <h3 className="text-sm font-black text-[#b80149] dark:text-[#ff3366] uppercase tracking-wider flex items-center gap-2 border-b border-[#e2bec2]/20 dark:border-white/5 pb-3">
+            <div className="bg-white dark:bg-[#141428] rounded-2xl shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-4">
+              <h3 className="text-sm font-black text-[#6D28D9] dark:text-[#A78BFA] uppercase tracking-wider flex items-center gap-2 border-b border-[#DDD6FE]/20 dark:border-white/5 pb-3">
                 <FileText size={18} /> Basic Information
               </h3>
               
               {/* Title */}
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-[#5a4044] dark:text-[#a3b0cc]">Product Title <span className="text-red-500">*</span></label>
+                <label className="text-xs font-bold text-[#4B5563] dark:text-[#C4B5FD]">Product Title <span className="text-red-500">*</span></label>
                 <input 
                   type="text" 
                   placeholder="e.g. Premium Cotton Blend Slim Fit Shirt" 
@@ -278,8 +278,8 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                     setName(e.target.value);
                     setFieldErrors(prev => ({ ...prev, name: null }));
                   }}
-                  className={`w-full h-11 px-4 rounded-xl border bg-white dark:bg-[#1e2029] outline-none text-sm transition-all focus:border-[#db2b60] focus:ring-1 focus:ring-[#db2b60] ${
-                    fieldErrors.name ? 'border-red-500' : 'border-[#e2bec2]/40 dark:border-white/10'
+                  className={`w-full h-11 px-4 rounded-xl border bg-white dark:bg-[#1A1A35] outline-none text-sm transition-all focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] ${
+                    fieldErrors.name ? 'border-red-500' : 'border-[#DDD6FE]/40 dark:border-white/10'
                   }`}
                 />
                 {fieldErrors.name && (
@@ -291,7 +291,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
 
               {/* Description */}
               <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-[#5a4044] dark:text-[#a3b0cc]">Detailed Description <span className="text-red-500">*</span></label>
+                <label className="text-xs font-bold text-[#4B5563] dark:text-[#C4B5FD]">Detailed Description <span className="text-red-500">*</span></label>
                 <textarea 
                   rows={4} 
                   placeholder="Enter details, materials guidelines, or care instructions..." 
@@ -300,8 +300,8 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                     setDescription(e.target.value);
                     setFieldErrors(prev => ({ ...prev, description: null }));
                   }}
-                  className={`w-full p-4 rounded-xl border bg-white dark:bg-[#1e2029] outline-none text-sm resize-none transition-all focus:border-[#db2b60] focus:ring-1 focus:ring-[#db2b60] ${
-                    fieldErrors.description ? 'border-red-500' : 'border-[#e2bec2]/40 dark:border-white/10'
+                  className={`w-full p-4 rounded-xl border bg-white dark:bg-[#1A1A35] outline-none text-sm resize-none transition-all focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] ${
+                    fieldErrors.description ? 'border-red-500' : 'border-[#DDD6FE]/40 dark:border-white/10'
                   }`}
                 />
                 {fieldErrors.description && (
@@ -313,15 +313,15 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
             </div>
 
             {/* Pricing & Inventory Configuration */}
-            <div className="bg-white dark:bg-[#12141c] rounded-2xl shadow-sm border border-[#e2bec2]/40 dark:border-white/10 p-6 flex flex-col gap-4">
-              <h3 className="text-sm font-black text-[#b80149] dark:text-[#ff3366] uppercase tracking-wider flex items-center gap-2 border-b border-[#e2bec2]/20 dark:border-white/5 pb-3">
+            <div className="bg-white dark:bg-[#141428] rounded-2xl shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-4">
+              <h3 className="text-sm font-black text-[#6D28D9] dark:text-[#A78BFA] uppercase tracking-wider flex items-center gap-2 border-b border-[#DDD6FE]/20 dark:border-white/5 pb-3">
                 <DollarSign size={18} /> Pricing &amp; Sizing Specs
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Base price */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-[#5a4044] dark:text-[#a3b0cc]">Discounted Price (₹) <span className="text-red-500">*</span></label>
+                  <label className="text-xs font-bold text-[#4B5563] dark:text-[#C4B5FD]">Discounted Price (₹) <span className="text-red-500">*</span></label>
                   <input 
                     type="number" 
                     placeholder="e.g. 799" 
@@ -330,8 +330,8 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                       setNewPrice(e.target.value);
                       setFieldErrors(prev => ({ ...prev, newPrice: null }));
                     }}
-                    className={`w-full h-11 px-4 rounded-xl border bg-white dark:bg-[#1e2029] outline-none text-sm focus:border-[#db2b60] focus:ring-1 focus:ring-[#db2b60] ${
-                      fieldErrors.newPrice ? 'border-red-500' : 'border-[#e2bec2]/40 dark:border-white/10'
+                    className={`w-full h-11 px-4 rounded-xl border bg-white dark:bg-[#1A1A35] outline-none text-sm focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] ${
+                      fieldErrors.newPrice ? 'border-red-500' : 'border-[#DDD6FE]/40 dark:border-white/10'
                     }`}
                   />
                   {fieldErrors.newPrice && (
@@ -343,7 +343,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
 
                 {/* MSRP */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-[#5a4044] dark:text-[#a3b0cc]">Maximum Retail Price / MSRP (₹) <span className="text-red-500">*</span></label>
+                  <label className="text-xs font-bold text-[#4B5563] dark:text-[#C4B5FD]">Maximum Retail Price / MSRP (₹) <span className="text-red-500">*</span></label>
                   <input 
                     type="number" 
                     placeholder="e.g. 1499" 
@@ -352,8 +352,8 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                       setOldPrice(e.target.value);
                       setFieldErrors(prev => ({ ...prev, oldPrice: null }));
                     }}
-                    className={`w-full h-11 px-4 rounded-xl border bg-white dark:bg-[#1e2029] outline-none text-sm focus:border-[#db2b60] focus:ring-1 focus:ring-[#db2b60] ${
-                      fieldErrors.oldPrice ? 'border-red-500' : 'border-[#e2bec2]/40 dark:border-white/10'
+                    className={`w-full h-11 px-4 rounded-xl border bg-white dark:bg-[#1A1A35] outline-none text-sm focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] ${
+                      fieldErrors.oldPrice ? 'border-red-500' : 'border-[#DDD6FE]/40 dark:border-white/10'
                     }`}
                   />
                   {fieldErrors.oldPrice && (
@@ -366,7 +366,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
 
               {/* Sizes available */}
               <div className="flex flex-col gap-2.5 mt-2">
-                <label className="text-xs font-bold text-[#5a4044] dark:text-[#a3b0cc]">Select Available Sizes</label>
+                <label className="text-xs font-bold text-[#4B5563] dark:text-[#C4B5FD]">Select Available Sizes</label>
                 <div className="flex flex-wrap gap-2">
                   {Array.from(new Set([...PRESET_SIZES, ...selectedSizes])).map((size) => {
                     const isSelected = selectedSizes.includes(size);
@@ -377,8 +377,8 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                         onClick={() => toggleSize(size)}
                         className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer ${
                           isSelected 
-                            ? "bg-[#db2b60] border-[#db2b60] text-white" 
-                            : "bg-[#f2f4f7] dark:bg-[#1e2029] border-[#e2bec2]/40 text-[#5a4044] dark:text-[#a3b0cc]"
+                            ? "bg-[#7C3AED] border-[#7C3AED] text-white" 
+                            : "bg-[#EEF0F8] dark:bg-[#1A1A35] border-[#DDD6FE]/40 text-[#4B5563] dark:text-[#C4B5FD]"
                         }`}
                       >
                         {size}
@@ -394,12 +394,12 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                     value={customSizeInput}
                     onChange={(e) => setCustomSizeInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomSize(); } }}
-                    className="flex-1 h-9 px-3 rounded-lg border border-[#e2bec2]/40 dark:border-white/10 bg-white dark:bg-[#1e2029] text-xs"
+                    className="flex-1 h-9 px-3 rounded-lg border border-[#DDD6FE]/40 dark:border-white/10 bg-white dark:bg-[#1A1A35] text-xs"
                   />
                   <button
                     type="button"
                     onClick={handleAddCustomSize}
-                    className="h-9 px-3 bg-[#db2b60] hover:bg-[#b80149] text-white text-xs font-bold rounded-lg flex items-center gap-1 cursor-pointer border-none shadow-sm"
+                    className="h-9 px-3 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-bold rounded-lg flex items-center gap-1 cursor-pointer border-none shadow-sm"
                   >
                     <Plus size={12} /> Add
                   </button>
@@ -409,7 +409,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
 
               {/* Colors selection */}
               <div className="flex flex-col gap-2.5 mt-2">
-                <label className="text-xs font-bold text-[#5a4044] dark:text-[#a3b0cc]">Select Available Colors</label>
+                <label className="text-xs font-bold text-[#4B5563] dark:text-[#C4B5FD]">Select Available Colors</label>
                 <div className="flex flex-wrap gap-2">
                   {Array.from(new Set([...PRESET_COLORS, ...selectedColors])).map((color) => {
                     const isSelected = selectedColors.includes(color);
@@ -420,8 +420,8 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                         onClick={() => toggleColor(color)}
                         className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer ${
                           isSelected 
-                            ? "bg-[#db2b60] border-[#db2b60] text-white" 
-                            : "bg-[#f2f4f7] dark:bg-[#1e2029] border-[#e2bec2]/40 text-[#5a4044] dark:text-[#a3b0cc]"
+                            ? "bg-[#7C3AED] border-[#7C3AED] text-white" 
+                            : "bg-[#EEF0F8] dark:bg-[#1A1A35] border-[#DDD6FE]/40 text-[#4B5563] dark:text-[#C4B5FD]"
                         }`}
                       >
                         {color}
@@ -435,7 +435,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                     type="color"
                     value={customHexColor}
                     onChange={(e) => setCustomHexColor(e.target.value)}
-                    className="w-9 h-9 border border-[#e2bec2]/40 rounded-lg cursor-pointer p-0 bg-transparent shrink-0"
+                    className="w-9 h-9 border border-[#DDD6FE]/40 rounded-lg cursor-pointer p-0 bg-transparent shrink-0"
                     title="Choose Palette"
                   />
                   <input
@@ -444,12 +444,12 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                     value={customColorInput}
                     onChange={(e) => setCustomColorInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomColor(); } }}
-                    className="flex-1 h-9 px-3 rounded-lg border border-[#e2bec2]/40 dark:border-white/10 bg-white dark:bg-[#1e2029] text-xs"
+                    className="flex-1 h-9 px-3 rounded-lg border border-[#DDD6FE]/40 dark:border-white/10 bg-white dark:bg-[#1A1A35] text-xs"
                   />
                   <button
                     type="button"
                     onClick={handleAddCustomColor}
-                    className="h-9 px-3 bg-[#db2b60] hover:bg-[#b80149] text-white text-xs font-bold rounded-lg flex items-center gap-1 cursor-pointer border-none shadow-sm"
+                    className="h-9 px-3 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-bold rounded-lg flex items-center gap-1 cursor-pointer border-none shadow-sm"
                   >
                     <Plus size={12} /> Add
                   </button>
@@ -462,8 +462,8 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
           {/* Right Column (Media Upload & Info) */}
           <div className="flex flex-col gap-6">
             {/* Image Upload card */}
-            <div className="bg-white dark:bg-[#12141c] rounded-2xl shadow-sm border border-[#e2bec2]/40 dark:border-white/10 p-6 flex flex-col gap-4">
-              <h3 className="text-sm font-black text-[#b80149] dark:text-[#ff3366] uppercase tracking-wider flex items-center gap-2 border-b border-[#e2bec2]/20 dark:border-white/5 pb-3">
+            <div className="bg-white dark:bg-[#141428] rounded-2xl shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-4">
+              <h3 className="text-sm font-black text-[#6D28D9] dark:text-[#A78BFA] uppercase tracking-wider flex items-center gap-2 border-b border-[#DDD6FE]/20 dark:border-white/5 pb-3">
                 <ImageIcon size={18} /> Media Files
               </h3>
               
@@ -476,16 +476,16 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                 onClick={() => document.getElementById('add-multiple-file-input')?.click()}
                 className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all duration-200 cursor-pointer flex flex-col items-center justify-center gap-2.5 ${
                   dragActive 
-                    ? "border-[#db2b60] bg-[#db2b60]/5" 
+                    ? "border-[#7C3AED] bg-[#7C3AED]/5" 
                     : fieldErrors.images 
                       ? "border-red-500 bg-red-500/5" 
-                      : "border-[#e2bec2]/60 dark:border-white/10 bg-[#f2f4f7]/30 dark:bg-[#1e2029]/30 hover:bg-[#e6e8eb] dark:hover:bg-[#363636]"
+                      : "border-[#DDD6FE]/60 dark:border-white/10 bg-[#EEF0F8]/30 dark:bg-[#1A1A35]/30 hover:bg-[#e6e8eb] dark:hover:bg-[#363636]"
                 }`}
               >
-                <Upload size={28} className="text-[#db2b60] animate-bounce" />
+                <Upload size={28} className="text-[#7C3AED] animate-bounce" />
                 <div>
-                  <p className="text-xs font-bold text-[#191c1e] dark:text-white">Drag &amp; drop product images</p>
-                  <p className="text-[10px] text-[#878787] mt-0.5">or click to browse from device</p>
+                  <p className="text-xs font-bold text-[#1E1B4B] dark:text-white">Drag &amp; drop product images</p>
+                  <p className="text-[10px] text-[#9CA3AF] mt-0.5">or click to browse from device</p>
                 </div>
                 <input 
                   id="add-multiple-file-input" 
@@ -505,7 +505,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                     <div 
                       key={idx} 
                       className={`relative aspect-square rounded-xl overflow-hidden border ${
-                        idx === 0 ? "border-2 border-[#db2b60]" : "border-[#e2bec2]/40"
+                        idx === 0 ? "border-2 border-[#7C3AED]" : "border-[#DDD6FE]/40"
                       } group`}
                     >
                       <img src={img} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
@@ -517,7 +517,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                         <Trash2 size={10} />
                       </button>
                       {idx === 0 && (
-                        <span className="absolute bottom-1 left-1 bg-[#db2b60] text-white text-[8px] font-black px-1.5 py-0.5 rounded">
+                        <span className="absolute bottom-1 left-1 bg-[#7C3AED] text-white text-[8px] font-black px-1.5 py-0.5 rounded">
                           Cover
                         </span>
                       )}
@@ -528,19 +528,19 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
             </div>
 
             {/* Organization & Category selection card */}
-            <div className="bg-white dark:bg-[#12141c] rounded-2xl shadow-sm border border-[#e2bec2]/40 dark:border-white/10 p-6 flex flex-col gap-4">
-              <h3 className="text-sm font-black text-[#b80149] dark:text-[#ff3366] uppercase tracking-wider flex items-center gap-2 border-b border-[#e2bec2]/20 dark:border-white/5 pb-3">
+            <div className="bg-white dark:bg-[#141428] rounded-2xl shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-4">
+              <h3 className="text-sm font-black text-[#6D28D9] dark:text-[#A78BFA] uppercase tracking-wider flex items-center gap-2 border-b border-[#DDD6FE]/20 dark:border-white/5 pb-3">
                 <Tag size={18} /> Organization
               </h3>
 
               <div className="flex flex-col gap-3">
                 {/* Category select */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-[#5a4044] dark:text-[#a3b0cc]">Catalog Category</label>
+                  <label className="text-xs font-bold text-[#4B5563] dark:text-[#C4B5FD]">Catalog Category</label>
                   <select 
                     value={category} 
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full h-11 px-3 rounded-xl border border-[#e2bec2]/40 dark:border-white/10 bg-white dark:bg-[#1e2029] text-xs font-semibold outline-none cursor-pointer"
+                    className="w-full h-11 px-3 rounded-xl border border-[#DDD6FE]/40 dark:border-white/10 bg-white dark:bg-[#1A1A35] text-xs font-semibold outline-none cursor-pointer"
                   >
                     <option value="women">Women's Apparel</option>
                     <option value="men">Men's Collection</option>
@@ -554,13 +554,13 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
 
         {/* Dynamic SKU & Variants Editor Grid */}
         {generatedVariants.length > 0 && (
-          <div className="bg-white dark:bg-[#12141c] rounded-2xl shadow-sm border border-[#e2bec2]/40 dark:border-white/10 p-6 flex flex-col gap-4 mt-2">
-            <div className="flex justify-between items-center flex-wrap gap-4 border-b border-[#e2bec2]/20 dark:border-white/5 pb-3">
+          <div className="bg-white dark:bg-[#141428] rounded-2xl shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-4 mt-2">
+            <div className="flex justify-between items-center flex-wrap gap-4 border-b border-[#DDD6FE]/20 dark:border-white/5 pb-3">
               <div>
-                <h3 className="text-sm font-black text-[#191c1e] dark:text-white uppercase tracking-wider">Generated Stock Variants</h3>
-                <p className="text-[11px] text-[#878787] font-medium mt-1">Audit or overwrite default pricing and stock items per size/color.</p>
+                <h3 className="text-sm font-black text-[#1E1B4B] dark:text-white uppercase tracking-wider">Generated Stock Variants</h3>
+                <p className="text-[11px] text-[#9CA3AF] font-medium mt-1">Audit or overwrite default pricing and stock items per size/color.</p>
               </div>
-              <span className="text-xs font-extrabold text-[#db2b60] bg-[#ffd9de]/30 px-3 py-1 rounded-full border border-[#db2b60]/20">
+              <span className="text-xs font-extrabold text-[#7C3AED] bg-[#EDE9FE]/30 px-3 py-1 rounded-full border border-[#7C3AED]/20">
                 Total Stock Count: {totalCalculatedStock} units
               </span>
             </div>
@@ -568,20 +568,20 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[700px]">
                 <thead>
-                  <tr className="border-b border-[#e2bec2]/30 text-xs font-bold text-[#878787]">
+                  <tr className="border-b border-[#DDD6FE]/30 text-xs font-bold text-[#9CA3AF]">
                     <th className="p-3">Color / Size Variant</th>
                     <th className="p-3">SKU Code</th>
                     <th className="p-3 w-40">Stock Units</th>
                     <th className="p-3 w-48">Variant Price (₹)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#e2bec2]/20 dark:divide-white/5">
+                <tbody className="divide-y divide-[#DDD6FE]/20 dark:divide-white/5">
                   {generatedVariants.map((v, idx) => (
                     <tr key={`${v.color}_${v.size}_${idx}`} className="text-xs">
                       <td className="p-3">
                         <div className="flex items-center gap-2">
                           <span className="w-2.5 h-2.5 rounded-full border border-gray-400" style={{ backgroundColor: v.color.toLowerCase() }}></span>
-                          <span className="font-bold text-[#5a4044] dark:text-[#a3b0cc]">{v.color} / {v.size}</span>
+                          <span className="font-bold text-[#4B5563] dark:text-[#C4B5FD]">{v.color} / {v.size}</span>
                         </div>
                       </td>
                       <td className="p-3">
@@ -589,7 +589,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                           type="text"
                           value={v.sku}
                           onChange={(e) => updateVariantField(v.color, v.size, "sku", e.target.value.toUpperCase())}
-                          className="w-full h-8 px-2.5 text-xs font-mono rounded-lg border border-[#e2bec2]/40 bg-white dark:bg-[#1e2029] outline-none"
+                          className="w-full h-8 px-2.5 text-xs font-mono rounded-lg border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] outline-none"
                         />
                       </td>
                       <td className="p-3">
@@ -598,7 +598,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                           value={v.stock}
                           min="0"
                           onChange={(e) => updateVariantField(v.color, v.size, "stock", Math.max(0, Number(e.target.value)))}
-                          className="w-28 h-8 px-2 text-xs rounded-lg border border-[#e2bec2]/40 bg-white dark:bg-[#1e2029] outline-none"
+                          className="w-28 h-8 px-2 text-xs rounded-lg border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] outline-none"
                         />
                       </td>
                       <td className="p-3">
@@ -607,7 +607,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                           value={v.price}
                           min="0"
                           onChange={(e) => updateVariantField(v.color, v.size, "price", Math.max(0, Number(e.target.value)))}
-                          className="w-32 h-8 px-2 text-xs font-bold rounded-lg border border-[#e2bec2]/40 bg-white dark:bg-[#1e2029] outline-none text-[#db2b60]"
+                          className="w-32 h-8 px-2 text-xs font-bold rounded-lg border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] outline-none text-[#7C3AED]"
                         />
                       </td>
                     </tr>
@@ -622,7 +622,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
         <button
           type="submit"
           disabled={saving}
-          className="w-full sm:w-auto self-start mt-2 px-6 py-3 bg-[#db2b60] hover:bg-[#b80149] text-white font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-[#db2b60]/20 disabled:opacity-50 border-none transition-all duration-200"
+          className="w-full sm:w-auto self-start mt-2 px-6 py-3 bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-[#7C3AED]/20 disabled:opacity-50 border-none transition-all duration-200"
         >
           {saving ? <Loader2 size={18} className="animate-spin" /> : <FolderPlus size={18} />}
           <span>{saving ? "Publishing Catalog Listing..." : "Publish Product Listing"}</span>

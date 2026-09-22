@@ -44,20 +44,20 @@ export const AdminSidebar = ({
   ];
 
   return (
-    <aside className="admin-sidebar w-[230px] bg-[#f8fafc] dark:bg-[#12141c] border-r border-[#e2bec2]/40 dark:border-white/10 flex flex-col h-screen py-6 px-4 gap-2 shrink-0 transition-colors duration-200">
+    <aside className="admin-sidebar w-[230px] bg-white dark:bg-[#141428] border-r border-[#DDD6FE] dark:border-[#2A2A50] flex flex-col h-screen py-6 px-3.5 gap-2 shrink-0 transition-colors duration-200">
       {/* Brand Header */}
-      <div className="sidebar-header px-3 mb-6 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-[#db2b60] text-white flex items-center justify-center font-bold text-sm shadow-sm">
+      <div className="sidebar-header px-2 mb-5 flex items-center gap-3">
+        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#7C3AED] to-[#6D28D9] text-white flex items-center justify-center font-bold text-sm shadow-md shadow-[#7C3AED]/30">
           R
         </div>
         <div>
-          <h1 className="text-sm font-extrabold text-[#191c1e] dark:text-white tracking-tight">RamCart Admin</h1>
-          <p className="text-[10px] font-bold text-[#878787] uppercase tracking-wider">Management Console</p>
+          <h1 className="text-sm font-extrabold text-[#1E1B4B] dark:text-white tracking-tight">RamCart Admin</h1>
+          <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wider">Management Console</p>
         </div>
       </div>
 
       {/* Navigation Menu */}
-      <nav className="sidebar-menu flex-1 flex flex-col gap-1.5 overflow-y-auto pr-1">
+      <nav className="sidebar-menu flex-1 flex flex-col gap-1 overflow-y-auto pr-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -69,19 +69,24 @@ export const AdminSidebar = ({
               onClick={() => setActiveTab(item.id)}
               className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-200 group cursor-pointer ${
                 isActive 
-                  ? "active bg-[#db2b60] text-white font-bold shadow-md shadow-[#db2b60]/20" 
-                  : "text-gray-700 dark:text-[#a3b0cc] hover:bg-gray-100 dark:hover:bg-[#1e2029]"
+                  ? "active bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white font-bold shadow-md shadow-[#7C3AED]/30" 
+                  : "text-[#4B5563] dark:text-[#C4B5FD] hover:bg-[#EDE9FE] dark:hover:bg-[#1A1A35] hover:text-[#7C3AED]"
               }`}
             >
               <div className="flex items-center gap-3">
-                <Icon size={18} className={`transition-transform duration-200 group-hover:scale-105 ${isActive ? "text-white" : "text-[#8e6f73] dark:text-[#8090a6]"}`} />
+                <Icon 
+                  size={17} 
+                  className={`transition-transform duration-200 group-hover:scale-105 ${
+                    isActive ? "text-white" : "text-[#7C3AED] dark:text-[#A78BFA] opacity-70"
+                  }`} 
+                />
                 <span className="text-xs font-bold tracking-wide">{item.label}</span>
               </div>
               {item.count !== undefined && item.count > 0 && (
                 <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                   isActive 
-                    ? "bg-white/20 text-white" 
-                    : "bg-[#e6e8eb] dark:bg-[#1e2029] text-[#5a4044] dark:text-[#a3b0cc] border border-[#e2bec2]/30 dark:border-white/5"
+                    ? "bg-white/25 text-white" 
+                    : "bg-[#EDE9FE] dark:bg-[#1A1A35] text-[#7C3AED] dark:text-[#A78BFA] border border-[#DDD6FE] dark:border-[#2A2A50]"
                 }`}>
                   {item.count}
                 </span>
@@ -92,22 +97,22 @@ export const AdminSidebar = ({
       </nav>
 
       {/* Bottom Profile and Action Buttons */}
-      <div className="sidebar-footer mt-auto pt-4 border-t border-[#e2bec2]/40 dark:border-white/10 flex flex-col gap-3">
+      <div className="sidebar-footer mt-auto pt-4 border-t border-[#DDD6FE] dark:border-[#2A2A50] flex flex-col gap-3">
         <div className="flex items-center gap-3 px-1">
-          <div className="w-9 h-9 rounded-full bg-[#ffd9de] dark:bg-[#ffd9de]/10 text-[#b80149] dark:text-[#ff3366] flex items-center justify-center font-bold text-xs">
+          <div className="w-9 h-9 rounded-full bg-[#EDE9FE] dark:bg-[#EDE9FE]/10 text-[#7C3AED] dark:text-[#A78BFA] flex items-center justify-center font-bold text-xs border border-[#DDD6FE] dark:border-[#2A2A50]">
             {user?.name ? user.name.charAt(0).toUpperCase() : <UserIcon size={16} />}
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-xs font-bold text-[#191c1e] dark:text-[#ebf1ff] truncate">
+            <span className="text-xs font-bold text-[#1E1B4B] dark:text-[#F5F3FF] truncate">
               {user?.name || 'Admin User'}
             </span>
-            <span className="text-[9px] font-bold text-[#878787] uppercase tracking-wider">
+            <span className="text-[9px] font-bold text-[#9CA3AF] uppercase tracking-wider">
               {user?.role === 'admin' ? 'System Root' : 'Administrator'}
             </span>
           </div>
         </div>
 
-        {/* Quick Action button matching template mockup */}
+        {/* Quick Action Button */}
         <button 
           type="button"
           onClick={() => alert("⚡ Quick Admin console drawer coming soon!")}
@@ -120,7 +125,7 @@ export const AdminSidebar = ({
         <button 
           type="button"
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-1.5 py-2 px-4 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 rounded-xl transition-all duration-200 text-xs font-semibold cursor-pointer border-none"
+          className="w-full flex items-center justify-center gap-1.5 py-2 px-4 bg-[#F6F7FB] hover:bg-[#EEF0F8] dark:bg-white/5 dark:hover:bg-white/10 text-[#4B5563] dark:text-[#C4B5FD] rounded-xl transition-all duration-200 text-xs font-semibold cursor-pointer border border-[#DDD6FE] dark:border-[#2A2A50]"
         >
           <LogOut size={12} />
           Logout

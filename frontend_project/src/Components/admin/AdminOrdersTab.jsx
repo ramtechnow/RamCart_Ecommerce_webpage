@@ -149,14 +149,14 @@ export const AdminOrdersTab = ({
   };
 
   return (
-    <div className="flex flex-col gap-6 animate-fade-in w-full text-[#191c1e] dark:text-[#ebf1ff]">
+    <div className="flex flex-col gap-6 animate-fade-in w-full text-[#1E1B4B] dark:text-[#F5F3FF]">
       {/* Title Header Block */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-xl font-bold tracking-tight text-[#191c1e] dark:text-[#ebf1ff]">
+          <h2 className="text-xl font-bold tracking-tight text-[#1E1B4B] dark:text-[#F5F3FF]">
             Order Tracking &amp; Management
           </h2>
-          <p className="text-xs text-[#878787] mt-0.5">
+          <p className="text-xs text-[#9CA3AF] mt-0.5">
             Monitor, process, and manage active customer orders.
           </p>
         </div>
@@ -164,7 +164,7 @@ export const AdminOrdersTab = ({
           <button 
             type="button"
             onClick={() => addToast("Exporting catalog order records...", "info")}
-            className="flex items-center gap-1.5 px-4 py-2 border border-gray-300 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 text-[#5a4044] dark:text-[#a3b0cc] text-xs font-bold rounded-xl transition-all cursor-pointer bg-white dark:bg-[#12141c]"
+            className="flex items-center gap-1.5 px-4 py-2 border border-gray-300 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 text-[#4B5563] dark:text-[#C4B5FD] text-xs font-bold rounded-xl transition-all cursor-pointer bg-white dark:bg-[#141428]"
           >
             <Download size={14} />
             <span>Export</span>
@@ -172,7 +172,7 @@ export const AdminOrdersTab = ({
           <button 
             type="button"
             onClick={() => addToast("Manual order generation mode", "info")}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#db2b60] hover:bg-[#b80149] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm border-none"
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm border-none"
           >
             <Plus size={14} />
             <span>New Order</span>
@@ -182,17 +182,17 @@ export const AdminOrdersTab = ({
 
       {/* Action Required: Delayed Shipments Banner */}
       {delayedOrders.length > 0 && (
-        <div className="bg-[#ffd9de] dark:bg-[#ffd9de]/10 border border-[#db2b60]/20 text-[#b80149] dark:text-[#ff4b72] rounded-xl p-4 flex items-start gap-3 shadow-sm">
-          <AlertCircle className="text-[#db2b60] shrink-0 mt-0.5" size={18} />
+        <div className="bg-[#EDE9FE] dark:bg-[#EDE9FE]/10 border border-[#7C3AED]/20 text-[#6D28D9] dark:text-[#A78BFA] rounded-xl p-4 flex items-start gap-3 shadow-sm">
+          <AlertCircle className="text-[#7C3AED] shrink-0 mt-0.5" size={18} />
           <div className="flex-1">
             <h3 className="text-xs font-black uppercase tracking-wider">Action Required: Delayed Shipments</h3>
-            <p className="text-xs mt-0.5 font-semibold text-[#5a4044] dark:text-[#a3b0cc]">
+            <p className="text-xs mt-0.5 font-semibold text-[#4B5563] dark:text-[#C4B5FD]">
               {delayedOrders.length} orders are currently delayed beyond the 48h SLA window. Please review and notify customers.
             </p>
           </div>
           <button 
             onClick={() => { setStatusFilter("Pending"); setSearchQuery(""); }}
-            className="text-xs font-black text-[#db2b60] dark:text-[#ff4b72] hover:underline cursor-pointer bg-transparent border-none p-0"
+            className="text-xs font-black text-[#7C3AED] dark:text-[#A78BFA] hover:underline cursor-pointer bg-transparent border-none p-0"
           >
             View Delayed ({delayedOrders.length})
           </button>
@@ -202,65 +202,65 @@ export const AdminOrdersTab = ({
       {/* Stepper and Performance Card Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Fulfillment Pipeline */}
-        <div className="lg:col-span-3 bg-white dark:bg-[#12141c] rounded-2xl border border-[#e2bec2]/40 dark:border-white/10 p-5 shadow-sm transition-colors duration-200">
-          <h3 className="text-xs font-black text-[#191c1e] dark:text-[#ebf1ff] uppercase tracking-wider mb-4">
+        <div className="lg:col-span-3 bg-white dark:bg-[#141428] rounded-2xl border border-[#DDD6FE]/40 dark:border-white/10 p-5 shadow-sm transition-colors duration-200">
+          <h3 className="text-xs font-black text-[#1E1B4B] dark:text-[#F5F3FF] uppercase tracking-wider mb-4">
             Active Fulfillment Pipeline
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 items-center">
             {/* Step 1: Ordered */}
-            <div className="flex flex-col items-center text-center p-3 bg-gray-50/50 dark:bg-white/5 rounded-2xl border border-[#e2bec2]/20 dark:border-white/5">
-              <div className="w-10 h-10 rounded-full bg-[#ffd9de] text-[#db2b60] flex items-center justify-center font-black mb-2 shadow-sm">
+            <div className="flex flex-col items-center text-center p-3 bg-gray-50/50 dark:bg-white/5 rounded-2xl border border-[#DDD6FE]/20 dark:border-white/5">
+              <div className="w-10 h-10 rounded-full bg-[#EDE9FE] text-[#7C3AED] flex items-center justify-center font-black mb-2 shadow-sm">
                 <ShoppingBag size={18} />
               </div>
-              <p className="text-xs font-bold text-[#191c1e] dark:text-[#ebf1ff]">Ordered</p>
-              <p className="text-[10px] text-[#878787] font-bold mt-0.5">{pipelineStats.pending} pending</p>
+              <p className="text-xs font-bold text-[#1E1B4B] dark:text-[#F5F3FF]">Ordered</p>
+              <p className="text-[10px] text-[#9CA3AF] font-bold mt-0.5">{pipelineStats.pending} pending</p>
             </div>
 
             {/* Step 2: Packed */}
-            <div className="flex flex-col items-center text-center p-3 bg-gray-50/50 dark:bg-white/5 rounded-2xl border border-[#e2bec2]/20 dark:border-white/5">
+            <div className="flex flex-col items-center text-center p-3 bg-gray-50/50 dark:bg-white/5 rounded-2xl border border-[#DDD6FE]/20 dark:border-white/5">
               <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-950/20 text-amber-600 flex items-center justify-center font-black mb-2 shadow-sm">
                 <Loader2 size={18} className="animate-spin" />
               </div>
-              <p className="text-xs font-bold text-[#191c1e] dark:text-[#ebf1ff]">Packed</p>
-              <p className="text-[10px] text-[#878787] font-bold mt-0.5">{pipelineStats.processing} ready</p>
+              <p className="text-xs font-bold text-[#1E1B4B] dark:text-[#F5F3FF]">Packed</p>
+              <p className="text-[10px] text-[#9CA3AF] font-bold mt-0.5">{pipelineStats.processing} ready</p>
             </div>
 
             {/* Step 3: Shipped */}
-            <div className="flex flex-col items-center text-center p-3 bg-gray-50/50 dark:bg-white/5 rounded-2xl border border-[#e2bec2]/20 dark:border-white/5">
+            <div className="flex flex-col items-center text-center p-3 bg-gray-50/50 dark:bg-white/5 rounded-2xl border border-[#DDD6FE]/20 dark:border-white/5">
               <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-950/20 text-blue-600 flex items-center justify-center font-black mb-2 shadow-sm">
                 <Calendar size={18} />
               </div>
-              <p className="text-xs font-bold text-[#191c1e] dark:text-[#ebf1ff]">Shipped</p>
-              <p className="text-[10px] text-[#878787] font-bold mt-0.5">{pipelineStats.shipped} in transit</p>
+              <p className="text-xs font-bold text-[#1E1B4B] dark:text-[#F5F3FF]">Shipped</p>
+              <p className="text-[10px] text-[#9CA3AF] font-bold mt-0.5">{pipelineStats.shipped} in transit</p>
             </div>
 
             {/* Step 4: Delivering */}
-            <div className="flex flex-col items-center text-center p-3 bg-gray-50/50 dark:bg-white/5 rounded-2xl border border-[#e2bec2]/20 dark:border-white/5">
+            <div className="flex flex-col items-center text-center p-3 bg-gray-50/50 dark:bg-white/5 rounded-2xl border border-[#DDD6FE]/20 dark:border-white/5">
               <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-950/20 text-emerald-600 flex items-center justify-center font-black mb-2 shadow-sm">
                 <ShoppingCart size={18} />
               </div>
-              <p className="text-xs font-bold text-[#191c1e] dark:text-[#ebf1ff]">Delivering</p>
-              <p className="text-[10px] text-[#878787] font-bold mt-0.5">{pipelineStats.delivered} today</p>
+              <p className="text-xs font-bold text-[#1E1B4B] dark:text-[#F5F3FF]">Delivering</p>
+              <p className="text-[10px] text-[#9CA3AF] font-bold mt-0.5">{pipelineStats.delivered} today</p>
             </div>
           </div>
         </div>
 
         {/* Today's Performance Card */}
-        <div className="bg-white dark:bg-[#12141c] rounded-2xl border border-[#e2bec2]/40 dark:border-white/10 p-5 shadow-sm transition-colors duration-200 flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#141428] rounded-2xl border border-[#DDD6FE]/40 dark:border-white/10 p-5 shadow-sm transition-colors duration-200 flex flex-col justify-between">
           <div>
-            <h3 className="text-xs font-black text-[#191c1e] dark:text-[#ebf1ff] uppercase tracking-wider mb-1">
+            <h3 className="text-xs font-black text-[#1E1B4B] dark:text-[#F5F3FF] uppercase tracking-wider mb-1">
               Today's Performance
             </h3>
-            <p className="text-[11px] text-[#878787] font-semibold leading-relaxed">
+            <p className="text-[11px] text-[#9CA3AF] font-semibold leading-relaxed">
               Fulfillment rate is looking good.
             </p>
           </div>
           <div className="mt-4">
-            <span className="text-[9px] font-black text-[#878787] uppercase tracking-wider">
+            <span className="text-[9px] font-black text-[#9CA3AF] uppercase tracking-wider">
               Orders Processed
             </span>
             <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-extrabold text-[#db2b60]">{orders.length * 3 + 14}</span>
+              <span className="text-2xl font-extrabold text-[#7C3AED]">{orders.length * 3 + 14}</span>
               <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5">
                 📈 +12%
               </span>
@@ -270,8 +270,8 @@ export const AdminOrdersTab = ({
       </div>
 
       {/* Orders Filter strip & search */}
-      <div className="bg-white dark:bg-[#12141c] rounded-2xl border border-[#e2bec2]/40 dark:border-white/10 overflow-hidden flex flex-col transition-colors duration-200">
-        <div className="p-4 border-b border-[#e2bec2]/20 dark:border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#f2f4f7]/20 dark:bg-[#1e2029]/20">
+      <div className="bg-white dark:bg-[#141428] rounded-2xl border border-[#DDD6FE]/40 dark:border-white/10 overflow-hidden flex flex-col transition-colors duration-200">
+        <div className="p-4 border-b border-[#DDD6FE]/20 dark:border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#EEF0F8]/20 dark:bg-[#1A1A35]/20">
           <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1.5 sm:pb-0">
             {["All", "Pending", "Processing", "Shipped"].map((status) => (
               <button
@@ -279,8 +279,8 @@ export const AdminOrdersTab = ({
                 onClick={() => setStatusFilter(status)}
                 className={`px-4 py-1.5 rounded-full text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap border ${
                   statusFilter === status 
-                    ? "bg-[#db2b60] text-white border-[#db2b60]" 
-                    : "bg-white dark:bg-[#1e2029] border-gray-300 dark:border-white/10 text-[#5a4044] dark:text-[#a3b0cc] hover:bg-gray-50 dark:hover:bg-[#363636]"
+                    ? "bg-[#7C3AED] text-white border-[#7C3AED]" 
+                    : "bg-white dark:bg-[#1A1A35] border-gray-300 dark:border-white/10 text-[#4B5563] dark:text-[#C4B5FD] hover:bg-gray-50 dark:hover:bg-[#363636]"
                 }`}
               >
                 {status === "All" ? "All Orders" : `${status} Orders`}
@@ -289,13 +289,13 @@ export const AdminOrdersTab = ({
           </div>
 
           <div className="relative w-full sm:w-64">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#878787]" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9CA3AF]" />
             <input 
               type="text" 
               placeholder="Search ID, Name..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-1.5 rounded-xl border border-gray-300 dark:border-white/10 bg-white dark:bg-[#1e2029] text-xs font-medium outline-none focus:border-[#db2b60]"
+              className="w-full pl-9 pr-4 py-1.5 rounded-xl border border-gray-300 dark:border-white/10 bg-white dark:bg-[#1A1A35] text-xs font-medium outline-none focus:border-[#7C3AED]"
             />
           </div>
         </div>
@@ -304,7 +304,7 @@ export const AdminOrdersTab = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr className="bg-gray-50 dark:bg-[#1e2029] text-xs font-bold text-[#5a4044] dark:text-[#a3b0cc] border-b border-[#e2bec2]/40 dark:border-white/10 uppercase tracking-wider">
+              <tr className="bg-gray-50 dark:bg-[#1A1A35] text-xs font-bold text-[#4B5563] dark:text-[#C4B5FD] border-b border-[#DDD6FE]/40 dark:border-white/10 uppercase tracking-wider">
                 <th className="p-4 w-32">Order ID</th>
                 <th className="p-4">Customer</th>
                 <th className="p-4 w-40">Date</th>
@@ -324,7 +324,7 @@ export const AdminOrdersTab = ({
                 const isDelayedRow = o.date ? ((Date.now() - new Date(o.date).getTime()) > threshold && (o.status === 'Pending' || o.status === 'Processing')) : false;
 
                 const rowBg = isExpanded 
-                  ? "bg-[#ffd9de]/5" 
+                  ? "bg-[#EDE9FE]/5" 
                   : isDelayedRow 
                     ? "bg-red-500/5" 
                     : "";
@@ -333,13 +333,13 @@ export const AdminOrdersTab = ({
                   <React.Fragment key={o._id}>
                     <tr 
                       onClick={() => setExpandedOrderId(isExpanded ? null : o._id)}
-                      className={`cursor-pointer transition-colors duration-150 hover:bg-[#f2f4f7]/30 dark:hover:bg-[#1e2029]/30 ${rowBg}`}
+                      className={`cursor-pointer transition-colors duration-150 hover:bg-[#EEF0F8]/30 dark:hover:bg-[#1A1A35]/30 ${rowBg}`}
                     >
                       {/* Order ID */}
                       <td className="p-4 align-middle">
                         <div className="flex items-center gap-1.5">
-                          <span className={`w-1.5 h-1.5 rounded-full bg-[#db2b60] ${isDelayedRow ? 'animate-ping' : ''}`}></span>
-                          <span className="text-xs font-bold font-mono text-gray-800 dark:text-[#ebf1ff]">
+                          <span className={`w-1.5 h-1.5 rounded-full bg-[#7C3AED] ${isDelayedRow ? 'animate-ping' : ''}`}></span>
+                          <span className="text-xs font-bold font-mono text-gray-800 dark:text-[#F5F3FF]">
                             #ORD-{o._id ? o._id.substring(0, 4).toUpperCase() : '9021'}
                           </span>
                         </div>
@@ -348,10 +348,10 @@ export const AdminOrdersTab = ({
                       {/* Customer Details */}
                       <td className="p-4 align-middle">
                         <div className="flex flex-col">
-                          <span className="text-xs font-bold text-gray-800 dark:text-[#ebf1ff]">
+                          <span className="text-xs font-bold text-gray-800 dark:text-[#F5F3FF]">
                             {o.userName || o.address?.fullName || "Sarah Jenkins"}
                           </span>
-                          <span className="text-[10px] text-[#878787] font-semibold">
+                          <span className="text-[10px] text-[#9CA3AF] font-semibold">
                             {o.userEmail || o.address?.email || "sarah.j@example.com"}
                           </span>
                         </div>
@@ -386,7 +386,7 @@ export const AdminOrdersTab = ({
                             : o.status === "Processing"
                               ? "bg-orange-50 dark:bg-orange-950/20 text-orange-600 border border-orange-100"
                               : o.status === "Out for Delivery"
-                                ? "bg-pink-50 dark:bg-pink-950/20 text-[#db2b60] border border-pink-100"
+                                ? "bg-pink-50 dark:bg-pink-950/20 text-[#7C3AED] border border-pink-100"
                                 : "bg-gray-50 dark:bg-gray-900/40 text-gray-600 border border-gray-200"
                         }`}>
                           {o.status || "Ordered"}
@@ -409,7 +409,7 @@ export const AdminOrdersTab = ({
                             value={o.status}
                             disabled={o.status === "Delivered" || updatingOrderId === o._id}
                             onChange={(e) => handleUpdateStatus(o._id, e.target.value)}
-                            className="h-8 px-2 rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-[#1e2029] text-[10px] font-bold outline-none cursor-pointer text-gray-800 dark:text-white"
+                            className="h-8 px-2 rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-[#1A1A35] text-[10px] font-bold outline-none cursor-pointer text-gray-800 dark:text-white"
                           >
                             <option value="Pending">Ordered</option>
                             <option value="Processing">Processing</option>
@@ -418,7 +418,7 @@ export const AdminOrdersTab = ({
                           </select>
 
                           {updatingOrderId === o._id ? (
-                            <Loader2 size={12} className="animate-spin text-[#db2b60]" />
+                            <Loader2 size={12} className="animate-spin text-[#7C3AED]" />
                           ) : (
                             <button
                               type="button"
@@ -435,14 +435,14 @@ export const AdminOrdersTab = ({
 
                     {/* Expandable address detail & itemized card drawer */}
                     {isExpanded && (
-                      <tr className="bg-gray-50/50 dark:bg-[#1e2029]/20">
+                      <tr className="bg-gray-50/50 dark:bg-[#1A1A35]/20">
                         <td colSpan="7" className="p-5">
-                          <div className="bg-white dark:bg-[#12141c] border border-[#e2bec2]/30 dark:border-white/10 rounded-2xl p-4 shadow-sm animate-slide-down flex flex-col md:flex-row gap-5">
+                          <div className="bg-white dark:bg-[#141428] border border-[#DDD6FE]/30 dark:border-white/10 rounded-2xl p-4 shadow-sm animate-slide-down flex flex-col md:flex-row gap-5">
                             
                             {/* Shipping address details */}
                             <div className="flex-1">
-                              <h4 className="text-xs font-black text-[#b80149] dark:text-[#ff3366] uppercase tracking-wider mb-2.5">📍 Shipping Destination</h4>
-                              <div className="p-3.5 border border-[#e2bec2]/20 dark:border-white/5 bg-gray-50 dark:bg-[#1e2029]/40 rounded-xl text-xs space-y-1.5 text-[#5a4044] dark:text-[#a3b0cc]">
+                              <h4 className="text-xs font-black text-[#6D28D9] dark:text-[#A78BFA] uppercase tracking-wider mb-2.5">📍 Shipping Destination</h4>
+                              <div className="p-3.5 border border-[#DDD6FE]/20 dark:border-white/5 bg-gray-50 dark:bg-[#1A1A35]/40 rounded-xl text-xs space-y-1.5 text-[#4B5563] dark:text-[#C4B5FD]">
                                 <p><strong className="text-gray-700 dark:text-white font-bold">Email:</strong> {o.userEmail || o.address?.email || o.email || "Registered Email"}</p>
                                 <p><strong className="text-gray-700 dark:text-white font-bold">Contact:</strong> {o.address?.fullName || o.userName || "Customer"}</p>
                                 <p><strong className="text-gray-700 dark:text-white font-bold">Street:</strong> {o.address?.addressLine}</p>
@@ -453,12 +453,12 @@ export const AdminOrdersTab = ({
 
                             {/* Itemized purchased list */}
                             <div className="flex-1">
-                              <h4 className="text-xs font-black text-[#b80149] dark:text-[#ff3366] uppercase tracking-wider mb-2.5">📦 Purchased Items</h4>
+                              <h4 className="text-xs font-black text-[#6D28D9] dark:text-[#A78BFA] uppercase tracking-wider mb-2.5">📦 Purchased Items</h4>
                               <div className="flex flex-col gap-2">
                                 {(o.items || []).map((item, idx) => {
                                   const prodDetails = products.find(p => p.id === item.productId);
                                   return (
-                                    <div key={idx} className="p-2.5 border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-[#1e2029]/40 rounded-xl flex items-center justify-between gap-3 text-xs">
+                                    <div key={idx} className="p-2.5 border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-[#1A1A35]/40 rounded-xl flex items-center justify-between gap-3 text-xs">
                                       <div className="flex items-center gap-3">
                                         <img 
                                           src={prodDetails?.image || item.image || ""} 
@@ -471,7 +471,7 @@ export const AdminOrdersTab = ({
                                         </div>
                                         <div className="flex flex-col min-w-0">
                                           <span className="font-bold text-gray-800 dark:text-white truncate w-36">{item.name}</span>
-                                          <span className="text-[10px] text-[#878787] mt-0.5">Size: {item.size || "M"} &bull; Color: {item.color || "Standard"} &bull; Qty: {item.quantity}</span>
+                                          <span className="text-[10px] text-[#9CA3AF] mt-0.5">Size: {item.size || "M"} &bull; Color: {item.color || "Standard"} &bull; Qty: {item.quantity}</span>
                                         </div>
                                       </div>
                                       <span className="font-bold text-gray-800 dark:text-white">₹{Number(item.price * item.quantity).toFixed(2)}</span>
@@ -490,7 +490,7 @@ export const AdminOrdersTab = ({
               })}
               {filteredOrders.length === 0 && (
                 <tr>
-                  <td colSpan="7" className="p-12 text-center text-sm font-medium text-[#878787]">
+                  <td colSpan="7" className="p-12 text-center text-sm font-medium text-[#9CA3AF]">
                     No customer orders found matching current filters.
                   </td>
                 </tr>
