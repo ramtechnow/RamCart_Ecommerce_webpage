@@ -17,7 +17,7 @@
   display: flex;
   min-height: 100vh;
   transition: var(--transition-smooth);
-  
+
   /* ══════════════════════════════════════════════════════════════
      RAMCART ADMIN THEME (Light & Dark matching User Reference Hues)
      Reference Hues:
@@ -28,11 +28,10 @@
      Button text:#fffffe (Crisp White)
      Secondary/Hover: #e53170 / #f25f4c (Crimson Red / Coral)
   ══════════════════════════════════════════════════════════════ */
-  
-  /* LIGHT MODE: calm blue-gray canvas with a single clear action color */
-  --bg-primary:   #f4f7fb;
-  --bg-secondary: #ffffff;
-  --bg-tertiary:  #eaf0f7;
+  /* LIGHT MODE (Clean, warm off-white surface, deep dark headlines, vibrant orange buttons & red hover) */
+  --bg-primary:   #f7f7fa;      /* soft background */
+  --bg-secondary: #ffffff;      /* crisp clean white card surface */
+  --bg-tertiary:  #eff0f6;      /* subtle container / hover fill */
 
   --text-primary:   #172033;
   --text-secondary: #4b5870;
@@ -62,6 +61,8 @@
   --border-radius-md:   0.625rem;
   --border-radius-lg:   0.875rem;
   --border-radius-full: 9999px;
+
+  --transition-smooth: all 0.2s ease;
 
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -1188,11 +1189,11 @@
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .audit-controls {
     width: 100%;
   }
-  
+
   .audit-search-input {
     flex: 1;
     width: 100%;
