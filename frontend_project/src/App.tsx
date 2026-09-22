@@ -39,6 +39,29 @@ const FestiveParticlesWrapper: React.FC<{ promo: SeasonalPromo | null }> = ({ pr
   return <FestiveParticles type={promo.particleType} enable={true} />;
 };
 
+const StorefrontChrome: React.FC = () => {
+  const location = useLocation();
+  const isAdminPage = location.pathname.startsWith("/admin");
+
+  if (isAdminPage) return null;
+
+  return (
+    <>
+      <div style={{ position: "relative", zIndex: 10 }}>
+        <Navbar />
+      </div>
+      <Suspense fallback={null}>
+        <div style={{ position: "relative", zIndex: 10 }}>
+          <Footer />
+        </div>
+      </Suspense>
+      <div style={{ position: "relative", zIndex: 100 }}>
+        <MobileBottomNav />
+      </div>
+    </>
+  );
+};
+
 export const App: React.FC = () => {
   const dispatch = useAppDispatch();
   const [activePromo, setActivePromo] = useState<SeasonalPromo | null>(null);
@@ -88,12 +111,7 @@ export const App: React.FC = () => {
         {/* Global Animated Background Patterns (Grid / Stars) */}
         <Pattern />
 
-        {/* Global Navigation Header */}
-        <Suspense fallback={null}>
-          <div style={{ position: "relative", zIndex: 10 }}>
-            <Navbar />
-          </div>
-        </Suspense>
+        <StorefrontChrome />
         
         {/* Main Content Viewport with Suspense fallback */}
         <div style={{ flexGrow: 1, position: "relative", zIndex: 2 }}>
@@ -161,17 +179,6 @@ export const App: React.FC = () => {
           </Suspense>
         </div>
         
-        {/* Global Footer */}
-        <Suspense fallback={null}>
-          <div style={{ position: "relative", zIndex: 10 }}>
-            <Footer />
-          </div>
-        </Suspense>
-
-        {/* Mobile Bottom Navigation (Meesho/Flipkart style) */}
-        <div style={{ position: "relative", zIndex: 100 }}>
-          <MobileBottomNav />
-        </div>
       </div>
 
       {/* Scroll to Top — global floating button */}
