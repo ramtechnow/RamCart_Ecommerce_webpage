@@ -7,13 +7,15 @@ import {
   PlusCircle, 
   Users, 
   ShoppingCart, 
-  Tag,
-  User as UserIcon,
-  LogOut,
-  Image as ImageIcon,
-  Sparkles,
-  Zap
+  Tag, 
+  User as UserIcon, 
+  LogOut, 
+  Image as ImageIcon, 
+  Sparkles, 
+  Zap, 
+  ShieldCheck 
 } from 'lucide-react';
+import { ThemeCustomizer } from '../ui/ThemeCustomizer';
 
 export const AdminSidebar = ({ 
   activeTab, 
@@ -44,15 +46,19 @@ export const AdminSidebar = ({
   ];
 
   return (
-    <aside className="admin-sidebar w-[230px] bg-white dark:bg-[#171622] border-r border-[#e2e4ed] dark:border-[#2e2d40] flex flex-col h-screen py-6 px-3.5 gap-2 shrink-0 transition-colors duration-200">
-      {/* Brand Header */}
-      <div className="sidebar-header px-2 mb-5 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-xl bg-[#ff8906] text-[#fffffe] flex items-center justify-center font-black text-sm shadow-md shadow-[#ff8906]/30">
+    <aside className="admin-sidebar w-[240px] bg-white dark:bg-[#171622] border-r border-[#e2e4ed] dark:border-[#2e2d40] flex flex-col h-screen py-5 px-3.5 gap-2 shrink-0 transition-colors duration-200">
+      {/* Brand Header — Crystal clear visibility with high contrast badge & title */}
+      <div className="sidebar-header px-2 mb-4 pb-3 flex items-center gap-3 border-b border-[#e2e4ed] dark:border-[#2e2d40]">
+        <div className="w-9 h-9 rounded-xl bg-[#ff8906] text-[#fffffe] flex items-center justify-center font-black text-base shadow-md shadow-[#ff8906]/35 shrink-0">
           R
         </div>
-        <div>
-          <h1 className="text-sm font-extrabold text-[#0f0e17] dark:text-[#fffffe] tracking-tight">RamCart Admin</h1>
-          <p className="text-[10px] font-bold text-[#717388] dark:text-[#a7a9be] uppercase tracking-wider">Management Console</p>
+        <div className="flex flex-col min-w-0">
+          <h1 className="text-sm font-black text-[#0f0e17] dark:text-[#fffffe] tracking-tight leading-tight">
+            RamCart Admin
+          </h1>
+          <span className="text-[10px] font-extrabold text-[#e53170] dark:text-[#ff8906] uppercase tracking-wider mt-0.5">
+            Management Console
+          </span>
         </div>
       </div>
 
@@ -96,19 +102,28 @@ export const AdminSidebar = ({
         })}
       </nav>
 
+      {/* Theme Customizer widget embedded in Sidebar */}
+      <div className="px-1">
+        <ThemeCustomizer />
+      </div>
+
       {/* Bottom Profile and Action Buttons */}
-      <div className="sidebar-footer mt-auto pt-4 border-t border-[#e2e4ed] dark:border-[#2e2d40] flex flex-col gap-3">
-        <div className="flex items-center gap-3 px-1">
-          <div className="w-9 h-9 rounded-full bg-[#fff3e6] dark:bg-[#212030] text-[#ff8906] flex items-center justify-center font-bold text-xs border border-[#e2e4ed] dark:border-[#2e2d40]">
-            {user?.name ? user.name.charAt(0).toUpperCase() : <UserIcon size={16} />}
+      <div className="sidebar-footer mt-auto pt-3 border-t border-[#e2e4ed] dark:border-[#2e2d40] flex flex-col gap-2.5">
+        {/* User profile capsule with crystal clear name and role badge */}
+        <div className="flex items-center gap-3 px-2 py-2 bg-[#f7f7fa] dark:bg-[#212030] rounded-xl border border-[#e2e4ed] dark:border-[#2e2d40]">
+          <div className="w-8 h-8 rounded-full bg-[#ff8906] text-[#fffffe] flex items-center justify-center font-black text-xs shrink-0 shadow-sm">
+            {user?.name ? user.name.charAt(0).toUpperCase() : <UserIcon size={15} />}
           </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-xs font-bold text-[#0f0e17] dark:text-[#fffffe] truncate">
-              {user?.name || 'Admin User'}
+          <div className="flex flex-col min-w-0 flex-1">
+            <span className="text-xs font-extrabold text-[#0f0e17] dark:text-[#fffffe] truncate">
+              {user?.name || 'Admin'}
             </span>
-            <span className="text-[9px] font-bold text-[#717388] dark:text-[#a7a9be] uppercase tracking-wider">
-              {user?.role === 'admin' ? 'System Root' : 'Administrator'}
-            </span>
+            <div className="flex items-center gap-1">
+              <ShieldCheck size={11} className="text-[#e53170] dark:text-[#ff8906] shrink-0" />
+              <span className="text-[10px] font-black text-[#e53170] dark:text-[#ff8906] uppercase tracking-wider truncate">
+                {user?.role === 'admin' ? 'System Root' : 'Administrator'}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -125,7 +140,7 @@ export const AdminSidebar = ({
         <button 
           type="button"
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-1.5 py-2 px-4 bg-[#eff0f6] hover:bg-[#e53170] hover:text-[#fffffe] dark:bg-[#212030] dark:hover:bg-[#e53170] text-[#2e2f3e] dark:text-[#a7a9be] rounded-xl transition-all duration-200 text-xs font-semibold cursor-pointer border border-[#e2e4ed] dark:border-[#2e2d40]"
+          className="w-full flex items-center justify-center gap-1.5 py-2 px-4 bg-[#eff0f6] hover:bg-[#e53170] hover:text-[#fffffe] dark:bg-[#212030] dark:hover:bg-[#e53170] text-[#2e2f3e] dark:text-[#a7a9be] rounded-xl transition-all duration-200 text-xs font-bold cursor-pointer border border-[#e2e4ed] dark:border-[#2e2d40]"
         >
           <LogOut size={12} />
           Logout

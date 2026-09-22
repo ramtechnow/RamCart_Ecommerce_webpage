@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { User, Eye, Bell, CheckCheck, ShoppingBag, AlertCircle, X, ArrowRight } from 'lucide-react';
+import React, { useState, useContext } from 'react';
+import { User, Eye, Bell, CheckCheck, ShoppingBag, AlertCircle, X, ArrowRight, Sun, Moon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ThemeContext } from '../../Context/ThemeContext';
 
 export const AdminTopbar = ({ 
   adminUser, 
@@ -10,6 +11,7 @@ export const AdminTopbar = ({
   onProcessOrder 
 }) => {
   const navigate = useNavigate();
+  const themeCtx = useContext(ThemeContext);
   const [showNotifications, setShowNotifications] = useState(false);
 
   const unreadCount = notifications.filter(n => n.unread).length;
@@ -19,10 +21,10 @@ export const AdminTopbar = ({
       {/* Left — Console Identity */}
       <div className="flex items-center gap-4 flex-1">
         <div>
-          <h2 className="text-sm font-extrabold text-[#ff8906] tracking-wider uppercase">
+          <h2 className="text-sm font-black text-[#ff8906] tracking-wider uppercase">
             ADMIN CONSOLE
           </h2>
-          <span className="text-[11px] text-[#717388] dark:text-[#a7a9be] font-medium hidden sm:inline">
+          <span className="text-[11px] text-[#717388] dark:text-[#a7a9be] font-semibold hidden sm:inline">
             Manage Catalog, Accounts, and Real-time Orders
           </span>
         </div>
@@ -30,6 +32,19 @@ export const AdminTopbar = ({
 
       {/* Right Controls */}
       <div className="flex items-center gap-3">
+        {/* Quick Dark / Light Theme Toggle Button */}
+        {themeCtx && (
+          <button
+            type="button"
+            onClick={themeCtx.toggleTheme}
+            aria-label="Toggle Theme Mode"
+            title={themeCtx.isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            className="w-9 h-9 rounded-full bg-[#eff0f6] dark:bg-[#212030] border border-[#e2e4ed] dark:border-[#2e2d40] flex items-center justify-center text-[#ff8906] hover:bg-[#ff8906] hover:text-[#fffffe] transition-all duration-200 cursor-pointer shadow-sm"
+          >
+            {themeCtx.isDarkMode ? <Sun size={17} /> : <Moon size={17} />}
+          </button>
+        )}
+
         {/* Storefront CTA — Orange button with white text, red hover */}
         <button
           onClick={() => navigate('/')}
@@ -148,14 +163,19 @@ export const AdminTopbar = ({
           )}
         </div>
 
-        {/* Profile Capsule */}
-        <div className="flex items-center gap-2 pl-1 pr-3 py-1 bg-[#eff0f6] dark:bg-[#212030] rounded-full border border-[#e2e4ed] dark:border-[#2e2d40]">
-          <div className="w-7 h-7 rounded-full bg-[#ff8906] text-[#fffffe] flex items-center justify-center text-xs font-bold shadow-sm">
+        {/* Profile Capsule — Clear bold text & role */}
+        <div className="flex items-center gap-2.5 pl-1.5 pr-3.5 py-1.5 bg-[#eff0f6] dark:bg-[#212030] rounded-full border border-[#e2e4ed] dark:border-[#2e2d40] shadow-sm">
+          <div className="w-7 h-7 rounded-full bg-[#ff8906] text-[#fffffe] flex items-center justify-center text-xs font-black shadow-sm shrink-0">
             {adminUser?.name ? adminUser.name.charAt(0).toUpperCase() : <User size={14} />}
           </div>
-          <span className="text-xs font-bold text-[#0f0e17] dark:text-[#fffffe] hidden sm:inline max-w-[100px] truncate">
-            {adminUser?.name || 'Administrator'}
-          </span>
+          <div className="flex flex-col min-w-0">
+            <span className="text-xs font-extrabold text-[#0f0e17] dark:text-[#fffffe] max-w-[120px] truncate leading-tight">
+              {adminUser?.name || 'Admin'}
+            </span>
+            <span className="text-[9px] font-black text-[#e53170] dark:text-[#ff8906] uppercase tracking-wider leading-none">
+              {adminUser?.role === 'admin' ? 'System Root' : 'Administrator'}
+            </span>
+          </div>
         </div>
       </div>
     </header>
