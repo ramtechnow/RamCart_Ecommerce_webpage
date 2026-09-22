@@ -265,7 +265,7 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
               <span style={{ color: 'var(--text-secondary)', fontWeight: '400' }}>vs last mo</span>
             </div>
           </div>
-          <div style={{ padding: '10px', borderRadius: 'var(--border-radius-md)', backgroundColor: 'rgba(184, 0, 53, 0.08)', color: 'var(--accent-color)' }}>
+          <div style={{ padding: '10px', borderRadius: 'var(--border-radius-md)', backgroundColor: 'rgba(124, 58, 237, 0.10)', color: 'var(--accent-color)' }}>
             <IndianRupee size={22} />
           </div>
         </div>
@@ -290,7 +290,7 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
               <span style={{ color: 'var(--text-secondary)' }}>this week</span>
             </div>
           </div>
-          <div style={{ padding: '10px', borderRadius: 'var(--border-radius-md)', backgroundColor: 'rgba(69, 71, 211, 0.08)', color: 'var(--tertiary)' }}>
+          <div style={{ padding: '10px', borderRadius: 'var(--border-radius-md)', backgroundColor: 'rgba(124, 58, 237, 0.10)', color: 'var(--tertiary)' }}>
             <ShoppingBag size={22} />
           </div>
         </div>
@@ -340,7 +340,7 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
               <span style={{ color: 'var(--text-secondary)', fontWeight: '400' }}>outbound</span>
             </div>
           </div>
-          <div style={{ padding: '10px', borderRadius: 'var(--border-radius-md)', backgroundColor: 'rgba(87, 94, 112, 0.08)', color: 'var(--text-secondary)' }}>
+          <div style={{ padding: '10px', borderRadius: 'var(--border-radius-md)', backgroundColor: 'rgba(13, 148, 136, 0.10)', color: 'var(--text-secondary)' }}>
             <Warehouse size={22} />
           </div>
         </div>

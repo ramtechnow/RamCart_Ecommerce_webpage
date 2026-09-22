@@ -165,7 +165,7 @@ export const AdminSeasonalTab: React.FC<AdminSeasonalTabProps> = ({ addToast, lo
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Left Bento: Theme and particle options */}
-        <div className="bg-white dark:bg-[#141428] rounded-2xl border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-5 shadow-sm transition-colors duration-200">
+        <div className="bg-[#FBFAFF] dark:bg-[#141428] rounded-2xl border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-5 shadow-sm transition-colors duration-200">
           <h3 className="text-xs font-black text-[#6D28D9] dark:text-[#A78BFA] uppercase tracking-wider border-b border-[#DDD6FE]/20 dark:border-white/5 pb-3 flex items-center gap-2">
             <Sparkles size={16} /> Theme &amp; Decoration Settings
           </h3>
@@ -176,7 +176,7 @@ export const AdminSeasonalTab: React.FC<AdminSeasonalTabProps> = ({ addToast, lo
             <select
               value={theme}
               onChange={(e) => handleThemeChange(e.target.value)}
-              className="w-full h-11 px-3.5 rounded-xl border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] text-xs font-semibold outline-none cursor-pointer"
+              className="w-full h-11 px-3.5 rounded-xl border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] text-xs font-semibold outline-none cursor-pointer"
             >
               {THEME_OPTIONS.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -192,7 +192,7 @@ export const AdminSeasonalTab: React.FC<AdminSeasonalTabProps> = ({ addToast, lo
               onChange={(e) => setAnnouncementText(e.target.value)}
               placeholder="e.g. 🎉 Vinayagar Chaturthi Sale: Get up to 10% Instant Discount on HDFC Cards! &bull; Free Shipping on orders above ₹1,000"
               rows={3}
-              className="w-full p-3.5 rounded-xl border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] text-xs outline-none resize-none leading-relaxed"
+              className="w-full p-3.5 rounded-xl border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] text-xs outline-none resize-none leading-relaxed"
             />
           </div>
 
@@ -202,7 +202,7 @@ export const AdminSeasonalTab: React.FC<AdminSeasonalTabProps> = ({ addToast, lo
             <select
               value={announcementBg}
               onChange={(e) => setAnnouncementBg(e.target.value)}
-              className="w-full h-10 px-3.5 rounded-xl border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] text-xs font-semibold outline-none cursor-pointer"
+              className="w-full h-10 px-3.5 rounded-xl border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] text-xs font-semibold outline-none cursor-pointer"
             >
               {GRADIENT_PRESETS.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -213,7 +213,7 @@ export const AdminSeasonalTab: React.FC<AdminSeasonalTabProps> = ({ addToast, lo
               value={announcementBg}
               onChange={(e) => setAnnouncementBg(e.target.value)}
               placeholder="Custom color hex or linear-gradient css value"
-              className="w-full h-10 px-3.5 rounded-xl border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] text-xs outline-none font-mono"
+              className="w-full h-10 px-3.5 rounded-xl border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] text-xs outline-none font-mono"
             />
           </div>
 
@@ -238,7 +238,7 @@ export const AdminSeasonalTab: React.FC<AdminSeasonalTabProps> = ({ addToast, lo
               <select
                 value={particleType}
                 onChange={(e) => setParticleType(e.target.value)}
-                className="w-full h-10 px-3.5 rounded-xl border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] text-xs font-semibold outline-none cursor-pointer"
+                className="w-full h-10 px-3.5 rounded-xl border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] text-xs font-semibold outline-none cursor-pointer"
               >
                 <option value="star">Shining golden stars (General)</option>
                 <option value="lamp">Clay glowing lamps / Diya (Vinayagar/Diwali)</option>
@@ -250,7 +250,7 @@ export const AdminSeasonalTab: React.FC<AdminSeasonalTabProps> = ({ addToast, lo
         </div>
 
         {/* Right Bento: Credit cards manager */}
-        <div className="bg-white dark:bg-[#141428] rounded-2xl border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-5 shadow-sm transition-colors duration-200">
+        <div className="bg-[#FBFAFF] dark:bg-[#141428] rounded-2xl border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-5 shadow-sm transition-colors duration-200">
           <h3 className="text-xs font-black text-[#6D28D9] dark:text-[#A78BFA] uppercase tracking-wider border-b border-[#DDD6FE]/20 dark:border-white/5 pb-3 flex items-center gap-2">
             <Megaphone size={16} /> Manage Active Bank Offers
           </h3>
@@ -265,7 +265,7 @@ export const AdminSeasonalTab: React.FC<AdminSeasonalTabProps> = ({ addToast, lo
                   placeholder="e.g. HDFC Bank"
                   value={newBank}
                   onChange={(e) => setNewBank(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] text-xs outline-none"
+                  className="w-full h-10 px-3 rounded-xl border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] text-xs outline-none"
                 />
               </div>
 
@@ -283,7 +283,7 @@ export const AdminSeasonalTab: React.FC<AdminSeasonalTabProps> = ({ addToast, lo
                     type="text"
                     value={newBadgeColor}
                     onChange={(e) => setNewBadgeColor(e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] text-xs outline-none font-mono"
+                    className="w-full h-10 px-3 rounded-xl border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] text-xs outline-none font-mono"
                   />
                 </div>
               </div>
@@ -296,7 +296,7 @@ export const AdminSeasonalTab: React.FC<AdminSeasonalTabProps> = ({ addToast, lo
                 placeholder="e.g. 10% Instant Discount up to ₹1,500"
                 value={newOfferText}
                 onChange={(e) => setNewOfferText(e.target.value)}
-                className="w-full h-10 px-3 rounded-xl border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] text-xs outline-none"
+                className="w-full h-10 px-3 rounded-xl border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] text-xs outline-none"
               />
             </div>
 
@@ -307,7 +307,7 @@ export const AdminSeasonalTab: React.FC<AdminSeasonalTabProps> = ({ addToast, lo
                   type="number"
                   value={newMinOrder}
                   onChange={(e) => setNewMinOrder(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] text-xs outline-none"
+                  className="w-full h-10 px-3 rounded-xl border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] text-xs outline-none"
                 />
               </div>
 

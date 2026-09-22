@@ -22,13 +22,17 @@
      RamCart Admin — Deep Violet & Teal Theme
      Light mode: Clean white surfaces, violet accents, teal CTAs
   ══════════════════════════════════════════ */
-  --bg-primary:   #F6F7FB;      /* soft lavender-white page background */
-  --bg-secondary: #FFFFFF;      /* pure white card surface */
-  --bg-tertiary:  #EEF0F8;      /* soft purple-tinted hover/container */
+  --bg-primary:   #F3F2FF;      /* soft violet-white page background */
+  --bg-secondary: #FBFAFF;      /* barely-violet card surface (not plain white) */
+  --bg-tertiary:  #EDEAFF;      /* soft violet container / hover fill */
 
   --text-primary:   #1E1B4B;    /* deep indigo heading text */
   --text-secondary: #4B5563;    /* slate gray body text */
   --text-muted:     #9CA3AF;    /* soft gray muted text */
+
+  --success-color: #0D9488;     /* teal green */
+  --warning:       #D97706;     /* amber */
+  --danger:        #DC2626;     /* red */
 
   /* Primary brand accent — Rich Violet */
   --accent-pink:   #7C3AED;

@@ -15,7 +15,7 @@ export const AdminTopbar = ({
   const unreadCount = notifications.filter(n => n.unread).length;
 
   return (
-    <header className="admin-topbar sticky top-0 z-50 flex items-center justify-between px-6 w-full h-16 bg-white dark:bg-[#141428] border-b border-[#DDD6FE] dark:border-[#2A2A50] shadow-sm shadow-[#7C3AED]/5 transition-colors duration-200">
+    <header className="admin-topbar sticky top-0 z-50 flex items-center justify-between px-6 w-full h-16 bg-[#FBFAFF] dark:bg-[#141428] border-b border-[#DDD6FE] dark:border-[#2A2A50] shadow-sm shadow-[#7C3AED]/5 transition-colors duration-200">
       {/* Left — Console Identity */}
       <div className="flex items-center gap-4 flex-1">
         <div>
@@ -57,7 +57,7 @@ export const AdminTopbar = ({
 
           {/* Notifications Dropdown */}
           {showNotifications && (
-            <div className="absolute right-0 mt-3 w-80 max-h-96 bg-white dark:bg-[#1A1A35] border border-[#DDD6FE] dark:border-[#2A2A50] rounded-2xl shadow-xl shadow-[#7C3AED]/10 z-50 flex flex-col overflow-hidden animate-fade-in">
+            <div className="absolute right-0 mt-3 w-80 max-h-96 bg-[#FBFAFF] dark:bg-[#1A1A35] border border-[#DDD6FE] dark:border-[#2A2A50] rounded-2xl shadow-xl shadow-[#7C3AED]/10 z-50 flex flex-col overflow-hidden animate-fade-in">
               {/* Header */}
               <div className="flex items-center justify-between p-3.5 border-b border-[#DDD6FE] dark:border-[#2A2A50] bg-[#EEF0F8] dark:bg-[#141428]">
                 <div className="flex items-center gap-2">

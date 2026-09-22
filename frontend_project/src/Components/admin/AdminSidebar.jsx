@@ -44,7 +44,7 @@ export const AdminSidebar = ({
   ];
 
   return (
-    <aside className="admin-sidebar w-[230px] bg-white dark:bg-[#141428] border-r border-[#DDD6FE] dark:border-[#2A2A50] flex flex-col h-screen py-6 px-3.5 gap-2 shrink-0 transition-colors duration-200">
+    <aside className="admin-sidebar w-[230px] bg-[#FBFAFF] dark:bg-[#141428] border-r border-[#DDD6FE] dark:border-[#2A2A50] flex flex-col h-screen py-6 px-3.5 gap-2 shrink-0 transition-colors duration-200">
       {/* Brand Header */}
       <div className="sidebar-header px-2 mb-5 flex items-center gap-3">
         <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#7C3AED] to-[#6D28D9] text-white flex items-center justify-center font-bold text-sm shadow-md shadow-[#7C3AED]/30">
@@ -125,7 +125,7 @@ export const AdminSidebar = ({
         <button 
           type="button"
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-1.5 py-2 px-4 bg-[#F6F7FB] hover:bg-[#EEF0F8] dark:bg-white/5 dark:hover:bg-white/10 text-[#4B5563] dark:text-[#C4B5FD] rounded-xl transition-all duration-200 text-xs font-semibold cursor-pointer border border-[#DDD6FE] dark:border-[#2A2A50]"
+          className="w-full flex items-center justify-center gap-1.5 py-2 px-4 bg-[#EDE9FE] hover:bg-[#DDD6FE] dark:bg-white/5 dark:hover:bg-white/10 text-[#4B5563] dark:text-[#C4B5FD] rounded-xl transition-all duration-200 text-xs font-semibold cursor-pointer border border-[#DDD6FE] dark:border-[#2A2A50]"
         >
           <LogOut size={12} />
           Logout

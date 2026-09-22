@@ -262,7 +262,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
           {/* Left Columns (Main Info) */}
           <div className="lg:col-span-2 flex flex-col gap-6">
             {/* General Info Card */}
-            <div className="bg-white dark:bg-[#141428] rounded-2xl shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-4">
+            <div className="bg-[#FBFAFF] dark:bg-[#141428] rounded-2xl shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-4">
               <h3 className="text-sm font-black text-[#6D28D9] dark:text-[#A78BFA] uppercase tracking-wider flex items-center gap-2 border-b border-[#DDD6FE]/20 dark:border-white/5 pb-3">
                 <FileText size={18} /> Basic Information
               </h3>
@@ -278,7 +278,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                     setName(e.target.value);
                     setFieldErrors(prev => ({ ...prev, name: null }));
                   }}
-                  className={`w-full h-11 px-4 rounded-xl border bg-white dark:bg-[#1A1A35] outline-none text-sm transition-all focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] ${
+                  className={`w-full h-11 px-4 rounded-xl border bg-[#FBFAFF] dark:bg-[#1A1A35] outline-none text-sm transition-all focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] ${
                     fieldErrors.name ? 'border-red-500' : 'border-[#DDD6FE]/40 dark:border-white/10'
                   }`}
                 />
@@ -300,7 +300,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                     setDescription(e.target.value);
                     setFieldErrors(prev => ({ ...prev, description: null }));
                   }}
-                  className={`w-full p-4 rounded-xl border bg-white dark:bg-[#1A1A35] outline-none text-sm resize-none transition-all focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] ${
+                  className={`w-full p-4 rounded-xl border bg-[#FBFAFF] dark:bg-[#1A1A35] outline-none text-sm resize-none transition-all focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] ${
                     fieldErrors.description ? 'border-red-500' : 'border-[#DDD6FE]/40 dark:border-white/10'
                   }`}
                 />
@@ -313,7 +313,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
             </div>
 
             {/* Pricing & Inventory Configuration */}
-            <div className="bg-white dark:bg-[#141428] rounded-2xl shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-4">
+            <div className="bg-[#FBFAFF] dark:bg-[#141428] rounded-2xl shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-4">
               <h3 className="text-sm font-black text-[#6D28D9] dark:text-[#A78BFA] uppercase tracking-wider flex items-center gap-2 border-b border-[#DDD6FE]/20 dark:border-white/5 pb-3">
                 <DollarSign size={18} /> Pricing &amp; Sizing Specs
               </h3>
@@ -330,7 +330,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                       setNewPrice(e.target.value);
                       setFieldErrors(prev => ({ ...prev, newPrice: null }));
                     }}
-                    className={`w-full h-11 px-4 rounded-xl border bg-white dark:bg-[#1A1A35] outline-none text-sm focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] ${
+                    className={`w-full h-11 px-4 rounded-xl border bg-[#FBFAFF] dark:bg-[#1A1A35] outline-none text-sm focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] ${
                       fieldErrors.newPrice ? 'border-red-500' : 'border-[#DDD6FE]/40 dark:border-white/10'
                     }`}
                   />
@@ -352,7 +352,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                       setOldPrice(e.target.value);
                       setFieldErrors(prev => ({ ...prev, oldPrice: null }));
                     }}
-                    className={`w-full h-11 px-4 rounded-xl border bg-white dark:bg-[#1A1A35] outline-none text-sm focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] ${
+                    className={`w-full h-11 px-4 rounded-xl border bg-[#FBFAFF] dark:bg-[#1A1A35] outline-none text-sm focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] ${
                       fieldErrors.oldPrice ? 'border-red-500' : 'border-[#DDD6FE]/40 dark:border-white/10'
                     }`}
                   />
@@ -394,7 +394,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                     value={customSizeInput}
                     onChange={(e) => setCustomSizeInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomSize(); } }}
-                    className="flex-1 h-9 px-3 rounded-lg border border-[#DDD6FE]/40 dark:border-white/10 bg-white dark:bg-[#1A1A35] text-xs"
+                    className="flex-1 h-9 px-3 rounded-lg border border-[#DDD6FE]/40 dark:border-white/10 bg-[#FBFAFF] dark:bg-[#1A1A35] text-xs"
                   />
                   <button
                     type="button"
@@ -444,7 +444,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                     value={customColorInput}
                     onChange={(e) => setCustomColorInput(e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomColor(); } }}
-                    className="flex-1 h-9 px-3 rounded-lg border border-[#DDD6FE]/40 dark:border-white/10 bg-white dark:bg-[#1A1A35] text-xs"
+                    className="flex-1 h-9 px-3 rounded-lg border border-[#DDD6FE]/40 dark:border-white/10 bg-[#FBFAFF] dark:bg-[#1A1A35] text-xs"
                   />
                   <button
                     type="button"
@@ -462,7 +462,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
           {/* Right Column (Media Upload & Info) */}
           <div className="flex flex-col gap-6">
             {/* Image Upload card */}
-            <div className="bg-white dark:bg-[#141428] rounded-2xl shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-4">
+            <div className="bg-[#FBFAFF] dark:bg-[#141428] rounded-2xl shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-4">
               <h3 className="text-sm font-black text-[#6D28D9] dark:text-[#A78BFA] uppercase tracking-wider flex items-center gap-2 border-b border-[#DDD6FE]/20 dark:border-white/5 pb-3">
                 <ImageIcon size={18} /> Media Files
               </h3>
@@ -528,7 +528,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
             </div>
 
             {/* Organization & Category selection card */}
-            <div className="bg-white dark:bg-[#141428] rounded-2xl shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-4">
+            <div className="bg-[#FBFAFF] dark:bg-[#141428] rounded-2xl shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-4">
               <h3 className="text-sm font-black text-[#6D28D9] dark:text-[#A78BFA] uppercase tracking-wider flex items-center gap-2 border-b border-[#DDD6FE]/20 dark:border-white/5 pb-3">
                 <Tag size={18} /> Organization
               </h3>
@@ -540,7 +540,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                   <select 
                     value={category} 
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full h-11 px-3 rounded-xl border border-[#DDD6FE]/40 dark:border-white/10 bg-white dark:bg-[#1A1A35] text-xs font-semibold outline-none cursor-pointer"
+                    className="w-full h-11 px-3 rounded-xl border border-[#DDD6FE]/40 dark:border-white/10 bg-[#FBFAFF] dark:bg-[#1A1A35] text-xs font-semibold outline-none cursor-pointer"
                   >
                     <option value="women">Women's Apparel</option>
                     <option value="men">Men's Collection</option>
@@ -554,7 +554,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
 
         {/* Dynamic SKU & Variants Editor Grid */}
         {generatedVariants.length > 0 && (
-          <div className="bg-white dark:bg-[#141428] rounded-2xl shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-4 mt-2">
+          <div className="bg-[#FBFAFF] dark:bg-[#141428] rounded-2xl shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-4 mt-2">
             <div className="flex justify-between items-center flex-wrap gap-4 border-b border-[#DDD6FE]/20 dark:border-white/5 pb-3">
               <div>
                 <h3 className="text-sm font-black text-[#1E1B4B] dark:text-white uppercase tracking-wider">Generated Stock Variants</h3>
@@ -589,7 +589,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                           type="text"
                           value={v.sku}
                           onChange={(e) => updateVariantField(v.color, v.size, "sku", e.target.value.toUpperCase())}
-                          className="w-full h-8 px-2.5 text-xs font-mono rounded-lg border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] outline-none"
+                          className="w-full h-8 px-2.5 text-xs font-mono rounded-lg border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] outline-none"
                         />
                       </td>
                       <td className="p-3">
@@ -598,7 +598,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                           value={v.stock}
                           min="0"
                           onChange={(e) => updateVariantField(v.color, v.size, "stock", Math.max(0, Number(e.target.value)))}
-                          className="w-28 h-8 px-2 text-xs rounded-lg border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] outline-none"
+                          className="w-28 h-8 px-2 text-xs rounded-lg border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] outline-none"
                         />
                       </td>
                       <td className="p-3">
@@ -607,7 +607,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                           value={v.price}
                           min="0"
                           onChange={(e) => updateVariantField(v.color, v.size, "price", Math.max(0, Number(e.target.value)))}
-                          className="w-32 h-8 px-2 text-xs font-bold rounded-lg border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] outline-none text-[#7C3AED]"
+                          className="w-32 h-8 px-2 text-xs font-bold rounded-lg border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] outline-none text-[#7C3AED]"
                         />
                       </td>
                     </tr>

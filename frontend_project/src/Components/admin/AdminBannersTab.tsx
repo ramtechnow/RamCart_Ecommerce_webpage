@@ -277,10 +277,10 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
             {banners.map((b) => (
               <div 
                 key={b._id} 
-                className="bg-white dark:bg-[#141428] rounded-2xl overflow-hidden shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 flex flex-col group hover:shadow-md transition-shadow duration-200"
+                className="bg-[#FBFAFF] dark:bg-[#141428] rounded-2xl overflow-hidden shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 flex flex-col group hover:shadow-md transition-shadow duration-200"
               >
                 {/* Widescreen image box */}
-                <div className="h-44 w-full relative bg-gray-100 dark:bg-gray-800">
+                <div className="h-44 w-full relative bg-[#EDEAFF] dark:bg-[#1A1A35]">
                   <img src={b.image} alt={b.description} className="w-full h-full object-cover" />
                   
                   {/* Page Indicator Tag */}
@@ -335,7 +335,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                       <button
                         type="button"
                         onClick={() => openEditModal(b)}
-                        className="px-2.5 py-1.5 border border-[#DDD6FE]/60 dark:border-white/10 hover:bg-[#e6e8eb] dark:hover:bg-[#363636] text-[#4B5563] dark:text-[#C4B5FD] text-[10px] font-bold rounded-xl flex items-center gap-1 transition-all cursor-pointer bg-white dark:bg-[#141428]"
+                        className="px-2.5 py-1.5 border border-[#DDD6FE]/60 dark:border-white/10 hover:bg-[#e6e8eb] dark:hover:bg-[#363636] text-[#4B5563] dark:text-[#C4B5FD] text-[10px] font-bold rounded-xl flex items-center gap-1 transition-all cursor-pointer bg-[#FBFAFF] dark:bg-[#141428]"
                       >
                         <Edit3 size={11} /> Edit
                       </button>
@@ -352,7 +352,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
               </div>
             ))}
             {banners.length === 0 && (
-              <div className="col-span-full p-12 text-center text-xs font-semibold text-[#9CA3AF] bg-white dark:bg-[#141428] rounded-2xl border border-[#DDD6FE]/30 dark:border-white/5">
+              <div className="col-span-full p-12 text-center text-xs font-semibold text-[#9CA3AF] bg-[#FBFAFF] dark:bg-[#141428] rounded-2xl border border-[#DDD6FE]/30 dark:border-white/5">
                 No hero banners published yet.
               </div>
             )}
@@ -361,7 +361,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
 
         {/* Right Side: Draft New Banner Form */}
         <div className="xl:col-span-1">
-          <div className="bg-white dark:bg-[#141428] rounded-2xl shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-4 sticky top-24 transition-colors duration-200">
+          <div className="bg-[#FBFAFF] dark:bg-[#141428] rounded-2xl shadow-sm border border-[#DDD6FE]/40 dark:border-white/10 p-6 flex flex-col gap-4 sticky top-24 transition-colors duration-200">
             <h3 className="text-xs font-black text-[#6D28D9] dark:text-[#A78BFA] uppercase tracking-wider flex items-center gap-2 border-b border-[#DDD6FE]/20 dark:border-white/5 pb-3">
               <Plus size={16} /> Draft New Banner
             </h3>
@@ -416,7 +416,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                   placeholder="e.g. End of Season Sale &bull; Up to 50% Off"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full h-10 px-3 text-xs rounded-xl border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] outline-none"
+                  className="w-full h-10 px-3 text-xs rounded-xl border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] outline-none"
                 />
               </div>
 
@@ -426,7 +426,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                 <select 
                   value={targetProductId} 
                   onChange={handleProductSelect}
-                  className="w-full h-10 px-3 text-xs rounded-xl border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] outline-none cursor-pointer"
+                  className="w-full h-10 px-3 text-xs rounded-xl border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] outline-none cursor-pointer"
                   disabled={loadingProducts}
                 >
                   <option value="">{loadingProducts ? 'Syncing Catalog...' : '— Select target product —'}</option>
@@ -442,7 +442,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                 <select 
                   value={page} 
                   onChange={(e) => setPage(e.target.value)}
-                  className="w-full h-10 px-3 text-xs rounded-xl border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] outline-none cursor-pointer"
+                  className="w-full h-10 px-3 text-xs rounded-xl border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] outline-none cursor-pointer"
                 >
                   <option value="home">Home Page Hero</option>
                   <option value="men">Men's Category</option>
@@ -457,7 +457,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                 <select 
                   value={discountType} 
                   onChange={(e) => setDiscountType(e.target.value)}
-                  className="w-full h-10 px-3 text-xs rounded-xl border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] outline-none cursor-pointer"
+                  className="w-full h-10 px-3 text-xs rounded-xl border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] outline-none cursor-pointer"
                 >
                   <option value="none">No Offer tag</option>
                   <option value="percentage">Percentage Discount (%)</option>
@@ -476,7 +476,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                     placeholder={discountType === 'percentage' ? 'e.g. 20' : 'e.g. 400'}
                     value={discountValue}
                     onChange={(e) => setDiscountValue(e.target.value)}
-                    className="w-full h-10 px-3 text-xs rounded-xl border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] outline-none"
+                    className="w-full h-10 px-3 text-xs rounded-xl border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] outline-none"
                   />
                 </div>
               )}
@@ -498,7 +498,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
       {/* Edit Banner Dialog Modal */}
       {editingBanner && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white dark:bg-[#141428] rounded-2xl border border-[#DDD6FE]/40 dark:border-white/10 p-6 max-w-lg w-full shadow-2xl flex flex-col gap-4 animate-scale-in max-h-[90vh] overflow-y-auto">
+          <div className="bg-[#FBFAFF] dark:bg-[#141428] rounded-2xl border border-[#DDD6FE]/40 dark:border-white/10 p-6 max-w-lg w-full shadow-2xl flex flex-col gap-4 animate-scale-in max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center border-b border-[#DDD6FE]/20 dark:border-white/5 pb-3">
               <h3 className="text-sm font-black text-[#6D28D9] dark:text-[#A78BFA] uppercase tracking-wider">Edit Banner Specifications</h3>
               <button 
@@ -517,7 +517,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                 <button
                   type="button"
                   onClick={() => editFileInputRef.current?.click()}
-                  className="self-start px-3 py-1.5 border border-[#DDD6FE]/60 dark:border-white/10 hover:bg-[#e6e8eb] dark:hover:bg-[#363636] text-[#4B5563] dark:text-[#C4B5FD] text-xs font-bold rounded-lg cursor-pointer bg-white dark:bg-[#141428]"
+                  className="self-start px-3 py-1.5 border border-[#DDD6FE]/60 dark:border-white/10 hover:bg-[#e6e8eb] dark:hover:bg-[#363636] text-[#4B5563] dark:text-[#C4B5FD] text-xs font-bold rounded-lg cursor-pointer bg-[#FBFAFF] dark:bg-[#141428]"
                 >
                   Replace image file
                 </button>
@@ -531,7 +531,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                   type="text" 
                   value={editDescription} 
                   onChange={(e) => setEditDescription(e.target.value)} 
-                  className="w-full h-9 px-3 rounded-lg border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] outline-none text-xs"
+                  className="w-full h-9 px-3 rounded-lg border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] outline-none text-xs"
                 />
               </div>
 
@@ -542,7 +542,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                   type="text" 
                   value={editTargetLink} 
                   onChange={(e) => setEditTargetLink(e.target.value)} 
-                  className="w-full h-9 px-3 rounded-lg border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] outline-none text-xs"
+                  className="w-full h-9 px-3 rounded-lg border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] outline-none text-xs"
                 />
               </div>
 
@@ -552,7 +552,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                 <select 
                   value={editPage} 
                   onChange={(e) => setEditPage(e.target.value)} 
-                  className="w-full h-9 px-3 rounded-lg border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] outline-none text-xs cursor-pointer"
+                  className="w-full h-9 px-3 rounded-lg border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] outline-none text-xs cursor-pointer"
                 >
                   <option value="home">Home Page Hero</option>
                   <option value="men">Men's Category</option>
@@ -567,7 +567,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                 <select 
                   value={editDiscountType} 
                   onChange={(e) => setEditDiscountType(e.target.value)} 
-                  className="w-full h-9 px-3 rounded-lg border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] outline-none text-xs cursor-pointer"
+                  className="w-full h-9 px-3 rounded-lg border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] outline-none text-xs cursor-pointer"
                 >
                   <option value="none">No Offer tag</option>
                   <option value="percentage">Percentage Discount (%)</option>
@@ -585,7 +585,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                     type="number" 
                     value={editDiscountValue} 
                     onChange={(e) => setEditDiscountValue(e.target.value)} 
-                    className="w-full h-9 px-3 rounded-lg border border-[#DDD6FE]/40 bg-white dark:bg-[#1A1A35] outline-none text-xs"
+                    className="w-full h-9 px-3 rounded-lg border border-[#DDD6FE]/40 bg-[#FBFAFF] dark:bg-[#1A1A35] outline-none text-xs"
                   />
                 </div>
               )}

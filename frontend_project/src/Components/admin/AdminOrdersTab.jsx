@@ -164,7 +164,7 @@ export const AdminOrdersTab = ({
           <button 
             type="button"
             onClick={() => addToast("Exporting catalog order records...", "info")}
-            className="flex items-center gap-1.5 px-4 py-2 border border-gray-300 dark:border-white/10 hover:bg-gray-50 dark:hover:bg-white/5 text-[#4B5563] dark:text-[#C4B5FD] text-xs font-bold rounded-xl transition-all cursor-pointer bg-white dark:bg-[#141428]"
+            className="flex items-center gap-1.5 px-4 py-2 border border-[#DDD6FE] dark:border-white/10 hover:bg-[#EDE9FE] dark:hover:bg-white/5 text-[#4B5563] dark:text-[#C4B5FD] text-xs font-bold rounded-xl transition-all cursor-pointer bg-[#FBFAFF] dark:bg-[#141428]"
           >
             <Download size={14} />
             <span>Export</span>
@@ -202,13 +202,13 @@ export const AdminOrdersTab = ({
       {/* Stepper and Performance Card Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Fulfillment Pipeline */}
-        <div className="lg:col-span-3 bg-white dark:bg-[#141428] rounded-2xl border border-[#DDD6FE]/40 dark:border-white/10 p-5 shadow-sm transition-colors duration-200">
+        <div className="lg:col-span-3 bg-[#FBFAFF] dark:bg-[#141428] rounded-2xl border border-[#DDD6FE]/40 dark:border-white/10 p-5 shadow-sm transition-colors duration-200">
           <h3 className="text-xs font-black text-[#1E1B4B] dark:text-[#F5F3FF] uppercase tracking-wider mb-4">
             Active Fulfillment Pipeline
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 items-center">
             {/* Step 1: Ordered */}
-            <div className="flex flex-col items-center text-center p-3 bg-gray-50/50 dark:bg-white/5 rounded-2xl border border-[#DDD6FE]/20 dark:border-white/5">
+            <div className="flex flex-col items-center text-center p-3 bg-[#EDE9FE]/30 dark:bg-white/5 rounded-2xl border border-[#DDD6FE]/20 dark:border-white/5">
               <div className="w-10 h-10 rounded-full bg-[#EDE9FE] text-[#7C3AED] flex items-center justify-center font-black mb-2 shadow-sm">
                 <ShoppingBag size={18} />
               </div>
@@ -217,7 +217,7 @@ export const AdminOrdersTab = ({
             </div>
 
             {/* Step 2: Packed */}
-            <div className="flex flex-col items-center text-center p-3 bg-gray-50/50 dark:bg-white/5 rounded-2xl border border-[#DDD6FE]/20 dark:border-white/5">
+            <div className="flex flex-col items-center text-center p-3 bg-[#EDE9FE]/30 dark:bg-white/5 rounded-2xl border border-[#DDD6FE]/20 dark:border-white/5">
               <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-950/20 text-amber-600 flex items-center justify-center font-black mb-2 shadow-sm">
                 <Loader2 size={18} className="animate-spin" />
               </div>
@@ -226,7 +226,7 @@ export const AdminOrdersTab = ({
             </div>
 
             {/* Step 3: Shipped */}
-            <div className="flex flex-col items-center text-center p-3 bg-gray-50/50 dark:bg-white/5 rounded-2xl border border-[#DDD6FE]/20 dark:border-white/5">
+            <div className="flex flex-col items-center text-center p-3 bg-[#EDE9FE]/30 dark:bg-white/5 rounded-2xl border border-[#DDD6FE]/20 dark:border-white/5">
               <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-950/20 text-blue-600 flex items-center justify-center font-black mb-2 shadow-sm">
                 <Calendar size={18} />
               </div>
@@ -235,7 +235,7 @@ export const AdminOrdersTab = ({
             </div>
 
             {/* Step 4: Delivering */}
-            <div className="flex flex-col items-center text-center p-3 bg-gray-50/50 dark:bg-white/5 rounded-2xl border border-[#DDD6FE]/20 dark:border-white/5">
+            <div className="flex flex-col items-center text-center p-3 bg-[#EDE9FE]/30 dark:bg-white/5 rounded-2xl border border-[#DDD6FE]/20 dark:border-white/5">
               <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-950/20 text-emerald-600 flex items-center justify-center font-black mb-2 shadow-sm">
                 <ShoppingCart size={18} />
               </div>
@@ -246,7 +246,7 @@ export const AdminOrdersTab = ({
         </div>
 
         {/* Today's Performance Card */}
-        <div className="bg-white dark:bg-[#141428] rounded-2xl border border-[#DDD6FE]/40 dark:border-white/10 p-5 shadow-sm transition-colors duration-200 flex flex-col justify-between">
+        <div className="bg-[#FBFAFF] dark:bg-[#141428] rounded-2xl border border-[#DDD6FE]/40 dark:border-white/10 p-5 shadow-sm transition-colors duration-200 flex flex-col justify-between">
           <div>
             <h3 className="text-xs font-black text-[#1E1B4B] dark:text-[#F5F3FF] uppercase tracking-wider mb-1">
               Today's Performance
@@ -270,7 +270,7 @@ export const AdminOrdersTab = ({
       </div>
 
       {/* Orders Filter strip & search */}
-      <div className="bg-white dark:bg-[#141428] rounded-2xl border border-[#DDD6FE]/40 dark:border-white/10 overflow-hidden flex flex-col transition-colors duration-200">
+      <div className="bg-[#FBFAFF] dark:bg-[#141428] rounded-2xl border border-[#DDD6FE]/40 dark:border-white/10 overflow-hidden flex flex-col transition-colors duration-200">
         <div className="p-4 border-b border-[#DDD6FE]/20 dark:border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#EEF0F8]/20 dark:bg-[#1A1A35]/20">
           <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1.5 sm:pb-0">
             {["All", "Pending", "Processing", "Shipped"].map((status) => (
@@ -280,7 +280,7 @@ export const AdminOrdersTab = ({
                 className={`px-4 py-1.5 rounded-full text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap border ${
                   statusFilter === status 
                     ? "bg-[#7C3AED] text-white border-[#7C3AED]" 
-                    : "bg-white dark:bg-[#1A1A35] border-gray-300 dark:border-white/10 text-[#4B5563] dark:text-[#C4B5FD] hover:bg-gray-50 dark:hover:bg-[#363636]"
+                    : "bg-[#FBFAFF] dark:bg-[#1A1A35] border-[#DDD6FE] dark:border-white/10 text-[#4B5563] dark:text-[#C4B5FD] hover:bg-gray-50 dark:hover:bg-[#363636]"
                 }`}
               >
                 {status === "All" ? "All Orders" : `${status} Orders`}
@@ -295,7 +295,7 @@ export const AdminOrdersTab = ({
               placeholder="Search ID, Name..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-1.5 rounded-xl border border-gray-300 dark:border-white/10 bg-white dark:bg-[#1A1A35] text-xs font-medium outline-none focus:border-[#7C3AED]"
+              className="w-full pl-9 pr-4 py-1.5 rounded-xl border border-[#DDD6FE] dark:border-white/10 bg-[#FBFAFF] dark:bg-[#1A1A35] text-xs font-medium outline-none focus:border-[#7C3AED]"
             />
           </div>
         </div>
@@ -304,7 +304,7 @@ export const AdminOrdersTab = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr className="bg-gray-50 dark:bg-[#1A1A35] text-xs font-bold text-[#4B5563] dark:text-[#C4B5FD] border-b border-[#DDD6FE]/40 dark:border-white/10 uppercase tracking-wider">
+              <tr className="bg-[#EEF0F8] dark:bg-[#1A1A35] text-xs font-bold text-[#4B5563] dark:text-[#C4B5FD] border-b border-[#DDD6FE]/40 dark:border-white/10 uppercase tracking-wider">
                 <th className="p-4 w-32">Order ID</th>
                 <th className="p-4">Customer</th>
                 <th className="p-4 w-40">Date</th>
@@ -339,7 +339,7 @@ export const AdminOrdersTab = ({
                       <td className="p-4 align-middle">
                         <div className="flex items-center gap-1.5">
                           <span className={`w-1.5 h-1.5 rounded-full bg-[#7C3AED] ${isDelayedRow ? 'animate-ping' : ''}`}></span>
-                          <span className="text-xs font-bold font-mono text-gray-800 dark:text-[#F5F3FF]">
+                          <span className="text-xs font-bold font-mono text-[#1E1B4B] dark:text-[#F5F3FF] dark:text-[#F5F3FF]">
                             #ORD-{o._id ? o._id.substring(0, 4).toUpperCase() : '9021'}
                           </span>
                         </div>
@@ -348,7 +348,7 @@ export const AdminOrdersTab = ({
                       {/* Customer Details */}
                       <td className="p-4 align-middle">
                         <div className="flex flex-col">
-                          <span className="text-xs font-bold text-gray-800 dark:text-[#F5F3FF]">
+                          <span className="text-xs font-bold text-[#1E1B4B] dark:text-[#F5F3FF] dark:text-[#F5F3FF]">
                             {o.userName || o.address?.fullName || "Sarah Jenkins"}
                           </span>
                           <span className="text-[10px] text-[#9CA3AF] font-semibold">
@@ -358,12 +358,12 @@ export const AdminOrdersTab = ({
                       </td>
 
                       {/* Date */}
-                      <td className="p-4 align-middle text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                      <td className="p-4 align-middle text-xs font-medium text-[#4B5563] dark:text-[#C4B5FD] dark:text-[#9CA3AF] dark:text-[#7C6FAA] whitespace-nowrap">
                         {orderDateString}
                       </td>
 
                       {/* Amount */}
-                      <td className="p-4 align-middle font-bold text-right text-xs text-gray-800 dark:text-white">
+                      <td className="p-4 align-middle font-bold text-right text-xs text-[#1E1B4B] dark:text-[#F5F3FF] dark:text-white">
                         ₹{Number(o.amount || 0).toFixed(2)}
                       </td>
 
@@ -387,7 +387,7 @@ export const AdminOrdersTab = ({
                               ? "bg-orange-50 dark:bg-orange-950/20 text-orange-600 border border-orange-100"
                               : o.status === "Out for Delivery"
                                 ? "bg-pink-50 dark:bg-pink-950/20 text-[#7C3AED] border border-pink-100"
-                                : "bg-gray-50 dark:bg-gray-900/40 text-gray-600 border border-gray-200"
+                                : "bg-[#EEF0F8] dark:bg-[#1A1A35] text-[#4B5563] dark:text-[#C4B5FD] border border-[#DDD6FE]"
                         }`}>
                           {o.status || "Ordered"}
                         </span>
@@ -399,7 +399,7 @@ export const AdminOrdersTab = ({
                           <button
                             type="button"
                             onClick={() => setExpandedOrderId(isExpanded ? null : o._id)}
-                            className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 dark:bg-white/5 dark:hover:bg-white/10 text-gray-500 cursor-pointer border-none"
+                            className="p-1.5 rounded-lg bg-[#EDE9FE] hover:bg-[#DDD6FE] dark:bg-white/5 dark:hover:bg-white/10 text-[#9CA3AF] dark:text-[#7C6FAA] cursor-pointer border-none"
                             title="View Order Details"
                           >
                             <Eye size={12} />
@@ -409,7 +409,7 @@ export const AdminOrdersTab = ({
                             value={o.status}
                             disabled={o.status === "Delivered" || updatingOrderId === o._id}
                             onChange={(e) => handleUpdateStatus(o._id, e.target.value)}
-                            className="h-8 px-2 rounded-lg border border-gray-300 dark:border-white/10 bg-white dark:bg-[#1A1A35] text-[10px] font-bold outline-none cursor-pointer text-gray-800 dark:text-white"
+                            className="h-8 px-2 rounded-lg border border-[#DDD6FE] dark:border-white/10 bg-[#FBFAFF] dark:bg-[#1A1A35] text-[10px] font-bold outline-none cursor-pointer text-[#1E1B4B] dark:text-[#F5F3FF] dark:text-white"
                           >
                             <option value="Pending">Ordered</option>
                             <option value="Processing">Processing</option>
@@ -437,17 +437,17 @@ export const AdminOrdersTab = ({
                     {isExpanded && (
                       <tr className="bg-gray-50/50 dark:bg-[#1A1A35]/20">
                         <td colSpan="7" className="p-5">
-                          <div className="bg-white dark:bg-[#141428] border border-[#DDD6FE]/30 dark:border-white/10 rounded-2xl p-4 shadow-sm animate-slide-down flex flex-col md:flex-row gap-5">
+                          <div className="bg-[#FBFAFF] dark:bg-[#141428] border border-[#DDD6FE]/30 dark:border-white/10 rounded-2xl p-4 shadow-sm animate-slide-down flex flex-col md:flex-row gap-5">
                             
                             {/* Shipping address details */}
                             <div className="flex-1">
                               <h4 className="text-xs font-black text-[#6D28D9] dark:text-[#A78BFA] uppercase tracking-wider mb-2.5">📍 Shipping Destination</h4>
-                              <div className="p-3.5 border border-[#DDD6FE]/20 dark:border-white/5 bg-gray-50 dark:bg-[#1A1A35]/40 rounded-xl text-xs space-y-1.5 text-[#4B5563] dark:text-[#C4B5FD]">
-                                <p><strong className="text-gray-700 dark:text-white font-bold">Email:</strong> {o.userEmail || o.address?.email || o.email || "Registered Email"}</p>
-                                <p><strong className="text-gray-700 dark:text-white font-bold">Contact:</strong> {o.address?.fullName || o.userName || "Customer"}</p>
-                                <p><strong className="text-gray-700 dark:text-white font-bold">Street:</strong> {o.address?.addressLine}</p>
-                                <p><strong className="text-gray-700 dark:text-white font-bold">City / Zip:</strong> {o.address?.city}, {o.address?.state} - {o.address?.postalCode}</p>
-                                <p><strong className="text-gray-700 dark:text-white font-bold">Phone:</strong> {o.address?.phone}</p>
+                              <div className="p-3.5 border border-[#DDD6FE]/20 dark:border-white/5 bg-[#EEF0F8] dark:bg-[#1A1A35]/40 rounded-xl text-xs space-y-1.5 text-[#4B5563] dark:text-[#C4B5FD]">
+                                <p><strong className="text-[#4B5563] dark:text-[#C4B5FD] dark:text-white font-bold">Email:</strong> {o.userEmail || o.address?.email || o.email || "Registered Email"}</p>
+                                <p><strong className="text-[#4B5563] dark:text-[#C4B5FD] dark:text-white font-bold">Contact:</strong> {o.address?.fullName || o.userName || "Customer"}</p>
+                                <p><strong className="text-[#4B5563] dark:text-[#C4B5FD] dark:text-white font-bold">Street:</strong> {o.address?.addressLine}</p>
+                                <p><strong className="text-[#4B5563] dark:text-[#C4B5FD] dark:text-white font-bold">City / Zip:</strong> {o.address?.city}, {o.address?.state} - {o.address?.postalCode}</p>
+                                <p><strong className="text-[#4B5563] dark:text-[#C4B5FD] dark:text-white font-bold">Phone:</strong> {o.address?.phone}</p>
                               </div>
                             </div>
 
@@ -458,7 +458,7 @@ export const AdminOrdersTab = ({
                                 {(o.items || []).map((item, idx) => {
                                   const prodDetails = products.find(p => p.id === item.productId);
                                   return (
-                                    <div key={idx} className="p-2.5 border border-gray-100 dark:border-white/5 bg-gray-50 dark:bg-[#1A1A35]/40 rounded-xl flex items-center justify-between gap-3 text-xs">
+                                    <div key={idx} className="p-2.5 border border-gray-100 dark:border-white/5 bg-[#EEF0F8] dark:bg-[#1A1A35]/40 rounded-xl flex items-center justify-between gap-3 text-xs">
                                       <div className="flex items-center gap-3">
                                         <img 
                                           src={prodDetails?.image || item.image || ""} 
@@ -466,15 +466,15 @@ export const AdminOrdersTab = ({
                                           className="w-9 h-11 object-cover rounded border border-gray-200 dark:border-white/5"
                                           onError={(e) => { e.target.style.display = 'none'; e.target.nextElementSibling && (e.target.nextElementSibling.style.display = 'flex'); }}
                                         />
-                                        <div className="hidden w-9 h-11 rounded border border-gray-200 bg-white font-bold items-center justify-center">
+                                        <div className="hidden w-9 h-11 rounded border border-gray-200 bg-[#FBFAFF] font-bold items-center justify-center">
                                           {item.name?.charAt(0)?.toUpperCase() || '?'}
                                         </div>
                                         <div className="flex flex-col min-w-0">
-                                          <span className="font-bold text-gray-800 dark:text-white truncate w-36">{item.name}</span>
+                                          <span className="font-bold text-[#1E1B4B] dark:text-[#F5F3FF] dark:text-white truncate w-36">{item.name}</span>
                                           <span className="text-[10px] text-[#9CA3AF] mt-0.5">Size: {item.size || "M"} &bull; Color: {item.color || "Standard"} &bull; Qty: {item.quantity}</span>
                                         </div>
                                       </div>
-                                      <span className="font-bold text-gray-800 dark:text-white">₹{Number(item.price * item.quantity).toFixed(2)}</span>
+                                      <span className="font-bold text-[#1E1B4B] dark:text-[#F5F3FF] dark:text-white">₹{Number(item.price * item.quantity).toFixed(2)}</span>
                                     </div>
                                   );
                                 })}
