@@ -325,7 +325,7 @@ async function sendSMS(phone, otp) {
         body: new URLSearchParams({
           To: phone,
           From: from,
-          Body: `Your SHOPPER login OTP code is: ${otp}. It is valid for 5 minutes.`
+          Body: `Your RamCart login OTP code is: ${otp}. It is valid for 5 minutes.`
         })
       });
       
@@ -378,7 +378,7 @@ async function sendEmail(email, subject, html) {
       }
     });
     await transporter.sendMail({
-      from: `"SHOPPER Support" <${user}>`,
+      from: `"RamCart Support" <${user}>`,
       to: email,
       subject: subject,
       html: html
@@ -530,18 +530,18 @@ exports.forgotPassword = async (req, res) => {
     await otpDoc.save();
 
     // Send email
-    const subject = "SHOPPER - Password Reset Verification Code";
+    const subject = "RamCart — Password Reset Verification Code";
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-        <h2 style="color: #ff4141; text-align: center;">SHOPPER Account Recovery</h2>
-        <p>Hello ${user.name || 'Shopper Customer'},</p>
+        <h2 style="color: #ff8906; text-align: center;">🛒 RamCart Account Recovery</h2>
+        <p>Hello ${user.name || 'Customer'},</p>
         <p>We received a request to reset your password. Use the verification code below to complete the reset process. This code is valid for 5 minutes.</p>
-        <div style="background-color: #f9f9f9; padding: 15px; text-align: center; border-radius: 6px; margin: 20px 0;">
+        <div style="background-color: #fff9f0; padding: 15px; text-align: center; border-radius: 6px; margin: 20px 0; border-left: 4px solid #ff8906;">
           <span style="font-size: 24px; font-weight: bold; letter-spacing: 4px; color: #333;">${otpCode}</span>
         </div>
         <p>If you did not request a password reset, please ignore this email or contact support if you have concerns.</p>
         <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-        <p style="font-size: 11px; color: #888; text-align: center;">SHOPPER E-Commerce Team &bull; Secure Password Reset Service</p>
+        <p style="font-size: 11px; color: #888; text-align: center;">RamCart by RamTechnow Technologies &bull; Secure Password Reset Service</p>
       </div>
     `;
     // Send email asynchronously in the background

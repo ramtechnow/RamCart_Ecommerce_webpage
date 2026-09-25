@@ -46,10 +46,20 @@ const StorefrontChrome: React.FC = () => {
   if (isAdminPage) return null;
 
   return (
+    <div style={{ position: "relative", zIndex: 10 }}>
+      <Navbar />
+    </div>
+  );
+};
+
+const StorefrontFooter: React.FC = () => {
+  const location = useLocation();
+  const isAdminPage = location.pathname.startsWith("/admin");
+
+  if (isAdminPage) return null;
+
+  return (
     <>
-      <div style={{ position: "relative", zIndex: 10 }}>
-        <Navbar />
-      </div>
       <Suspense fallback={null}>
         <div style={{ position: "relative", zIndex: 10 }}>
           <Footer />
@@ -179,6 +189,9 @@ export const App: React.FC = () => {
           </Suspense>
         </div>
         
+        {/* Global Footer + Mobile Bottom Nav */}
+        <StorefrontFooter />
+
       </div>
 
       {/* Scroll to Top — global floating button */}

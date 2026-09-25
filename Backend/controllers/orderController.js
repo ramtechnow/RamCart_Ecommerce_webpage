@@ -1,6 +1,7 @@
 const Order = require('../models/Order');
 const User = require('../models/User');
 const { incrementCouponUsage } = require('./couponController');
+const { sendEmail } = require('./userController');
 
 // Place a new Order (Authenticated User)
 exports.placeOrder = async (req, res) => {
@@ -33,6 +34,74 @@ exports.placeOrder = async (req, res) => {
     // Clear user's shopping cart on successful checkout
     await User.findByIdAndUpdate(userId, { $set: { cartData: {} } });
 
+    // Send order confirmation email (fire-and-forget, non-blocking)
+    try {
+      const user = await User.findById(userId, { email: 1, name: 1 });
+      if (user && user.email) {
+        const itemsHtml = (items || []).map(item => `
+          <tr>
+            <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;">${item.name || item.title || 'Product'}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:center;">${item.size || '-'}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:center;">${item.quantity || 1}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:right;">₹${(item.price * (item.quantity || 1)).toFixed(2)}</td>
+          </tr>
+        `).join('');
+
+        const emailHtml = `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e8e8e8;">
+            <div style="background:linear-gradient(135deg,#ff8906,#e53170);padding:28px 32px;text-align:center;">
+              <h1 style="color:#fff;margin:0;font-size:26px;font-weight:800;letter-spacing:1px;">🛒 RamCart</h1>
+              <p style="color:rgba(255,255,255,0.9);margin:6px 0 0;font-size:14px;">Order Confirmation</p>
+            </div>
+            <div style="padding:28px 32px;">
+              <p style="font-size:15px;color:#333;">Hi <strong>${user.name || 'Customer'}</strong>,</p>
+              <p style="color:#555;line-height:1.6;">Thank you for your order! We've received it and it's being processed. Here's a summary of what you ordered:</p>
+
+              <div style="background:#fff9f0;border-left:4px solid #ff8906;padding:14px 18px;border-radius:6px;margin:20px 0;">
+                <p style="margin:0;font-size:13px;color:#888;">Order ID</p>
+                <p style="margin:4px 0 0;font-size:15px;font-weight:700;color:#333;word-break:break-all;">${newOrder._id}</p>
+              </div>
+
+              <table style="width:100%;border-collapse:collapse;margin:20px 0;font-size:13px;">
+                <thead>
+                  <tr style="background:#f7f7f7;">
+                    <th style="padding:10px 12px;text-align:left;color:#555;font-weight:600;">Item</th>
+                    <th style="padding:10px 12px;text-align:center;color:#555;font-weight:600;">Size</th>
+                    <th style="padding:10px 12px;text-align:center;color:#555;font-weight:600;">Qty</th>
+                    <th style="padding:10px 12px;text-align:right;color:#555;font-weight:600;">Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${itemsHtml}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="3" style="padding:12px;text-align:right;font-weight:700;color:#333;font-size:14px;">Total Paid:</td>
+                    <td style="padding:12px;text-align:right;font-weight:800;color:#ff8906;font-size:16px;">₹${Number(amount).toFixed(2)}</td>
+                  </tr>
+                </tfoot>
+              </table>
+
+              ${address ? `
+              <div style="background:#f9f9f9;padding:14px 18px;border-radius:8px;margin-bottom:20px;font-size:13px;color:#555;line-height:1.7;">
+                <p style="margin:0 0 6px;font-weight:700;color:#333;">📦 Delivery Address</p>
+                <p style="margin:0;">${address.fullName || ''}<br/>${address.addressLine || ''}<br/>${address.city || ''}, ${address.state || ''} - ${address.postalCode || ''}</p>
+              </div>
+              ` : ''}
+
+              <p style="color:#555;line-height:1.6;">We'll notify you when your order is shipped. You can track your order status anytime from your <strong>Order History</strong> page.</p>
+            </div>
+            <div style="background:#f7f7f7;padding:16px 32px;text-align:center;border-top:1px solid #e8e8e8;">
+              <p style="margin:0;font-size:11px;color:#aaa;">© ${new Date().getFullYear()} RamCart by RamTechnow Technologies · Demo Platform · No real currency involved</p>
+            </div>
+          </div>
+        `;
+        sendEmail(user.email, '🛒 RamCart — Order Confirmed! Your order is being processed', emailHtml);
+      }
+    } catch (emailErr) {
+      console.error("⚠️ Order confirmation email failed (non-critical):", emailErr.message);
+    }
+
     console.log(`Order placed successfully by user ${userId}. Order ID: ${newOrder._id}`);
     res.json({ success: true, message: "Order placed successfully!", orderId: newOrder._id });
   } catch (error) {
@@ -40,6 +109,7 @@ exports.placeOrder = async (req, res) => {
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
+
 
 // Get orders history for the authenticated user
 exports.getUserOrders = async (req, res) => {
