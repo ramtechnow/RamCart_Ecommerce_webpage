@@ -39,7 +39,16 @@ export default {
         lg: "var(--shadow-lg)",
         xl: "var(--shadow-xl)",
         '2xl': "var(--shadow-2xl)",
-      }
+      },
+      keyframes: {
+        'meesho-scroll': {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
+      },
+      animation: {
+        'meesho-scroll': 'meesho-scroll 25s linear infinite',
+      },
     },
   },
   plugins: [],
