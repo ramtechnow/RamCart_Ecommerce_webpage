@@ -300,8 +300,8 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
       {/* Title Header */}
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-xl font-bold text-[#1f2937] dark:text-[#f4f7ff] tracking-tight">Catalog Audit</h2>
-          <p className="text-sm text-[#7a1f2d] dark:text-[#ffc2cc] mt-0.5">Manage inventory, pricing, and product details.</p>
+          <h2 className="text-xl font-bold text-[#0f0e17] dark:text-[#fffffe] tracking-tight">Catalog Audit</h2>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">Manage inventory, pricing, and product details.</p>
         </div>
       </div>
 
@@ -315,7 +315,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
             placeholder="Search catalog..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-11 pl-10 pr-4 rounded-xl border border-[#e2e4ed]/40 dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] focus:border-[#ff8906] focus:ring-1 focus:ring-[#ff8906] outline-none text-sm transition-all text-[#0f0e17] dark:text-white"
+            className="w-full h-11 pl-10 pr-4 rounded-xl border border-[#e2e4ed]/40 dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] focus:border-black dark:focus:border-white focus:ring-1 focus:ring-black dark:focus:ring-white outline-none text-sm transition-all text-[#0f0e17] dark:text-white"
           />
         </div>
 
@@ -379,8 +379,8 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
 
                 let rowBgClass = "";
                 if (isEditing) {
-                  // High contrast bold red/pink background selection layout to prevent light cement gray issues
-                  rowBgClass = "bg-[#fff0f2] dark:bg-[#291319] border-y-2 border-[#ff8906]";
+                  // High contrast, theme-consistent background for the row being edited
+                  rowBgClass = "bg-zinc-100 dark:bg-zinc-800/60 border-y-2 border-black dark:border-white";
                 } else if (isMissingImages) {
                   rowBgClass = "bg-amber-500/5 dark:bg-amber-500/10";
                 } else if (isLowStock) {
@@ -402,7 +402,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                               <div 
                                 key={idx} 
                                 className={`relative w-8 h-10 rounded overflow-hidden border ${
-                                  idx === 0 ? "border-[#ff8906] border-2" : "border-[#e2e4ed]/60"
+                                  idx === 0 ? "border-black dark:border-white border-2" : "border-[#e2e4ed]/60"
                                 } group`}
                               >
                                 <img src={img} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
@@ -410,7 +410,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                                   <button 
                                     type="button" 
                                     onClick={() => handleReplaceClick(idx)} 
-                                    className="p-0.5 bg-[#eff0f6] text-[#ff8906] dark:text-[#fffffe] rounded-full hover:bg-[#eff0f6] cursor-pointer"
+                                    className="p-0.5 bg-[#eff0f6] text-zinc-900 rounded-full hover:bg-white cursor-pointer"
                                   >
                                     <Pencil size={8} />
                                   </button>
@@ -428,7 +428,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                             <button
                               type="button"
                               onClick={() => { setReplaceIndex(null); document.getElementById(`edit-image-input-file-${prod.id}`)?.click(); }}
-                              className="w-8 h-10 border border-dashed border-[#ff8906]/50 dark:border-white/30 rounded flex items-center justify-center text-[#ff8906] dark:text-[#ff8906] hover:border-[#ff8906] cursor-pointer bg-[#ffffff] dark:bg-[#212030]"
+                              className="w-8 h-10 border border-dashed border-zinc-400 dark:border-zinc-600 rounded flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white cursor-pointer bg-[#ffffff] dark:bg-[#212030]"
                             >
                               <Plus size={12} />
                             </button>
@@ -466,18 +466,18 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                       {isEditing && editForm ? (
                         <div className="flex flex-col gap-2.5 max-w-sm">
                           <div>
-                            <label className="block text-[10px] font-black text-[#2f2a2b] dark:text-[#ffe5ea] uppercase mb-1">Product Title</label>
+                            <label className="block text-[10px] font-black text-zinc-900 dark:text-zinc-100 uppercase mb-1">Product Title</label>
                             <input 
                               type="text" 
                               value={editForm.name} 
                               placeholder="e.g. Premium Cotton Shirt"
                               onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                              className="w-full px-3 py-1.5 text-xs rounded-lg border-2 border-[#ff8906]/30 focus:border-[#ff8906] outline-none text-[#0f0e17] dark:text-white font-bold bg-[#ffffff] dark:bg-[#212030] placeholder-[#8e6f73] shadow-sm"
+                              className="w-full px-3 py-1.5 text-xs rounded-lg border-2 border-zinc-300 dark:border-zinc-700 focus:border-black dark:focus:border-white outline-none text-[#0f0e17] dark:text-white font-bold bg-[#ffffff] dark:bg-[#212030] placeholder-zinc-400 shadow-sm"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-[10px] font-black text-[#2f2a2b] dark:text-[#ffe5ea] uppercase mb-1">🎨 Colors (comma-separated)</label>
+                            <label className="block text-[10px] font-black text-zinc-900 dark:text-zinc-100 uppercase mb-1">🎨 Colors (comma-separated)</label>
                             <input 
                               type="text" 
                               value={editForm.colors.join(', ')} 
@@ -487,12 +487,12 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                                 const newVariants = syncVariants(newColors, editForm.sizes, editForm.variants, editForm.category, editForm.name, editForm.newPrice);
                                 setEditForm({ ...editForm, colors: newColors, variants: newVariants });
                               }}
-                              className="w-full px-3 py-1.5 text-xs rounded-lg border-2 border-[#ff8906]/30 focus:border-[#ff8906] outline-none text-[#0f0e17] dark:text-white font-bold bg-[#ffffff] dark:bg-[#212030] placeholder-[#8e6f73] shadow-sm"
+                              className="w-full px-3 py-1.5 text-xs rounded-lg border-2 border-zinc-300 dark:border-zinc-700 focus:border-black dark:focus:border-white outline-none text-[#0f0e17] dark:text-white font-bold bg-[#ffffff] dark:bg-[#212030] placeholder-zinc-400 shadow-sm"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-[10px] font-black text-[#2f2a2b] dark:text-[#ffe5ea] uppercase mb-1">📏 Sizes (comma-separated)</label>
+                            <label className="block text-[10px] font-black text-zinc-900 dark:text-zinc-100 uppercase mb-1">📏 Sizes (comma-separated)</label>
                             <input 
                               type="text" 
                               value={editForm.sizes.join(', ')} 
@@ -502,18 +502,18 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                                 const newVariants = syncVariants(editForm.colors, newSizes, editForm.variants, editForm.category, editForm.name, editForm.newPrice);
                                 setEditForm({ ...editForm, sizes: newSizes, variants: newVariants });
                               }}
-                              className="w-full px-3 py-1.5 text-xs rounded-lg border-2 border-[#ff8906]/30 focus:border-[#ff8906] outline-none text-[#0f0e17] dark:text-white font-bold bg-[#ffffff] dark:bg-[#212030] placeholder-[#8e6f73] shadow-sm"
+                              className="w-full px-3 py-1.5 text-xs rounded-lg border-2 border-zinc-300 dark:border-zinc-700 focus:border-black dark:focus:border-white outline-none text-[#0f0e17] dark:text-white font-bold bg-[#ffffff] dark:bg-[#212030] placeholder-zinc-400 shadow-sm"
                             />
                           </div>
 
                           <div>
-                            <label className="block text-[10px] font-black text-[#2f2a2b] dark:text-[#ffe5ea] uppercase mb-1">📝 Description</label>
+                            <label className="block text-[10px] font-black text-zinc-900 dark:text-zinc-100 uppercase mb-1">📝 Description</label>
                             <textarea 
                               value={editForm.description || ''} 
                               placeholder="e.g. Comfortable fit and light fabric..."
                               onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                               rows={2}
-                              className="w-full px-3 py-1.5 text-xs rounded-lg border-2 border-[#ff8906]/30 focus:border-[#ff8906] outline-none text-[#0f0e17] dark:text-white font-bold bg-[#ffffff] dark:bg-[#212030] placeholder-[#8e6f73] resize-none shadow-sm"
+                              className="w-full px-3 py-1.5 text-xs rounded-lg border-2 border-zinc-300 dark:border-zinc-700 focus:border-black dark:focus:border-white outline-none text-[#0f0e17] dark:text-white font-bold bg-[#ffffff] dark:bg-[#212030] placeholder-zinc-400 resize-none shadow-sm"
                             />
                           </div>
                         </div>
@@ -548,20 +548,14 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                         <select 
                           value={editForm.category} 
                           onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                          className="h-9 px-3 rounded-lg border-2 border-[#ff8906]/30 focus:border-[#ff8906] bg-[#ffffff] dark:bg-[#212030] text-xs text-[#0f0e17] dark:text-white font-extrabold outline-none cursor-pointer shadow-sm"
+                          className="h-9 px-3 rounded-lg border-2 border-zinc-300 dark:border-zinc-700 focus:border-black dark:focus:border-white bg-[#ffffff] dark:bg-[#212030] text-xs text-[#0f0e17] dark:text-white font-extrabold outline-none cursor-pointer shadow-sm"
                         >
                           <option value="women">Women</option>
                           <option value="men">Men</option>
                           <option value="kid">Kids</option>
                         </select>
                       ) : (
-                        <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                          prod.category?.toLowerCase() === 'men' 
-                            ? "bg-blue-50 dark:bg-blue-950/20 text-blue-600 border border-blue-100 dark:border-blue-950" 
-                            : prod.category?.toLowerCase() === 'women'
-                              ? "bg-pink-50 dark:bg-pink-950/20 text-[#ff8906] border border-pink-100 dark:border-pink-950" 
-                              : "bg-emerald-50 dark:bg-emerald-950/20 text-[#388E3C] border border-emerald-100 dark:border-emerald-950"
-                        }`}>
+                        <span className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border border-zinc-300 dark:border-zinc-700">
                           {normalizeCategory(prod.category)}
                         </span>
                       )}
@@ -574,20 +568,20 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                           {editForm.variants.map((v, idx) => (
                             <div key={idx} className="flex items-center gap-2 border-b border-[#e2e4ed]/30 dark:border-white/5 pb-1.5">
                               <span className="w-2.5 h-2.5 rounded-full border border-gray-400" style={{ backgroundColor: v.color.toLowerCase() }}></span>
-                              <span className="text-[11px] font-black text-[#2f2a2b] dark:text-[#ffe5ea] min-w-[60px]">{v.color}/{v.size}</span>
+                              <span className="text-[11px] font-black text-zinc-900 dark:text-zinc-100 min-w-[60px]">{v.color}/{v.size}</span>
                               <input 
                                 type="text" 
                                 value={v.sku || ""}
                                 placeholder="SKU Code"
                                 onChange={(e) => handleVariantFieldChange(idx, "sku", e.target.value.toUpperCase())}
-                                className="flex-1 px-2.5 py-1 text-[11px] font-bold font-mono rounded border-2 border-[#ff8906]/20 bg-[#ffffff] dark:bg-[#212030] text-[#0f0e17] dark:text-white placeholder-[#8e6f73]"
+                                className="flex-1 px-2.5 py-1 text-[11px] font-bold font-mono rounded border-2 border-zinc-200 dark:border-zinc-700 bg-[#ffffff] dark:bg-[#212030] text-[#0f0e17] dark:text-white placeholder-zinc-400"
                               />
                               <input 
                                 type="number" 
                                 value={v.stock}
                                 onChange={(e) => handleVariantFieldChange(idx, "stock", Math.max(0, Number(e.target.value)))}
                                 min="0"
-                                className="w-16 px-2 py-1 text-[11px] font-bold rounded border-2 border-[#ff8906]/20 bg-[#ffffff] dark:bg-[#212030] text-[#0f0e17] dark:text-white"
+                                className="w-16 px-2 py-1 text-[11px] font-bold rounded border-2 border-zinc-200 dark:border-zinc-700 bg-[#ffffff] dark:bg-[#212030] text-[#0f0e17] dark:text-white"
                               />
                             </div>
                           ))}
@@ -656,7 +650,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                           type="number" 
                           value={editForm.newPrice} 
                           onChange={(e) => setEditForm({ ...editForm, newPrice: Number(e.target.value) })}
-                          className="w-20 px-2 py-1 text-xs rounded border-2 border-[#ff8906]/20 bg-[#ffffff] dark:bg-[#212030] text-[#0f0e17] dark:text-white font-extrabold outline-none shadow-sm"
+                          className="w-20 px-2 py-1 text-xs rounded border-2 border-zinc-200 dark:border-zinc-700 bg-[#ffffff] dark:bg-[#212030] text-[#0f0e17] dark:text-white font-extrabold outline-none shadow-sm"
                         />
                       ) : (
                         <span>₹{prod.newPrice}</span>
@@ -670,7 +664,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                           type="number" 
                           value={editForm.oldPrice} 
                           onChange={(e) => setEditForm({ ...editForm, oldPrice: Number(e.target.value) })}
-                          className="w-20 px-2 py-1 text-xs rounded border-2 border-[#ff8906]/20 bg-[#ffffff] dark:bg-[#212030] text-[#0f0e17] dark:text-white font-bold outline-none shadow-sm"
+                          className="w-20 px-2 py-1 text-xs rounded border-2 border-zinc-200 dark:border-zinc-700 bg-[#ffffff] dark:bg-[#212030] text-[#0f0e17] dark:text-white font-bold outline-none shadow-sm"
                         />
                       ) : (
                         <span>₹{prod.oldPrice || 0}</span>

@@ -212,7 +212,7 @@ export const AdminUsersTab = ({
                   <span className="font-semibold text-[#717388]">Role Profile</span>
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
                     u.isAdmin 
-                      ? "bg-purple-50 dark:bg-purple-950/20 text-purple-600 border border-purple-100" 
+                      ? "bg-black text-white dark:bg-white dark:text-black border border-transparent" 
                       : "bg-[#eff0f6] dark:bg-[#212030] text-[#2e2f3e] dark:text-[#a7a9be] border border-gray-200 dark:border-gray-700"
                   }`}>
                     {u.isAdmin ? "Super Admin" : "Customer"}
@@ -317,3 +317,5 @@ export const AdminUsersTab = ({
     </div>
   );
 };
+
+export default AdminUsersTab;
