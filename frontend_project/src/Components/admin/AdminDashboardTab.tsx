@@ -220,8 +220,8 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
               alignItems: 'center',
               gap: '8px',
               padding: '10px 18px',
-              backgroundColor: 'var(--accent-color)',
-              color: 'white',
+              backgroundColor: 'var(--btn-primary)',
+              color: 'var(--btn-text)',
               border: 'none',
               borderRadius: 'var(--border-radius-sm)',
               fontSize: '0.85rem',
@@ -230,8 +230,8 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
               transition: 'background-color 0.2s',
               boxShadow: 'var(--shadow-sm)'
             }}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--accent-hover)'}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--accent-color)'}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--btn-hover)'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--btn-primary)'}
           >
             <Plus size={16} /> New Entry
           </button>

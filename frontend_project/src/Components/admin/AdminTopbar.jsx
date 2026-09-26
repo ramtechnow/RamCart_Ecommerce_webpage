@@ -34,15 +34,21 @@ export const AdminTopbar = ({
 
         <div className="flex flex-col min-w-0">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 shadow-sm shadow-orange-500/50 animate-pulse shrink-0"></span>
-            <h2 className="text-sm font-black text-zinc-900 dark:text-zinc-100 tracking-wider uppercase m-0 leading-none flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-black dark:bg-white shrink-0"></span>
+            <h2 
+              className="text-sm font-black tracking-wider uppercase m-0 leading-none flex items-center gap-1.5"
+              style={{ color: 'var(--text-primary)' }}
+            >
               <span>ADMIN CONSOLE</span>
-              <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-md bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400 border border-orange-500/20">
+              <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-md bg-black text-white dark:bg-white dark:text-black">
                 Live
               </span>
             </h2>
           </div>
-          <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium hidden sm:inline-block mt-1">
+          <span 
+            className="text-[11px] font-medium hidden sm:inline-block mt-1"
+            style={{ color: 'var(--text-secondary)' }}
+          >
             Manage Catalog, Accounts, and Real-Time Orders
           </span>
         </div>

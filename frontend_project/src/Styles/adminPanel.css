@@ -33,15 +33,15 @@
   --bg-secondary: #fafafa;      /* clean elevated surface */
   --bg-tertiary:  #f4f4f5;      /* subtle container / hover fill */
 
-  --text-primary:   #09090b;      /* high contrast dark headline */
+  --text-primary:   #000000;      /* high contrast pure black headline */
   --text-secondary: #52525b;      /* clean dark neutral */
   --text-muted:     #71717a;      /* subtle secondary labels */
 
-  --btn-primary:    #09090b;      /* classic black button */
+  --btn-primary:    #000000;      /* classic black button */
   --btn-text:       #ffffff;      /* crisp white text */
   --btn-hover:      #27272a;      /* subtle dark hover */
 
-  --accent-color:   #09090b;
+  --accent-color:   #000000;
   --accent-hover:   #27272a;
   --accent-light:   rgba(9, 9, 11, 0.05);
   --accent-red:     #18181b;
@@ -88,15 +88,15 @@
   --bg-secondary: #121214;      /* elevated dark surface */
   --bg-tertiary:  #18181b;      /* subtle container / chip fill */
 
-  --text-primary:   #fafafa;      /* crisp white headline */
+  --text-primary:   #ffffff;      /* crisp pure white headline */
   --text-secondary: #a1a1aa;      /* balanced readable zinc */
   --text-muted:     #a1a1aa;      /* readable muted labels */
 
-  --btn-primary:    #fafafa;      /* classic white button */
-  --btn-text:       #09090b;      /* bold black text */
+  --btn-primary:    #ffffff;      /* classic white button */
+  --btn-text:       #000000;      /* bold black text */
   --btn-hover:      #e4e4e7;      /* light hover */
 
-  --accent-color:   #fafafa;
+  --accent-color:   #ffffff;
   --accent-hover:   #e4e4e7;
   --accent-light:   rgba(250, 250, 250, 0.08);
   --accent-red:     #f87171;
@@ -1707,7 +1707,7 @@
 }
 
 .admin-panel table tbody tr:hover {
-  background-color: color-mix(in srgb, var(--accent-color) 6%, var(--bg-secondary)) !important;
+  background-color: var(--bg-tertiary) !important;
 }
 
 .admin-panel table th,
@@ -1815,8 +1815,7 @@
   transform: translateX(4px);
 }
 
-.admin-sidebar .sidebar-menu button:hover svg,
-.admin-sidebar .sidebar-menu button:hover span {
+.admin-sidebar .sidebar-menu button:hover svg {
   color: var(--text-primary) !important;
 }
 
@@ -1827,9 +1826,50 @@
   box-shadow: 0 4px 14px var(--shadow-glow-strong) !important;
 }
 
+.admin-sidebar .sidebar-menu button.active svg {
+  color: var(--btn-text) !important;
+}
+
 .admin-sidebar .sidebar-menu button.active:hover {
   background: var(--btn-primary) !important;
   color: var(--btn-text) !important;
+}
+
+.admin-sidebar .sidebar-menu button.active:hover svg {
+  color: var(--btn-text) !important;
+}
+
+/* Ensure sidebar badge numbers are always visible, high-contrast, and never hidden on hover */
+.admin-sidebar .sidebar-count-badge {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  padding: 2px 7px !important;
+  border-radius: 9999px !important;
+  flex-shrink: 0 !important;
+  line-height: 1.2 !important;
+}
+
+.admin-sidebar .sidebar-menu button:not(.active) .sidebar-count-badge {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+.admin-sidebar .sidebar-menu button:not(.active):hover .sidebar-count-badge {
+  background: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.admin-sidebar .sidebar-menu button.active .sidebar-count-badge {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid transparent !important;
+}
+
+.admin-sidebar .sidebar-menu button.active:hover .sidebar-count-badge {
+  background: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid transparent !important;
 }
 
 .admin-topbar {

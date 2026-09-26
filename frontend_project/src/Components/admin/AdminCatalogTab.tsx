@@ -353,11 +353,11 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
       </div>
 
       {/* Audit Data Table */}
-      <div className="bg-[#ffffff] dark:bg-[#171622] rounded-2xl shadow-sm border border-[#e2e4ed]/40 dark:border-white/10 overflow-hidden flex flex-col transition-colors duration-200">
+      <div className="bg-white dark:bg-[#121214] rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden flex flex-col transition-colors duration-200">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
-              <tr className="bg-[#f3f4f6] dark:bg-[#212030] border-b border-[#e2e4ed]/40 dark:border-white/10 text-xs font-bold text-[#2f2a2b] dark:text-[#e8f0ff] uppercase tracking-wider">
+              <tr className="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 text-xs font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">
                 <th className="p-4 w-28 text-center">Product View</th>
                 <th className="p-4">Title & Specifications</th>
                 <th className="p-4 w-32">Category</th>
@@ -367,7 +367,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                 <th className="p-4 w-44 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#e2e4ed]/20 dark:divide-white/5">
+            <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
               {filteredProducts.map((prod) => {
                 const isEditing = editingProductId === prod.id;
                 const isSaving = savingProductId === prod.id;
@@ -379,18 +379,14 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
 
                 let rowBgClass = "";
                 if (isEditing) {
-                  // High contrast, theme-consistent background for the row being edited
-                  rowBgClass = "bg-zinc-100 dark:bg-zinc-800/60 border-y-2 border-black dark:border-white";
-                } else if (isMissingImages) {
-                  rowBgClass = "bg-amber-500/5 dark:bg-amber-500/10";
-                } else if (isLowStock) {
-                  rowBgClass = "bg-red-500/5 dark:bg-red-500/10";
+                  // Subtle left border outline indicating editing row without dark or filled background
+                  rowBgClass = "border-l-4 border-black dark:border-white bg-zinc-50/50 dark:bg-zinc-900/30";
                 }
 
                 return (
                   <tr 
                     key={prod.id} 
-                    className={`transition-all duration-150 hover:bg-[#eff0f6]/30 dark:hover:bg-[#212030]/30 ${rowBgClass}`}
+                    className={`transition-colors duration-150 hover:bg-zinc-50 dark:hover:bg-zinc-900/40 ${rowBgClass}`}
                   >
                     {/* Media Gallery / Single image preview */}
                     <td className="p-4 align-middle">
