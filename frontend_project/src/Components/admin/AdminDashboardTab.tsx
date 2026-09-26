@@ -67,6 +67,14 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
   const totalStock = products.reduce((acc, curr) => acc + (Number(curr.stockCount) || 0), 0);
   const catalogValue = products.reduce((acc, curr) => acc + ((Number(curr.newPrice) || 0) * (Number(curr.stockCount) || 0)), 0);
 
+  // Realized Sales Revenue from real paid orders (excludes cancelled)
+  const realizedRevenue = orders
+    .filter(o => o.payment && o.status !== "Cancelled")
+    .reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+
+  const deliveredOrdersCount = orders.filter(o => o.status === "Delivered").length;
+  const pendingOrdersCount = orders.filter(o => o.status === "Pending" || o.status === "Processing" || o.status === "Shipped").length;
+
   // Out of stock & Low stock counts
   const outOfStockCount = products.filter(p => Number(p.stockCount) === 0).length;
   const lowStockProducts = products.filter(p => Number(p.stockCount) > 0 && Number(p.stockCount) <= 15);
@@ -79,7 +87,7 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
   const catKids = countCategory("kid") + countCategory("kids");
   const totalCategoryItems = catWomen + catMen + catKids || 1;
 
-  // 1. Sleek 7-Day Revenue Line Chart calculation using real order data
+  // 1. Sleek 7-Day Revenue Line Chart calculation using 100% REAL order data
   const revenueData = useMemo(() => {
     const days: Array<{ date: Date; label: string; revenue: number }> = [];
     const now = new Date();
@@ -96,8 +104,9 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
       });
     }
 
-    // Accumulate actual order totals
+    // Accumulate actual order totals from real orders
     orders.forEach(order => {
+      if (order.status === "Cancelled") return;
       const orderDate = new Date(order.date);
       const dayIndex = days.findIndex(day => 
         day.date.getDate() === orderDate.getDate() && 
@@ -108,15 +117,6 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
         days[dayIndex].revenue += Number(order.amount) || 0;
       }
     });
-
-    // If no real revenue, fall back to high-quality mockup values for demo beauty
-    const allZero = days.every(d => d.revenue === 0);
-    if (allZero) {
-      const mockRevenues = [12500, 18400, 15200, 24800, 21000, 32400, 28900];
-      days.forEach((day, idx) => {
-        day.revenue = mockRevenues[idx];
-      });
-    }
 
     return days;
   }, [orders]);
@@ -245,7 +245,32 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
         gap: '24px',
         marginBottom: '32px' 
       }}>
-        {/* Catalog Asset Value */}
+        {/* Realized Sales Revenue */}
+        <div className="metric-card" style={{
+          backgroundColor: 'var(--bg-secondary)',
+          border: '1px solid var(--border-color)',
+          borderRadius: 'var(--border-radius-lg)',
+          padding: '24px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          boxShadow: 'var(--shadow-sm)',
+          transition: 'var(--transition-smooth)'
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Realized Sales</span>
+            <h3 style={{ fontSize: '1.6rem', fontWeight: '800', margin: 0, color: 'var(--text-primary)', fontFamily: "'Outfit', sans-serif" }}>₹{realizedRevenue.toLocaleString('en-IN')}</h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--success-color)', fontSize: '0.8rem', fontWeight: '600' }}>
+              <span>{orders.filter(o => o.payment && o.status !== 'Cancelled').length} paid</span>
+              <span style={{ color: 'var(--text-secondary)', fontWeight: '400' }}>orders</span>
+            </div>
+          </div>
+          <div style={{ padding: '10px', borderRadius: 'var(--border-radius-md)', backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
+            <IndianRupee size={22} />
+          </div>
+        </div>
+
+        {/* Catalog Asset Valuation */}
         <div className="metric-card" style={{
           backgroundColor: 'var(--bg-secondary)',
           border: '1px solid var(--border-color)',
@@ -260,67 +285,17 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Catalog Assets</span>
             <h3 style={{ fontSize: '1.6rem', fontWeight: '800', margin: 0, color: 'var(--text-primary)', fontFamily: "'Outfit', sans-serif" }}>₹{catalogValue.toLocaleString('en-IN')}</h3>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--success-color)', fontSize: '0.8rem', fontWeight: '600' }}>
-              <span>+12.5%</span>
-              <span style={{ color: 'var(--text-secondary)', fontWeight: '400' }}>vs last mo</span>
-            </div>
-          </div>
-          <div style={{ padding: '10px', borderRadius: 'var(--border-radius-md)', backgroundColor: 'rgba(124, 58, 237, 0.10)', color: 'var(--accent-color)' }}>
-            <IndianRupee size={22} />
-          </div>
-        </div>
-
-        {/* Active Products */}
-        <div className="metric-card" style={{
-          backgroundColor: 'var(--bg-secondary)',
-          border: '1px solid var(--border-color)',
-          borderRadius: 'var(--border-radius-lg)',
-          padding: '24px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          boxShadow: 'var(--shadow-sm)',
-          transition: 'var(--transition-smooth)'
-        }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Active Catalog</span>
-            <h3 style={{ fontSize: '1.6rem', fontWeight: '800', margin: 0, color: 'var(--text-primary)', fontFamily: "'Outfit', sans-serif" }}>{totalProducts} Items</h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
-              <span>No change</span>
-              <span style={{ color: 'var(--text-secondary)' }}>this week</span>
+              <span>{totalProducts}</span>
+              <span style={{ color: 'var(--text-secondary)' }}>active products</span>
             </div>
           </div>
-          <div style={{ padding: '10px', borderRadius: 'var(--border-radius-md)', backgroundColor: 'rgba(124, 58, 237, 0.10)', color: 'var(--tertiary)' }}>
+          <div style={{ padding: '10px', borderRadius: 'var(--border-radius-md)', backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
             <ShoppingBag size={22} />
           </div>
         </div>
 
-        {/* Registered Users */}
-        <div className="metric-card" style={{
-          backgroundColor: 'var(--bg-secondary)',
-          border: '1px solid var(--border-color)',
-          borderRadius: 'var(--border-radius-lg)',
-          padding: '24px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          boxShadow: 'var(--shadow-sm)',
-          transition: 'var(--transition-smooth)'
-        }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Customer Directory</span>
-            <h3 style={{ fontSize: '1.6rem', fontWeight: '800', margin: 0, color: 'var(--text-primary)', fontFamily: "'Outfit', sans-serif" }}>{totalUsers} Accounts</h3>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--success-color)', fontSize: '0.8rem', fontWeight: '600' }}>
-              <span>+2 New</span>
-              <span style={{ color: 'var(--text-secondary)', fontWeight: '400' }}>today</span>
-            </div>
-          </div>
-          <div style={{ padding: '10px', borderRadius: 'var(--border-radius-md)', backgroundColor: 'rgba(16, 185, 129, 0.08)', color: 'var(--success-color)' }}>
-            <Users size={22} />
-          </div>
-        </div>
-
-        {/* Store Stocks */}
+        {/* Warehoused Stock */}
         <div className="metric-card" style={{
           backgroundColor: 'var(--bg-secondary)',
           border: '1px solid var(--border-color)',
@@ -335,13 +310,37 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Warehoused Stock</span>
             <h3 style={{ fontSize: '1.6rem', fontWeight: '800', margin: 0, color: 'var(--text-primary)', fontFamily: "'Outfit', sans-serif" }}>{totalStock} Units</h3>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#ef4444', fontSize: '0.8rem', fontWeight: '600' }}>
-              <span>-4.2%</span>
-              <span style={{ color: 'var(--text-secondary)', fontWeight: '400' }}>outbound</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: outOfStockCount > 0 ? '#ef4444' : 'var(--success-color)', fontSize: '0.8rem', fontWeight: '600' }}>
+              <span>{outOfStockCount > 0 ? `${outOfStockCount} Out of Stock` : 'All items in stock'}</span>
             </div>
           </div>
-          <div style={{ padding: '10px', borderRadius: 'var(--border-radius-md)', backgroundColor: 'rgba(13, 148, 136, 0.10)', color: 'var(--text-secondary)' }}>
+          <div style={{ padding: '10px', borderRadius: 'var(--border-radius-md)', backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
             <Warehouse size={22} />
+          </div>
+        </div>
+
+        {/* Order Fulfillment Status */}
+        <div className="metric-card" style={{
+          backgroundColor: 'var(--bg-secondary)',
+          border: '1px solid var(--border-color)',
+          borderRadius: 'var(--border-radius-lg)',
+          padding: '24px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          boxShadow: 'var(--shadow-sm)',
+          transition: 'var(--transition-smooth)'
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <span style={{ fontSize: '0.75rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Fulfillment & Users</span>
+            <h3 style={{ fontSize: '1.6rem', fontWeight: '800', margin: 0, color: 'var(--text-primary)', fontFamily: "'Outfit', sans-serif" }}>{orders.length} Orders</h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--success-color)', fontSize: '0.8rem', fontWeight: '600' }}>
+              <span>{deliveredOrdersCount} Delivered</span>
+              <span style={{ color: 'var(--text-secondary)', fontWeight: '400' }}>· {pendingOrdersCount} in-transit ({totalUsers} Users)</span>
+            </div>
+          </div>
+          <div style={{ padding: '10px', borderRadius: 'var(--border-radius-md)', backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
+            <Users size={22} />
           </div>
         </div>
       </div>

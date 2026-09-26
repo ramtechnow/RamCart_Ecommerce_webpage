@@ -17,7 +17,7 @@ import "../Styles/productGrid.css";
 
 export const ProductCardSkeleton: React.FC = () => {
   return (
-    <div className="product-card-skeleton" style={{ background: "rgba(255, 255, 255, 0.4)", backdropFilter: "blur(8px)", borderRadius: "17px", border: "1px solid var(--border-color)", overflow: "hidden" }}>
+    <div className="product-card-skeleton" style={{ background: "var(--bg-secondary)", borderRadius: "4px", border: "1px solid var(--border-color)", overflow: "hidden" }}>
       <div className="shimmer-line" style={{ width: "100%", aspectRatio: "4/5", background: "rgba(120, 120, 120, 0.12)" }} />
       <div style={{ padding: "10px", display: "flex", flexDirection: "column", gap: "8px" }}>
         <div className="shimmer-line tag-shimmer" style={{ width: "40%", height: "9px", background: "rgba(120, 120, 120, 0.1)" }} />

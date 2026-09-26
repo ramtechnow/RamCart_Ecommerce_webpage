@@ -1,6 +1,6 @@
 /**
- * Compress an image file to JPEG format and return as Base64 string
- * Limits max resolution to 800px for optimal Mongo storage
+ * Compress an image file to lightweight WebP/JPEG format and return as Base64 string
+ * Limits max resolution to 640px for fast loading and optimal Mongo storage
  */
 export const compressImageToBase64 = (file) => {
   return new Promise((resolve, reject) => {
@@ -11,7 +11,7 @@ export const compressImageToBase64 = (file) => {
       img.src = event.target.result;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const max_size = 800;
+        const max_size = 640;
         let width = img.width;
         let height = img.height;
         
@@ -27,14 +27,21 @@ export const compressImageToBase64 = (file) => {
           }
         }
         
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = Math.round(width);
+        canvas.height = Math.round(height);
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         
-        // 0.7 JPEG compression ratio
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-        resolve(dataUrl);
+        // Try WebP first for ~60% size savings, fallback to clean JPEG
+        try {
+          const webpUrl = canvas.toDataURL('image/webp', 0.72);
+          if (webpUrl.startsWith('data:image/webp')) {
+            return resolve(webpUrl);
+          }
+        } catch (_) {}
+
+        const jpegUrl = canvas.toDataURL('image/jpeg', 0.68);
+        resolve(jpegUrl);
       };
       img.onerror = (err) => reject(err);
     };

@@ -17,6 +17,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const isWishlisted = isInWishlist(product.id);
   const [imgError, setImgError] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -62,6 +63,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <div className="product-card-badge">{discountPercent}% OFF</div>
           )}
 
+          {!imgLoaded && !showAltName && (
+            <div className="product-card-image-skeleton" aria-hidden="true" />
+          )}
+
           {showAltName ? (
             /* No image: show styled product name as alt */
             <div style={{
@@ -84,7 +89,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               alt={product.name}
               className="product-card-image"
               loading="lazy"
-              onError={() => setImgError(true)}
+              decoding="async"
+              onLoad={() => setImgLoaded(true)}
+              onError={() => {
+                setImgError(true);
+                setImgLoaded(true);
+              }}
+              style={{
+                opacity: imgLoaded ? 1 : 0,
+                transition: "opacity 0.3s ease-in-out"
+              }}
             />
           )}
         </div>

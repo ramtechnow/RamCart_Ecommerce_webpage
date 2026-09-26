@@ -1,5 +1,6 @@
 const Order = require('../models/Order');
 const User = require('../models/User');
+const Product = require('../models/Product');
 const { incrementCouponUsage } = require('./couponController');
 const { sendEmail } = require('./userController');
 
@@ -25,6 +26,41 @@ exports.placeOrder = async (req, res) => {
     });
 
     await newOrder.save();
+
+    // Deduct stock for each purchased item accurately in real time
+    for (const item of items) {
+      const prodId = item.id;
+      const qty = Number(item.quantity) || 1;
+      const color = item.color;
+      const size = item.size;
+
+      try {
+        const query = isNaN(Number(prodId)) ? { _id: prodId } : { $or: [{ id: Number(prodId) }, { _id: prodId }] };
+        const product = await Product.findOne(query);
+
+        if (product) {
+          // Deduct overall stockCount (minimum 0)
+          product.stockCount = Math.max(0, (product.stockCount || 0) - qty);
+
+          // Deduct variant stock if variant matches
+          if (Array.isArray(product.variants) && product.variants.length > 0) {
+            product.variants = product.variants.map(v => {
+              const vObj = v.toObject ? v.toObject() : v;
+              const matchColor = !color || (vObj.color && vObj.color.toLowerCase() === String(color).toLowerCase());
+              const matchSize = !size || (vObj.size && vObj.size.toLowerCase() === String(size).toLowerCase());
+              if (matchColor && matchSize) {
+                return { ...vObj, stock: Math.max(0, (vObj.stock || 0) - qty) };
+              }
+              return vObj;
+            });
+          }
+          await product.save();
+          console.log(`📦 Real-time inventory sync: Product ${product.id} stock decreased by ${qty}. New stock: ${product.stockCount}`);
+        }
+      } catch (stockErr) {
+        console.warn(`Could not sync stock for item ${prodId}:`, stockErr.message);
+      }
+    }
 
     // If a coupon was used, increment its usage counter
     if (couponCode) {
@@ -160,11 +196,35 @@ exports.updateOrderStatus = async (req, res) => {
       return res.status(400).json({ success: false, error: "Missing required status fields" });
     }
 
+    const prevOrder = await Order.findById(orderId);
+    if (!prevOrder) {
+      return res.status(404).json({ success: false, error: "Order not found" });
+    }
+
     const updatedOrder = await Order.findByIdAndUpdate(
       orderId,
       { $set: { status, notificationSeen: false } },
       { new: true }
     );
+
+    // If order was cancelled and was not cancelled before, restore stock
+    if (status === "Cancelled" && prevOrder.status !== "Cancelled") {
+      for (const item of (updatedOrder.items || [])) {
+        try {
+          const prodId = item.id;
+          const qty = Number(item.quantity) || 1;
+          const query = isNaN(Number(prodId)) ? { _id: prodId } : { $or: [{ id: Number(prodId) }, { _id: prodId }] };
+          const product = await Product.findOne(query);
+          if (product) {
+            product.stockCount = (product.stockCount || 0) + qty;
+            await product.save();
+            console.log(`🔄 Restocked cancelled order item: Product ${product.id} +${qty}`);
+          }
+        } catch (rErr) {
+          console.warn("Could not restock cancelled item:", rErr.message);
+        }
+      }
+    }
 
     if (updatedOrder) {
       console.log(`🚚 Order ${orderId} shipping status updated to: ${status}`);

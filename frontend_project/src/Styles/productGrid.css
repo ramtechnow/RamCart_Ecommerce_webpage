@@ -86,43 +86,63 @@
   }
 }
 
-/* ── Product Card — Myntra Style ─────────────────────────── */
+/* ── Product Card — Modern Sharp Box Style ─────────────────────────── */
 .product-card {
   box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.65);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: 17px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border-radius: 4px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   position: relative;
   user-select: none;
 }
 
-.dark-theme .product-card {
-  background: rgba(30, 30, 30, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+.dark-theme .product-card,
+.dark .product-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
 .product-card:hover {
-  border: 1.5px solid var(--text-primary);
-  transform: translateY(-4px);
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.14);
+  border-color: var(--text-primary);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
-.dark-theme .product-card:hover {
-  border: 1.5px solid var(--accent-pink);
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.32);
+.dark-theme .product-card:hover,
+.dark .product-card:hover {
+  border-color: var(--text-primary);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .product-card:active {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+}
+
+@keyframes cardShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.product-card-image-skeleton {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(200, 200, 200, 0.12) 25%, rgba(200, 200, 200, 0.28) 50%, rgba(200, 200, 200, 0.12) 75%);
+  background-size: 200% 100%;
+  animation: cardShimmer 1.4s infinite;
+  z-index: 1;
+}
+
+.dark-theme .product-card-image-skeleton,
+.dark .product-card-image-skeleton {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.03) 75%);
+  background-size: 200% 100%;
 }
 
 /* Image area — 4:5 ratio like Myntra */
