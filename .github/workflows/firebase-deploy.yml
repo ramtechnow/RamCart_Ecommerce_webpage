@@ -29,6 +29,17 @@ jobs:
         working-directory: frontend_project
         run: npm run build
 
+      - name: Check Firebase Token Availability
+        id: check-token
+        run: |
+          if [ -z "${{ secrets.FIREBASE_TOKEN }}" ]; then
+            echo "has_token=false" >> $GITHUB_OUTPUT
+            echo "::warning::FIREBASE_TOKEN secret is missing in GitHub Repository Secrets. Deployment skipped."
+          else
+            echo "has_token=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Deploy to Firebase Hosting
+        if: steps.check-token.outputs.has_token == 'true'
         working-directory: frontend_project
         run: npx firebase-tools deploy --only hosting --token "${{ secrets.FIREBASE_TOKEN }}" --project ecommerce-website-dfd55
