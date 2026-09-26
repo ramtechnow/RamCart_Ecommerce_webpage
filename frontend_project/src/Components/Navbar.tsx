@@ -4,7 +4,7 @@ import "../Styles/navbar.css";
 import {
   ShoppingCart, Heart, LogOut, ChevronDown,
   Sun, Moon, X, Home, LayoutGrid, User, LogIn,
-  Package, ShieldCheck, Menu, Mic, Search, Sparkles, Bell
+  Package, ShieldCheck, Menu, Mic, Search, Bell
 } from "lucide-react";
 import { useCart } from "../features/checkout/hooks/useCart";
 import { useAuth } from "../features/auth/hooks/useAuth";
@@ -13,13 +13,11 @@ import { useWishlist } from "../features/catalog/hooks/useWishlist";
 import { useAppDispatch } from "../store/hooks";
 import { addToast } from "../store/slices/toastSlice";
 import { fetchUnseenOrders, markOrderAsSeen } from "../features/checkout/services/orderService";
-import ThemeCustomizer from "./ui/ThemeCustomizer";
 
 export const Navbar: React.FC = () => {
   const dispatch = useAppDispatch();
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [desktopCustomizerOpen, setDesktopCustomizerOpen] = useState(false);
 
   const { cartCount, clearCart } = useCart();
   const { user, logoutUser } = useAuth();
@@ -478,11 +476,6 @@ export const Navbar: React.FC = () => {
                 )}
               </nav>
 
-              {/* Theme Customizer Panel */}
-              <div style={{ padding: "0 10px 10px 10px" }}>
-                <ThemeCustomizer />
-              </div>
-
               {/* Footer actions */}
               <div className="mob-drawer-footer" style={{ paddingBottom: "100px" }}>
                 {user ? (
@@ -506,29 +499,6 @@ export const Navbar: React.FC = () => {
           </aside>
         </>
       )}
-
-      {/* ─── DESKTOP FLOATING THEME CUSTOMIZER ────────────────── */}
-      <div className="desktop-customizer-floating-wrapper">
-        <button 
-          className="desktop-customizer-trigger"
-          onClick={() => setDesktopCustomizerOpen(prev => !prev)}
-          aria-label="Customize Theme"
-          title="Theme Customizer"
-        >
-          <Sparkles size={20} />
-        </button>
-        {desktopCustomizerOpen && (
-          <div className="desktop-customizer-panel">
-            <div className="desktop-customizer-header">
-              <h3>Theme Customizer</h3>
-              <button className="desktop-customizer-close" onClick={() => setDesktopCustomizerOpen(false)}>&times;</button>
-            </div>
-            <div className="desktop-customizer-body">
-              <ThemeCustomizer />
-            </div>
-          </div>
-        )}
-      </div>
     </>
   );
 };

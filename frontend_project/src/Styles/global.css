@@ -272,8 +272,9 @@ h3, .heading-3 {
 
 @media (min-width: 769px) {
   .scroll-to-top-btn {
-    bottom: 145px;      /* Stack cleanly above the Theme Customizer icon on desktop */
-    right: 27px;        /* Horizontal alignment with Customizer trigger */
+    bottom: 30px;
+    right: 28px;
   }
 }
+
 

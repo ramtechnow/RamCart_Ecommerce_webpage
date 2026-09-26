@@ -15,7 +15,6 @@ import {
   Zap,
   ShieldCheck
 } from 'lucide-react';
-import { ThemeCustomizer } from '../ui/ThemeCustomizer';
 
 export const AdminSidebar = ({
   activeTab,
@@ -176,11 +175,6 @@ export const AdminSidebar = ({
           );
         })}
       </nav>
-
-      {/* ─── Theme Customizer ─────────────────────────────────── */}
-      <div className="px-1">
-        <ThemeCustomizer />
-      </div>
 
       {/* ─── Bottom Profile & Actions ─────────────────────────── */}
       <div className="sidebar-footer mt-auto pt-3 border-t border-[#e2e4ed] dark:border-[#2e2d40] flex flex-col gap-2.5">
