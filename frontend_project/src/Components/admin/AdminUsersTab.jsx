@@ -140,7 +140,7 @@ export const AdminUsersTab = ({
             placeholder="Search users by name or email..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-10 px-4 rounded-xl border border-[#e2e4ed]/40 dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] focus:border-[#ff8906] focus:ring-1 focus:ring-[#ff8906] outline-none text-xs"
+            className="w-full h-10 px-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 focus:border-black dark:focus:border-white outline-none text-xs"
           />
         </div>
 
@@ -148,7 +148,7 @@ export const AdminUsersTab = ({
         <select 
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
-          className="h-10 px-3 pr-8 rounded-xl border border-[#e2e4ed]/40 dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] text-xs font-semibold text-[#2e2f3e] dark:text-[#a7a9be] outline-none cursor-pointer"
+          className="h-10 px-3 pr-8 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-semibold text-zinc-700 dark:text-zinc-300 outline-none cursor-pointer"
         >
           <option value="all">All Roles</option>
           <option value="admin">Super Admin</option>
@@ -159,7 +159,7 @@ export const AdminUsersTab = ({
         <select 
           value={cartFilter}
           onChange={(e) => setCartFilter(e.target.value)}
-          className="h-10 px-3 pr-8 rounded-xl border border-[#e2e4ed]/40 dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] text-xs font-semibold text-[#2e2f3e] dark:text-[#a7a9be] outline-none cursor-pointer"
+          className="h-10 px-3 pr-8 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-semibold text-zinc-700 dark:text-zinc-300 outline-none cursor-pointer"
         >
           <option value="all">All Cart Status</option>
           <option value="active">Active Cart</option>
@@ -171,7 +171,7 @@ export const AdminUsersTab = ({
           <button 
             type="button"
             onClick={() => { setSearchQuery(""); setRoleFilter("all"); setCartFilter("all"); }}
-            className="text-xs font-bold text-[#e53170] dark:text-[#ff8906] hover:underline cursor-pointer bg-transparent border-none p-0"
+            className="text-xs font-bold text-zinc-900 dark:text-zinc-100 hover:underline cursor-pointer bg-transparent border-none p-0"
           >
             Clear Filters
           </button>
@@ -189,18 +189,18 @@ export const AdminUsersTab = ({
           return (
             <div 
               key={idx} 
-              className="bg-[#ffffff] dark:bg-[#171622] rounded-2xl shadow-sm border border-[#e2e4ed]/30 dark:border-white/5 overflow-hidden flex flex-col transition-all duration-200 hover:shadow-md hover:border-[#e2e4ed]/60"
+              className="bg-[#ffffff] dark:bg-[#171622] rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden flex flex-col transition-all duration-200 hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700"
             >
               {/* Card Header */}
-              <div className="p-4 border-b border-[#e2e4ed]/20 dark:border-white/5 flex gap-4 items-center bg-[#eff0f6]/30 dark:bg-[#212030]/30">
-                <div className="w-11 h-11 rounded-full bg-[#eff0f6] dark:bg-[#eff0f6]/10 text-[#e53170] dark:text-[#ff8906] flex items-center justify-center font-bold text-sm">
+              <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex gap-4 items-center bg-zinc-50 dark:bg-zinc-900/40">
+                <div className="w-11 h-11 rounded-full bg-black text-white dark:bg-white dark:text-black flex items-center justify-center font-black text-sm shadow-xs">
                   {u.name ? u.name.charAt(0).toUpperCase() : <User size={18} />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-xs font-extrabold text-[#0f0e17] dark:text-[#fffffe] truncate">
                     {u.name || 'Anonymous User'}
                   </h3>
-                  <p className="text-[10px] text-[#717388] font-semibold truncate mt-0.5">
+                  <p className="text-[10px] text-zinc-500 dark:text-zinc-400 font-semibold truncate mt-0.5">
                     {u.email}
                   </p>
                 </div>
@@ -238,8 +238,8 @@ export const AdminUsersTab = ({
 
                 {/* Expanded active cart checklist drawer inline inside the Card */}
                 {isExpanded && (
-                  <div className="mt-4 pt-4 border-t border-[#e2e4ed]/20 dark:border-white/5 animate-slide-down flex flex-col gap-2.5">
-                    <h4 className="text-[10px] font-black text-[#e53170] dark:text-[#ff8906] uppercase tracking-wider mb-1 flex items-center gap-1">
+                  <div className="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800 animate-slide-down flex flex-col gap-2.5">
+                    <h4 className="text-[10px] font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-wider mb-1 flex items-center gap-1">
                       <ShoppingCart size={12} /> Active Cart Audit
                     </h4>
                     {normalizedItems.length === 0 ? (
@@ -279,11 +279,11 @@ export const AdminUsersTab = ({
               </div>
 
               {/* Card Footer Actions */}
-              <div className="p-3 bg-[#eff0f6]/30 dark:bg-[#212030]/30 border-t border-[#e2e4ed]/20 dark:border-white/5 flex gap-1.5 justify-end">
+              <div className="p-3 bg-zinc-50 dark:bg-zinc-900/40 border-t border-zinc-200 dark:border-zinc-800 flex gap-1.5 justify-end">
                 <button 
                   type="button"
                   onClick={() => setExpandedUserEmail(isExpanded ? null : u.email)}
-                  className="px-2.5 py-1.5 border border-[#e2e4ed]/60 dark:border-white/10 hover:bg-[#e6e8eb] dark:hover:bg-[#363636] text-[#2e2f3e] dark:text-[#a7a9be] text-[11px] font-bold rounded-xl flex items-center gap-1 transition-all cursor-pointer bg-[#ffffff] dark:bg-[#171622]"
+                  className="px-2.5 py-1.5 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-[11px] font-bold rounded-xl flex items-center gap-1 transition-all cursor-pointer bg-white dark:bg-zinc-900"
                 >
                   {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                   <span>Inspect Cart</span>
@@ -291,7 +291,7 @@ export const AdminUsersTab = ({
                 <button 
                   type="button"
                   onClick={() => handleToggleRole(u)}
-                  className="px-2.5 py-1.5 border border-[#ff8906]/50 hover:bg-[#ff8906]/10 text-[#ff8906] text-[11px] font-bold rounded-xl flex items-center gap-1 transition-all cursor-pointer bg-[#ffffff] dark:bg-[#171622]"
+                  className="px-2.5 py-1.5 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-[11px] font-bold rounded-xl flex items-center gap-1 transition-all cursor-pointer bg-white dark:bg-zinc-900"
                 >
                   <UserCheck size={12} />
                   <span>{u.isAdmin ? "Demote" : "Promote"}</span>

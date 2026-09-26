@@ -172,7 +172,7 @@ export const AdminOrdersTab = ({
           <button 
             type="button"
             onClick={() => addToast("Manual order generation mode", "info")}
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#ff8906] hover:bg-[#e53170] text-white text-xs font-bold rounded-xl transition-all cursor-pointer shadow-sm border-none"
+            className="flex items-center gap-1.5 px-4 py-2 bg-black hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-200 dark:text-black text-xs font-bold rounded-xl transition-all cursor-pointer shadow-xs border-none"
           >
             <Plus size={14} />
             <span>New Order</span>
@@ -182,17 +182,17 @@ export const AdminOrdersTab = ({
 
       {/* Action Required: Delayed Shipments Banner */}
       {delayedOrders.length > 0 && (
-        <div className="bg-[#eff0f6] dark:bg-[#eff0f6]/10 border border-[#ff8906]/20 text-[#e53170] dark:text-[#ff8906] rounded-xl p-4 flex items-start gap-3 shadow-sm">
-          <AlertCircle className="text-[#ff8906] shrink-0 mt-0.5" size={18} />
+        <div className="bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 rounded-xl p-4 flex items-start gap-3 shadow-xs">
+          <AlertCircle className="text-zinc-900 dark:text-zinc-100 shrink-0 mt-0.5" size={18} />
           <div className="flex-1">
             <h3 className="text-xs font-black uppercase tracking-wider">Action Required: Delayed Shipments</h3>
-            <p className="text-xs mt-0.5 font-semibold text-[#2e2f3e] dark:text-[#a7a9be]">
+            <p className="text-xs mt-0.5 font-semibold text-zinc-600 dark:text-zinc-400">
               {delayedOrders.length} orders are currently delayed beyond the 48h SLA window. Please review and notify customers.
             </p>
           </div>
           <button 
             onClick={() => { setStatusFilter("Pending"); setSearchQuery(""); }}
-            className="text-xs font-black text-[#ff8906] dark:text-[#ff8906] hover:underline cursor-pointer bg-transparent border-none p-0"
+            className="text-xs font-black text-zinc-900 dark:text-zinc-100 hover:underline cursor-pointer bg-transparent border-none p-0"
           >
             View Delayed ({delayedOrders.length})
           </button>
@@ -260,7 +260,7 @@ export const AdminOrdersTab = ({
               Orders Processed
             </span>
             <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-extrabold text-[#ff8906]">{orders.length * 3 + 14}</span>
+              <span className="text-2xl font-black text-zinc-900 dark:text-zinc-100">{orders.length * 3 + 14}</span>
               <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5">
                 📈 +12%
               </span>
@@ -270,17 +270,17 @@ export const AdminOrdersTab = ({
       </div>
 
       {/* Orders Filter strip & search */}
-      <div className="bg-[#ffffff] dark:bg-[#171622] rounded-2xl border border-[#e2e4ed]/40 dark:border-white/10 overflow-hidden flex flex-col transition-colors duration-200">
-        <div className="p-4 border-b border-[#e2e4ed]/20 dark:border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#eff0f6]/20 dark:bg-[#212030]/20">
+      <div className="bg-[#ffffff] dark:bg-[#171622] rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden flex flex-col transition-colors duration-200">
+        <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row justify-between items-center gap-4 bg-zinc-50 dark:bg-zinc-900/40">
           <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1.5 sm:pb-0">
             {["All", "Pending", "Processing", "Shipped"].map((status) => (
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
-                className={`px-4 py-1.5 rounded-full text-xs font-extrabold transition-all cursor-pointer whitespace-nowrap border ${
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap border ${
                   statusFilter === status 
-                    ? "bg-[#ff8906] text-white border-[#ff8906]" 
-                    : "bg-[#ffffff] dark:bg-[#212030] border-[#e2e4ed] dark:border-white/10 text-[#2e2f3e] dark:text-[#a7a9be] hover:bg-gray-50 dark:hover:bg-[#363636]"
+                    ? "bg-black text-white dark:bg-white dark:text-black border-transparent shadow-xs" 
+                    : "bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700"
                 }`}
               >
                 {status === "All" ? "All Orders" : `${status} Orders`}
@@ -289,13 +289,13 @@ export const AdminOrdersTab = ({
           </div>
 
           <div className="relative w-full sm:w-64">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#717388]" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input 
               type="text" 
               placeholder="Search ID, Name..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-1.5 rounded-xl border border-[#e2e4ed] dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] text-xs font-medium outline-none focus:border-[#ff8906]"
+              className="w-full pl-9 pr-4 py-1.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium outline-none focus:border-black dark:focus:border-white"
             />
           </div>
         </div>
@@ -338,8 +338,8 @@ export const AdminOrdersTab = ({
                       {/* Order ID */}
                       <td className="p-4 align-middle">
                         <div className="flex items-center gap-1.5">
-                          <span className={`w-1.5 h-1.5 rounded-full bg-[#ff8906] ${isDelayedRow ? 'animate-ping' : ''}`}></span>
-                          <span className="text-xs font-bold font-mono text-[#0f0e17] dark:text-[#fffffe] dark:text-[#fffffe]">
+                          <span className={`w-1.5 h-1.5 rounded-full bg-black dark:bg-white ${isDelayedRow ? 'animate-ping' : ''}`}></span>
+                          <span className="text-xs font-bold font-mono text-[#0f0e17] dark:text-[#fffffe]">
                             #ORD-{o._id ? o._id.substring(0, 4).toUpperCase() : '9021'}
                           </span>
                         </div>
@@ -348,7 +348,7 @@ export const AdminOrdersTab = ({
                       {/* Customer Details */}
                       <td className="p-4 align-middle">
                         <div className="flex flex-col">
-                          <span className="text-xs font-bold text-[#0f0e17] dark:text-[#fffffe] dark:text-[#fffffe]">
+                          <span className="text-xs font-bold text-[#0f0e17] dark:text-[#fffffe]">
                             {o.userName || o.address?.fullName || "Sarah Jenkins"}
                           </span>
                           <span className="text-[10px] text-[#717388] font-semibold">
@@ -358,12 +358,12 @@ export const AdminOrdersTab = ({
                       </td>
 
                       {/* Date */}
-                      <td className="p-4 align-middle text-xs font-medium text-[#2e2f3e] dark:text-[#a7a9be] dark:text-[#717388] dark:text-[#7C6FAA] whitespace-nowrap">
+                      <td className="p-4 align-middle text-xs font-medium text-[#2e2f3e] dark:text-[#a7a9be] whitespace-nowrap">
                         {orderDateString}
                       </td>
 
                       {/* Amount */}
-                      <td className="p-4 align-middle font-bold text-right text-xs text-[#0f0e17] dark:text-[#fffffe] dark:text-white">
+                      <td className="p-4 align-middle font-bold text-right text-xs text-[#0f0e17] dark:text-[#fffffe]">
                         ₹{Number(o.amount || 0).toFixed(2)}
                       </td>
 
@@ -382,11 +382,11 @@ export const AdminOrdersTab = ({
                       <td className="p-4 align-middle">
                         <span className={`inline-block px-3 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wide ${
                           o.status === "Delivered" || o.status === "Shipped"
-                            ? "bg-blue-50 dark:bg-blue-950/20 text-blue-600 border border-blue-100" 
+                            ? "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 border border-emerald-100" 
                             : o.status === "Processing"
-                              ? "bg-orange-50 dark:bg-orange-950/20 text-orange-600 border border-orange-100"
+                              ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700"
                               : o.status === "Out for Delivery"
-                                ? "bg-pink-50 dark:bg-pink-950/20 text-[#ff8906] border border-pink-100"
+                                ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border border-zinc-300 dark:border-zinc-600"
                                 : "bg-[#eff0f6] dark:bg-[#212030] text-[#2e2f3e] dark:text-[#a7a9be] border border-[#e2e4ed]"
                         }`}>
                           {o.status || "Ordered"}
@@ -409,7 +409,7 @@ export const AdminOrdersTab = ({
                             value={o.status}
                             disabled={o.status === "Delivered" || updatingOrderId === o._id}
                             onChange={(e) => handleUpdateStatus(o._id, e.target.value)}
-                            className="h-8 px-2 rounded-lg border border-[#e2e4ed] dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] text-[10px] font-bold outline-none cursor-pointer text-[#0f0e17] dark:text-[#fffffe] dark:text-white"
+                            className="h-8 px-2 rounded-lg border border-[#e2e4ed] dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] text-[10px] font-bold outline-none cursor-pointer text-[#0f0e17] dark:text-[#fffffe]"
                           >
                             <option value="Pending">Ordered</option>
                             <option value="Processing">Processing</option>
@@ -418,7 +418,7 @@ export const AdminOrdersTab = ({
                           </select>
 
                           {updatingOrderId === o._id ? (
-                            <Loader2 size={12} className="animate-spin text-[#ff8906]" />
+                            <Loader2 size={12} className="animate-spin text-black dark:text-white" />
                           ) : (
                             <button
                               type="button"
@@ -441,7 +441,7 @@ export const AdminOrdersTab = ({
                             
                             {/* Shipping address details */}
                             <div className="flex-1">
-                              <h4 className="text-xs font-black text-[#e53170] dark:text-[#ff8906] uppercase tracking-wider mb-2.5">📍 Shipping Destination</h4>
+                              <h4 className="text-xs font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-wider mb-2.5">📍 Shipping Destination</h4>
                               <div className="p-3.5 border border-[#e2e4ed]/20 dark:border-white/5 bg-[#eff0f6] dark:bg-[#212030]/40 rounded-xl text-xs space-y-1.5 text-[#2e2f3e] dark:text-[#a7a9be]">
                                 <p><strong className="text-[#2e2f3e] dark:text-[#a7a9be] dark:text-white font-bold">Email:</strong> {o.userEmail || o.address?.email || o.email || "Registered Email"}</p>
                                 <p><strong className="text-[#2e2f3e] dark:text-[#a7a9be] dark:text-white font-bold">Contact:</strong> {o.address?.fullName || o.userName || "Customer"}</p>
@@ -453,7 +453,7 @@ export const AdminOrdersTab = ({
 
                             {/* Itemized purchased list */}
                             <div className="flex-1">
-                              <h4 className="text-xs font-black text-[#e53170] dark:text-[#ff8906] uppercase tracking-wider mb-2.5">📦 Purchased Items</h4>
+                              <h4 className="text-xs font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-wider mb-2.5">📦 Purchased Items</h4>
                               <div className="flex flex-col gap-2">
                                 {(o.items || []).map((item, idx) => {
                                   const prodDetails = products.find(p => p.id === item.productId);

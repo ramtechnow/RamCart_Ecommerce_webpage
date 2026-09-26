@@ -28,34 +28,34 @@
      Button text:#fffffe (Crisp White)
      Secondary/Hover: #e53170 / #f25f4c (Crimson Red / Coral)
   ══════════════════════════════════════════════════════════════ */
-  /* LIGHT MODE (Clean warm surfaces, deep dark headlines, vibrant orange buttons & red/coral hover) */
-  --bg-primary:   #f7f7fa;      /* soft background */
-  --bg-secondary: #ffffff;      /* crisp clean white card surface */
-  --bg-tertiary:  #eff0f6;      /* subtle container / hover fill */
+  /* LIGHT MODE (Classic monochrome black and white) */
+  --bg-primary:   #ffffff;      /* crisp white background */
+  --bg-secondary: #fafafa;      /* clean elevated surface */
+  --bg-tertiary:  #f4f4f5;      /* subtle container / hover fill */
 
-  --text-primary:   #0f0e17;      /* crisp near-black headline */
-  --text-secondary: #4b5870;      /* readable paragraph */
-  --text-muted:     #717388;      /* subtle labels */
+  --text-primary:   #09090b;      /* high contrast dark headline */
+  --text-secondary: #52525b;      /* clean dark neutral */
+  --text-muted:     #71717a;      /* subtle secondary labels */
 
-  --btn-primary:    #ff8906;      /* vibrant orange CTA */
-  --btn-text:       #fffffe;      /* crisp white */
-  --btn-hover:      #e53170;      /* crimson red hover */
+  --btn-primary:    #09090b;      /* classic black button */
+  --btn-text:       #ffffff;      /* crisp white text */
+  --btn-hover:      #27272a;      /* subtle dark hover */
 
-  --accent-color:   #ff8906;
-  --accent-hover:   #e53170;
-  --accent-light:   rgba(255, 137, 6, 0.12);
-  --accent-red:     #e53170;
-  --accent-red-hover:#f25f4c;
+  --accent-color:   #09090b;
+  --accent-hover:   #27272a;
+  --accent-light:   rgba(9, 9, 11, 0.05);
+  --accent-red:     #18181b;
+  --accent-red-hover:#27272a;
 
   --success-color:  #10b981;
   --warning:        #f59e0b;
-  --danger:         #e53170;
+  --danger:         #ef4444;
 
-  --border-color:   #e2e4ed;
-  --border-focus:   #ff8906;
+  --border-color:   #e4e4e7;
+  --border-focus:   #09090b;
 
-  --shadow-sm: 0 2px 8px rgba(15, 14, 23, 0.05);
-  --shadow-md: 0 10px 28px rgba(15, 14, 23, 0.08);
+  --shadow-sm: 0 2px 8px rgba(9, 9, 11, 0.05);
+  --shadow-md: 0 10px 28px rgba(9, 9, 11, 0.08);
 
   --border-radius-sm:   0.375rem;
   --border-radius-md:   0.625rem;
@@ -69,44 +69,38 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   DARK MODE OVERRIDES (Exact Reference Palette)
-   Background: #0f0e17
-   Headline:   #fffffe
-   Paragraph:  #a7a9be
-   Button:     #ff8906
-   Secondary:  #f25f4c
-   Tertiary:   #e53170
+   DARK MODE OVERRIDES (Classic Black & White Minimalist)
 ══════════════════════════════════════════════════════════════ */
 .dark-theme .admin-panel,
 .dark .admin-panel {
   color-scheme: dark;
-  --bg-primary:   #0f0e17;      /* deep dark background */
-  --bg-secondary: #171622;      /* elevated dark surface */
-  --bg-tertiary:  #212030;      /* subtle container / chip fill */
+  --bg-primary:   #09090b;      /* pure deep dark background */
+  --bg-secondary: #121214;      /* elevated dark surface */
+  --bg-tertiary:  #18181b;      /* subtle container / chip fill */
 
-  --text-primary:   #fffffe;      /* crisp white headline */
-  --text-secondary: #a7a9be;      /* balanced paragraph */
-  --text-muted:     #717388;      /* muted labels */
+  --text-primary:   #fafafa;      /* crisp white headline */
+  --text-secondary: #a1a1aa;      /* balanced readable zinc */
+  --text-muted:     #71717a;      /* muted labels */
 
-  --btn-primary:    #ff8906;      /* vibrant orange CTA */
-  --btn-text:       #fffffe;      /* crisp white text */
-  --btn-hover:      #e53170;      /* crimson red hover */
+  --btn-primary:    #fafafa;      /* classic white button */
+  --btn-text:       #09090b;      /* bold black text */
+  --btn-hover:      #e4e4e7;      /* light hover */
 
-  --accent-color:   #ff8906;
-  --accent-hover:   #e53170;
-  --accent-light:   rgba(255, 137, 6, 0.15);
-  --accent-red:     #e53170;
-  --accent-red-hover:#f25f4c;
+  --accent-color:   #fafafa;
+  --accent-hover:   #e4e4e7;
+  --accent-light:   rgba(250, 250, 250, 0.08);
+  --accent-red:     #27272a;
+  --accent-red-hover:#3f3f46;
 
   --success-color:  #10b981;
   --warning:        #f59e0b;
-  --danger:         #e53170;
+  --danger:         #ef4444;
 
-  --border-color:   #2e2d40;
-  --border-focus:   #ff8906;
+  --border-color:   #27272a;
+  --border-focus:   #fafafa;
 
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.45);
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 12px 30px rgba(0, 0, 0, 0.6);
 }
 
 /* ═══════════════════════════
@@ -167,39 +161,38 @@
   gap: 10px;
 }
 
-/* User requirement: hover panna RED / CORAL color la theriya vendum (#e53170 / #f25f4c), text white */
+/* User requirement: Classic black and white monochrome */
 .sidebar-menu button:hover {
-  background: var(--accent-red) !important;
-  color: #fffffe !important;
-  transform: translateX(4px);
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+  transform: none;
 }
 
 .sidebar-menu button:hover svg {
-  color: #fffffe !important;
+  color: var(--text-primary) !important;
 }
 
 .sidebar-menu button:hover span {
-  color: #fffffe !important;
+  color: var(--text-primary) !important;
 }
 
-/* Selected active tab: Front la white (#fffffe) text, background Orange (#ff8906) button */
+/* Selected active tab: Classic monochrome */
 .sidebar-menu button.active {
   background: var(--btn-primary) !important;
   color: var(--btn-text) !important;
   font-weight: 800 !important;
   border-radius: var(--border-radius-md) !important;
-  box-shadow: 0 4px 14px rgba(255, 137, 6, 0.35) !important;
+  box-shadow: none !important;
   transform: none !important;
 }
 
-/* Selected active tab hover panna kooda red / coral theriya vendum */
 .sidebar-menu button.active:hover {
-  background: var(--accent-red) !important;
-  color: #fffffe !important;
+  background: var(--btn-primary) !important;
+  color: var(--btn-text) !important;
 }
 
 .sidebar-menu button.active svg {
-  color: #fffffe !important;
+  color: var(--btn-text) !important;
 }
 
 .menu-icon {
@@ -1910,95 +1903,87 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
   }
 
-  /* Horizontal swipeable pill navigation strip */
+  /* Mobile Off-canvas Slide-out Drawer */
   .admin-sidebar {
-    position: sticky !important;
-    top: 54px !important;
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
     left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
-    height: 50px !important;
-    min-height: 50px !important;
-    max-height: 50px !important;
-    flex-direction: row !important;
-    padding: 6px 8px !important;
-    gap: 0 !important;
-    border-right: none !important;
-    border-bottom: 1px solid var(--border-color) !important;
-    border-top: none !important;
-    z-index: 45 !important;
+    width: 280px !important;
+    max-width: 85vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    z-index: 100 !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: flex !important;
+    flex-direction: column !important;
     background: var(--bg-secondary) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: none !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45) !important;
+    padding: 20px 16px !important;
+    gap: 16px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    border-right: 1px solid var(--border-color) !important;
+    border-bottom: none !important;
   }
 
-  .admin-sidebar::-webkit-scrollbar {
-    display: none !important;
+  .admin-sidebar.mobile-open {
+    transform: translateX(0) !important;
   }
 
-  .admin-sidebar .sidebar-header,
+  .admin-sidebar .sidebar-header {
+    display: flex !important;
+  }
+
   .admin-sidebar .sidebar-footer {
-    display: none !important;
+    display: flex !important;
   }
 
   .admin-sidebar .sidebar-menu {
     display: flex !important;
-    flex-direction: row !important;
-    gap: 8px !important;
-    width: max-content !important;
-    align-items: center !important;
-    height: 100% !important;
-    overflow-x: visible !important;
-    padding: 0 4px !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 0 !important;
     margin: 0 !important;
   }
 
   .admin-sidebar .sidebar-menu button {
-    flex: 0 0 auto !important;
-    min-width: auto !important;
-    height: 36px !important;
-    min-height: 36px !important;
-    padding: 0 14px !important;
-    display: inline-flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 6px !important;
-    border-radius: 9999px !important;
-    border: 1.5px solid var(--border-color) !important;
-    font-size: 12px !important;
+    width: 100% !important;
+    border-radius: var(--border-radius-md) !important;
+    justify-content: space-between !important;
+    padding: 10px 14px !important;
+    border: none !important;
+    background: transparent !important;
+    color: var(--text-secondary) !important;
+    font-size: 13px !important;
     font-weight: 700 !important;
-    color: var(--text-primary) !important;
-    background: var(--bg-tertiary) !important;
-    white-space: nowrap !important;
-    transform: none !important;
+    height: auto !important;
+    min-height: 42px !important;
+    white-space: normal !important;
   }
 
   .admin-sidebar .sidebar-menu button:hover {
-    background: var(--btn-hover, #e53170) !important;
-    color: #fffffe !important;
-    border-color: var(--btn-hover, #e53170) !important;
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+    border-color: transparent !important;
     transform: none !important;
   }
 
   .admin-sidebar .sidebar-menu button.active {
-    color: #fffffe !important;
-    background: var(--btn-primary, #ff8906) !important;
-    border-color: var(--btn-primary, #ff8906) !important;
-    box-shadow: 0 2px 8px rgba(255, 137, 6, 0.35) !important;
+    color: var(--btn-text) !important;
+    background: var(--btn-primary) !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
   }
 
   .admin-sidebar .sidebar-menu button.active:hover {
-    background: var(--btn-hover, #e53170) !important;
-    border-color: var(--btn-hover, #e53170) !important;
-    color: #fffffe !important;
+    background: var(--btn-primary) !important;
+    color: var(--btn-text) !important;
   }
 
   /* Content view below sticky navigation */

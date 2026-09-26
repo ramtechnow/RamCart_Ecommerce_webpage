@@ -452,8 +452,8 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
             <svg viewBox={`0 0 ${chartWidth} 170`} width="100%" height="100%" preserveAspectRatio="none" style={{ overflow: 'visible' }}>
               <defs>
                 <linearGradient id="chart-area-grad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--accent-pink)" stopOpacity="0.4"/>
-                  <stop offset="100%" stopColor="var(--accent-pink)" stopOpacity="0.0"/>
+                  <stop offset="0%" stopColor="var(--text-primary)" stopOpacity="0.2"/>
+                  <stop offset="100%" stopColor="var(--text-primary)" stopOpacity="0.0"/>
                 </linearGradient>
               </defs>
               
@@ -466,12 +466,12 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
               <path d={areaPath} fill="url(#chart-area-grad)" />
 
               {/* Sleek Line Path */}
-              <path d={linePath} fill="none" stroke="var(--accent-pink)" strokeWidth="3" strokeLinecap="round" />
+              <path d={linePath} fill="none" stroke="var(--text-primary)" strokeWidth="3" strokeLinecap="round" />
 
               {/* Points & Labels */}
               {points.map((p, idx) => (
                 <g key={idx}>
-                  <circle cx={p.x} cy={p.y} r="5" fill="var(--bg-secondary)" stroke="var(--accent-pink)" strokeWidth="2.5" />
+                  <circle cx={p.x} cy={p.y} r="5" fill="var(--bg-secondary)" stroke="var(--text-primary)" strokeWidth="2.5" />
                   <text x={p.x} y={p.y - 12} fill="var(--text-primary)" fontSize="10" fontWeight="700" textAnchor="middle">
                     ₹{p.revenue >= 1000 ? `${(p.revenue / 1000).toFixed(1)}k` : p.revenue}
                   </text>
@@ -505,7 +505,7 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
                   <div style={{
                     width: `${(p.qty / maxQtySold) * 100}%`,
                     height: '100%',
-                    backgroundColor: 'var(--accent-pink)',
+                    backgroundColor: 'var(--text-primary)',
                     borderRadius: '50px'
                   }} />
                 </div>

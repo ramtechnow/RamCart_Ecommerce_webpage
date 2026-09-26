@@ -34,6 +34,7 @@ export const AdminPanel: React.FC = () => {
 
   // 2. Active Tab State
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // 3. Database State
   const [products, setProducts] = useState<any[]>([]);
@@ -268,6 +269,8 @@ export const AdminPanel: React.FC = () => {
         ordersCount={orders.length}
         couponsCount={coupons.length}
         bannersCount={banners.length}
+        isMobileOpen={mobileSidebarOpen}
+        onCloseMobile={() => setMobileSidebarOpen(false)}
       />
 
       {/* Primary Content Viewport */}
@@ -280,6 +283,7 @@ export const AdminPanel: React.FC = () => {
           onMarkAllRead={handleMarkAllNotificationsRead}
           onMarkSingleRead={handleMarkSingleNotificationRead}
           onProcessOrder={handleProcessOrder}
+          onToggleMobileSidebar={() => setMobileSidebarOpen(prev => !prev)}
         />
 
         {/* 3. Tab Body Panel */}

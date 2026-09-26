@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { User, Eye, Bell, CheckCheck, ShoppingBag, AlertCircle, X, ArrowRight, Sun, Moon } from 'lucide-react';
+import { User, Eye, Bell, CheckCheck, ShoppingBag, AlertCircle, X, ArrowRight, Sun, Moon, Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../../Context/ThemeContext';
 
@@ -8,7 +8,8 @@ export const AdminTopbar = ({
   notifications = [], 
   onMarkAllRead, 
   onMarkSingleRead, 
-  onProcessOrder 
+  onProcessOrder,
+  onToggleMobileSidebar
 }) => {
   const navigate = useNavigate();
   const themeCtx = useContext(ThemeContext);
@@ -17,21 +18,32 @@ export const AdminTopbar = ({
   const unreadCount = notifications.filter(n => n.unread).length;
 
   return (
-    <header className="admin-topbar sticky top-0 z-50 flex items-center justify-between px-6 w-full h-16 bg-white dark:bg-[#171622] border-b border-[#e2e4ed] dark:border-[#2e2d40] shadow-sm transition-colors duration-200">
-      {/* Left — Console Identity */}
-      <div className="flex items-center gap-4 flex-1">
+    <header className="admin-topbar sticky top-0 z-50 flex items-center justify-between px-4 sm:px-6 w-full h-16 bg-white dark:bg-[#121214] border-b border-zinc-200 dark:border-zinc-800 transition-colors duration-200">
+      {/* Left — Console Identity & Mobile Menu Toggle */}
+      <div className="flex items-center gap-3 flex-1">
+        {/* Mobile Hamburger Button */}
+        <button
+          type="button"
+          onClick={onToggleMobileSidebar}
+          aria-label="Open Admin Navigation Menu"
+          title="Open Menu"
+          className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer shadow-xs shrink-0"
+        >
+          <Menu size={18} />
+        </button>
+
         <div>
-          <h2 className="text-sm font-black text-[#ff8906] tracking-wider uppercase">
+          <h2 className="text-sm font-black text-zinc-900 dark:text-zinc-100 tracking-wider uppercase m-0 leading-none">
             ADMIN CONSOLE
           </h2>
-          <span className="text-[11px] text-[#717388] dark:text-[#a7a9be] font-semibold hidden sm:inline">
+          <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium hidden sm:inline-block mt-1">
             Manage Catalog, Accounts, and Real-time Orders
           </span>
         </div>
       </div>
 
       {/* Right Controls */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5 sm:gap-3">
         {/* Quick Dark / Light Theme Toggle Button */}
         {themeCtx && (
           <button
@@ -39,23 +51,19 @@ export const AdminTopbar = ({
             onClick={themeCtx.toggleTheme}
             aria-label="Toggle Theme Mode"
             title={themeCtx.isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            className="w-9 h-9 rounded-full flex items-center justify-center text-[#ff8906] hover:bg-[#ff8906] hover:text-[#fffffe] transition-all duration-200 cursor-pointer shadow-sm"
-            style={{
-              backgroundColor: 'var(--bg-tertiary, #eff0f6)',
-              border: '1px solid var(--border-color, #dbe3ee)'
-            }}
+            className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-800 dark:text-zinc-200 bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 transition-all duration-200 cursor-pointer shadow-xs shrink-0"
           >
-            {themeCtx.isDarkMode ? <Sun size={17} /> : <Moon size={17} />}
+            {themeCtx.isDarkMode ? <Sun size={16} /> : <Moon size={16} />}
           </button>
         )}
 
-        {/* Storefront CTA — Orange button with white text, red hover */}
+        {/* Storefront CTA — Classic monochrome button */}
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#ff8906] hover:bg-[#e53170] text-[#fffffe] text-xs font-bold rounded-xl transition-all duration-200 shadow-sm shadow-[#ff8906]/25 cursor-pointer border-none"
+          className="flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 bg-black hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-200 dark:text-black text-xs font-bold rounded-xl transition-all duration-200 shadow-xs cursor-pointer border-none"
         >
           <Eye size={14} />
-          <span>Storefront</span>
+          <span className="hidden sm:inline">Storefront</span>
         </button>
 
         {/* Notifications */}
@@ -64,16 +72,11 @@ export const AdminTopbar = ({
             onClick={() => setShowNotifications(prev => !prev)}
             aria-label="View Admin Notifications"
             title="Notifications"
-            className="relative w-9 h-9 rounded-full flex items-center justify-center transition-all duration-150 cursor-pointer shadow-sm"
-            style={{
-              backgroundColor: 'var(--bg-tertiary, #eff0f6)',
-              border: '1px solid var(--border-color, #dbe3ee)',
-              color: 'var(--text-primary, #0f0e17)'
-            }}
+            className="relative w-9 h-9 rounded-full flex items-center justify-center bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-800 transition-all duration-150 cursor-pointer shadow-xs shrink-0"
           >
-            <Bell size={17} />
+            <Bell size={16} />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-[#e53170] text-[#fffffe] text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-sm pointer-events-none z-10 animate-pulse">
+              <span className="absolute -top-1 -right-1 bg-black text-white dark:bg-white dark:text-black text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-xs pointer-events-none z-10 border border-white dark:border-black animate-pulse">
                 {unreadCount}
               </span>
             )}
@@ -82,7 +85,7 @@ export const AdminTopbar = ({
           {/* Backdrop for closing dropdown on click outside */}
           {showNotifications && (
             <div 
-              className="fixed inset-0 z-40 bg-black/20 sm:bg-transparent" 
+              className="fixed inset-0 z-40 bg-black/40 sm:bg-transparent" 
               onClick={() => setShowNotifications(false)} 
             />
           )}
@@ -90,26 +93,16 @@ export const AdminTopbar = ({
           {/* Notifications Dropdown */}
           {showNotifications && (
             <div 
-              className="fixed sm:absolute right-3 sm:right-0 top-16 sm:top-auto sm:mt-3 w-[calc(100vw-24px)] sm:w-80 max-w-[360px] max-h-[80vh] sm:max-h-96 rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden animate-fade-in"
-              style={{
-                backgroundColor: 'var(--bg-secondary, #ffffff)',
-                border: '1px solid var(--border-color, #dbe3ee)'
-              }}
+              className="fixed sm:absolute right-3 sm:right-0 top-16 sm:top-auto sm:mt-3 w-[calc(100vw-24px)] sm:w-80 max-w-[360px] max-h-[80vh] sm:max-h-96 rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden animate-fade-in bg-white dark:bg-[#121214] border border-zinc-200 dark:border-zinc-800"
             >
               {/* Header */}
-              <div 
-                className="flex items-center justify-between p-3.5 border-b"
-                style={{
-                  backgroundColor: 'var(--bg-tertiary, #eff0f6)',
-                  borderColor: 'var(--border-color, #dbe3ee)'
-                }}
-              >
+              <div className="flex items-center justify-between p-3.5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-extrabold" style={{ color: 'var(--text-primary, #0f0e17)' }}>
+                  <span className="text-xs font-black text-zinc-900 dark:text-zinc-100">
                     Notifications
                   </span>
                   {unreadCount > 0 && (
-                    <span className="text-[10px] font-bold bg-[#ff8906] text-[#fffffe] px-2 py-0.5 rounded-full shadow-xs">
+                    <span className="text-[10px] font-black bg-black text-white dark:bg-white dark:text-black px-2 py-0.5 rounded-full">
                       {unreadCount} new
                     </span>
                   )}
@@ -118,15 +111,14 @@ export const AdminTopbar = ({
                   {unreadCount > 0 && (
                     <button
                       onClick={onMarkAllRead}
-                      className="text-[#ff8906] hover:text-[#e53170] text-[10px] font-bold flex items-center gap-1 cursor-pointer bg-transparent border-none p-0"
+                      className="text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer bg-transparent border-none p-0 transition-colors"
                     >
                       <CheckCheck size={12} /> Clear All
                     </button>
                   )}
                   <button
                     onClick={() => setShowNotifications(false)}
-                    className="cursor-pointer bg-transparent border-none p-0 transition-colors"
-                    style={{ color: 'var(--text-muted, #717388)' }}
+                    className="cursor-pointer bg-transparent border-none p-0 transition-colors text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
                   >
                     <X size={15} />
                   </button>
@@ -134,12 +126,9 @@ export const AdminTopbar = ({
               </div>
 
               {/* Notification Items */}
-              <div 
-                className="overflow-y-auto flex-1 divide-y"
-                style={{ borderColor: 'var(--border-color, #dbe3ee)' }}
-              >
+              <div className="overflow-y-auto flex-1 divide-y divide-zinc-200 dark:divide-zinc-800">
                 {notifications.length === 0 ? (
-                  <div className="p-8 text-center text-xs font-medium" style={{ color: 'var(--text-muted, #717388)' }}>
+                  <div className="p-8 text-center text-xs text-zinc-400 dark:text-zinc-500 font-medium">
                     No recent order notifications
                   </div>
                 ) : (
@@ -147,29 +136,25 @@ export const AdminTopbar = ({
                     <div
                       key={n.id}
                       onClick={() => onMarkSingleRead && onMarkSingleRead(n.id)}
-                      className="p-3.5 flex flex-col gap-2 transition-all duration-150 cursor-pointer"
-                      style={{
-                        backgroundColor: n.unread ? 'var(--accent-light, rgba(255, 137, 6, 0.08))' : 'transparent',
-                        borderBottom: '1px solid var(--border-color, #dbe3ee)'
-                      }}
+                      className={`p-3.5 flex flex-col gap-2 transition-all duration-150 cursor-pointer ${
+                        n.unread 
+                          ? "bg-zinc-100/70 dark:bg-zinc-800/40" 
+                          : "hover:bg-zinc-50 dark:hover:bg-zinc-900/40"
+                      }`}
                     >
                       <div className="flex gap-2.5 items-start">
-                        <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                          n.type === 'order' 
-                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" 
-                            : "bg-red-500/10 text-[#e53170]"
-                        }`}>
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-zinc-200 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200">
                           {n.type === 'order' ? <ShoppingBag size={14} /> : <AlertCircle size={14} />}
                         </div>
 
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-center">
-                            <span className="text-[12px] font-bold truncate" style={{ color: 'var(--text-primary, #0f0e17)' }}>
+                            <span className="text-[12px] font-bold truncate text-zinc-900 dark:text-zinc-100">
                               {n.title}
                             </span>
-                            <span className="text-[9px]" style={{ color: 'var(--text-muted, #717388)' }}>{n.time}</span>
+                            <span className="text-[9px] text-zinc-400 dark:text-zinc-500">{n.time}</span>
                           </div>
-                          <p className="text-[11px] mt-1 leading-snug" style={{ color: 'var(--text-secondary, #4b5870)' }}>
+                          <p className="text-[11px] mt-1 leading-snug text-zinc-600 dark:text-zinc-400">
                             {n.message}
                           </p>
                         </div>
@@ -183,9 +168,9 @@ export const AdminTopbar = ({
                             setShowNotifications(false);
                             onProcessOrder && onProcessOrder(n.orderId);
                           }}
-                          className="self-end px-3 py-1 bg-[#ff8906] hover:bg-[#e53170] text-[#fffffe] text-[10px] font-bold rounded-lg flex items-center gap-1 cursor-pointer border-none shadow-sm transition-all"
+                          className="self-end px-3 py-1 bg-black text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200 text-[10px] font-bold rounded-lg flex items-center gap-1 cursor-pointer border-none shadow-xs transition-all"
                         >
-                          Process & Ship <ArrowRight size={10} />
+                          Process &amp; Ship <ArrowRight size={10} />
                         </button>
                       )}
                     </div>
@@ -196,35 +181,20 @@ export const AdminTopbar = ({
           )}
         </div>
 
-        {/* Profile Capsule — Crisp high-contrast surface, bold username & distinct role badge */}
+        {/* Profile Capsule — Classic Black and White */}
         {(() => {
           const displayName = adminUser?.name || adminUser?.username || (adminUser?.email ? adminUser.email.split('@')[0] : 'Admin');
           const initial = displayName ? displayName.charAt(0).toUpperCase() : 'A';
           return (
-            <div 
-              className="flex items-center gap-2 pl-1.5 pr-3 py-1 rounded-full shadow-sm"
-              style={{
-                backgroundColor: 'var(--bg-tertiary, #eff0f6)',
-                border: '1px solid var(--border-color, #dbe3ee)'
-              }}
-            >
-              <div 
-                className="w-7 h-7 rounded-full text-white flex items-center justify-center text-xs font-black shadow-sm shrink-0"
-                style={{ background: 'linear-gradient(135deg, #ff8906 0%, #e53170 100%)' }}
-              >
+            <div className="flex items-center gap-2 pl-1 pr-2.5 sm:pr-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs">
+              <div className="w-7 h-7 rounded-full bg-black text-white dark:bg-white dark:text-black flex items-center justify-center text-xs font-black shadow-xs shrink-0">
                 {initial}
               </div>
-              <div className="flex flex-col min-w-0">
-                <span 
-                  className="text-xs font-black max-w-[120px] truncate leading-tight tracking-tight"
-                  style={{ color: 'var(--text-primary, #0f0e17)' }}
-                >
+              <div className="hidden sm:flex flex-col min-w-0">
+                <span className="text-xs font-black text-zinc-900 dark:text-zinc-100 max-w-[110px] truncate leading-tight tracking-tight">
                   {displayName}
                 </span>
-                <span 
-                  className="text-[9px] font-extrabold uppercase tracking-wider leading-none mt-0.5"
-                  style={{ color: 'var(--accent-color, #ff8906)' }}
-                >
+                <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 leading-none mt-0.5">
                   {adminUser?.role === 'admin' ? 'Root Admin' : 'Admin'}
                 </span>
               </div>
@@ -235,4 +205,5 @@ export const AdminTopbar = ({
     </header>
   );
 };
+
 export default AdminTopbar;
