@@ -32,12 +32,18 @@ export const AdminTopbar = ({
           <Menu size={18} />
         </button>
 
-        <div>
-          <h2 className="text-sm font-black text-zinc-900 dark:text-zinc-100 tracking-wider uppercase m-0 leading-none">
-            ADMIN CONSOLE
-          </h2>
+        <div className="flex flex-col min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 shadow-sm shadow-orange-500/50 animate-pulse shrink-0"></span>
+            <h2 className="text-sm font-black text-zinc-900 dark:text-zinc-100 tracking-wider uppercase m-0 leading-none flex items-center gap-1.5">
+              <span>ADMIN CONSOLE</span>
+              <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-md bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400 border border-orange-500/20">
+                Live
+              </span>
+            </h2>
+          </div>
           <span className="text-[11px] text-zinc-500 dark:text-zinc-400 font-medium hidden sm:inline-block mt-1">
-            Manage Catalog, Accounts, and Real-time Orders
+            Manage Catalog, Accounts, and Real-Time Orders
           </span>
         </div>
       </div>
@@ -181,20 +187,20 @@ export const AdminTopbar = ({
           )}
         </div>
 
-        {/* Profile Capsule — Classic Black and White */}
+        {/* Profile Capsule */}
         {(() => {
           const displayName = adminUser?.name || adminUser?.username || (adminUser?.email ? adminUser.email.split('@')[0] : 'Admin');
           const initial = displayName ? displayName.charAt(0).toUpperCase() : 'A';
           return (
             <div className="flex items-center gap-2 pl-1 pr-2.5 sm:pr-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs">
-              <div className="w-7 h-7 rounded-full bg-black text-white dark:bg-white dark:text-black flex items-center justify-center text-xs font-black shadow-xs shrink-0">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-white flex items-center justify-center text-xs font-black shadow-xs shrink-0">
                 {initial}
               </div>
               <div className="hidden sm:flex flex-col min-w-0">
                 <span className="text-xs font-black text-zinc-900 dark:text-zinc-100 max-w-[110px] truncate leading-tight tracking-tight">
                   {displayName}
                 </span>
-                <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 leading-none mt-0.5">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400 leading-none mt-0.5">
                   {adminUser?.role === 'admin' ? 'Root Admin' : 'Admin'}
                 </span>
               </div>

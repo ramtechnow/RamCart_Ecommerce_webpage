@@ -123,14 +123,17 @@ export const AdminSidebar = ({
         {/* ─── Brand Header ─────────────────────────────────────── */}
         <div className="sidebar-header px-1 mb-4 pb-3 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-black text-white dark:bg-white dark:text-black flex items-center justify-center font-black text-lg shadow-sm shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 via-orange-500 to-orange-600 text-white flex items-center justify-center font-black text-lg shadow-md shadow-orange-500/25 shrink-0">
               R
             </div>
             <div className="flex flex-col min-w-0 justify-center">
-              <h1 className="text-[15px] font-black tracking-tight leading-snug whitespace-nowrap block m-0 p-0 text-zinc-900 dark:text-zinc-100">
-                RamCart Admin
+              <h1 className="text-[15px] font-black tracking-tight leading-snug whitespace-nowrap block m-0 p-0 text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                <span>RamCart</span>
+                <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-orange-500/10 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400 border border-orange-500/20 uppercase tracking-wider">
+                  Admin
+                </span>
               </h1>
-              <span className="text-[10px] font-bold uppercase tracking-wider block mt-0.5 text-zinc-500 dark:text-zinc-400">
+              <span className="text-[10px] font-bold uppercase tracking-wider block mt-0.5 text-orange-600/90 dark:text-orange-400/90">
                 Management Console
               </span>
             </div>
@@ -203,7 +206,7 @@ export const AdminSidebar = ({
         <div className="sidebar-footer mt-auto pt-3 border-t border-zinc-200 dark:border-zinc-800 flex flex-col gap-2.5">
           {/* User Profile Capsule */}
           <div className="flex items-center gap-3 px-2.5 py-2 bg-zinc-100 dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800">
-            <div className="w-8 h-8 rounded-full bg-black text-white dark:bg-white dark:text-black flex items-center justify-center font-black text-xs shrink-0 shadow-xs">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-xs">
               {user?.name ? (
                 user.name.charAt(0).toUpperCase()
               ) : (
@@ -217,9 +220,9 @@ export const AdminSidebar = ({
               <div className="flex items-center gap-1">
                 <ShieldCheck
                   size={12}
-                  className="text-zinc-500 dark:text-zinc-400 shrink-0"
+                  className="text-orange-600 dark:text-orange-400 shrink-0"
                 />
-                <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider truncate">
+                <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wider truncate">
                   {user?.role === 'admin' ? 'Root Admin' : 'Admin'}
                 </span>
               </div>
