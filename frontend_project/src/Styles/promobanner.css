@@ -1,436 +1,338 @@
-/* Full-width carousel container */
-.promo-wrapper {
+/* ============================================================
+   FLIPKART STYLE MULTI-CARD CAROUSEL (Mobile & Laptop)
+   Matches Flipkart BBD Banner Design with Peeking & Pill Indicators
+   ============================================================ */
+
+.flipkart-carousel-wrapper {
   width: 100%;
+  max-width: 1440px;
+  margin: 12px auto 24px;
   position: relative;
-  margin-bottom: var(--space-8);
+  overflow: hidden;
+  user-select: none;
+  --slide-step: calc(48% + 16px);
 }
 
-/* Demo notice bar */
-.demo-bar {
-  background-color: var(--text-primary);
-  color: #fff;
-  font-size: 11px;
-  font-weight: 600;
-  text-align: center;
-  padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+.flipkart-carousel-viewport {
   width: 100%;
+  overflow: hidden;
+  padding: 4px 16px 8px;
   box-sizing: border-box;
+}
+
+.flipkart-carousel-track {
+  display: flex;
+  transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
+}
+
+/* Individual Flipkart Banner Card */
+.flipkart-banner-card {
+  flex-shrink: 0;
+  width: 48%;
+  margin-right: 16px;
+  aspect-ratio: 16 / 8.5;
+  min-height: 260px;
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  background-color: #0f1115;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.flipkart-banner-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+}
+
+.flipkart-banner-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.5s ease;
+  z-index: 1;
+}
+
+.flipkart-banner-card:hover .flipkart-banner-img {
+  transform: scale(1.02);
+}
+
+/* Dark gradient overlay so text is 100% readable over any photo */
+.flipkart-banner-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(15, 17, 21, 0.85) 0%,
+    rgba(15, 17, 21, 0.55) 50%,
+    rgba(15, 17, 21, 0.15) 100%
+  );
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Banner Content Text & Offer Badges */
+.flipkart-banner-content {
+  position: relative;
+  z-index: 3;
+  padding: clamp(16px, 3vw, 28px);
+  max-width: 65%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #ffffff;
+}
+
+/* Yellow / Blue Early Bird Badge */
+.flipkart-badge-earlybird {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #facc15, #eab308);
+  color: #1e1b4b;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.flipkart-badge-discount {
+  display: inline-flex;
+  align-items: center;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
   letter-spacing: 0.3px;
 }
 
-/* Carousel shell */
-.hero-carousel {
-  position: relative;
-  width: 100%;
-  height: clamp(280px, 48vw, 500px);
-  overflow: hidden;
-}
-
-/* Single hero slide */
-.hero-slide {
-  width: 100%;
-  height: clamp(280px, 48vw, 500px);
-  background-size: cover;
-  background-position: center top; /* Keeps faces in upper half of banner from getting cut off */
-  display: flex;
-  align-items: center;
-  padding: 0 clamp(20px, 6vw, 80px);
-  box-sizing: border-box;
-  color: #fff;
-}
-
-/* Carousel track container and track */
-.carousel-track {
-  display: flex;
-  width: 100%;
-  height: 100%;
-  transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-.carousel-slide {
-  flex-shrink: 0;
-  width: 100%;
-  height: 100%;
-}
-
-/* Hero text block */
-.hero-content {
-  max-width: 540px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  position: relative;
-  z-index: 2;
-}
-
-/* Tag / label */
-.hero-tag {
-  color: var(--accent-pink);
+/* Headline */
+.flipkart-banner-title {
+  font-size: clamp(16px, 2.2vw, 24px);
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 2.5px;
-  font-size: 11px;
-}
-
-/* Promo offer tag (from DB banners) */
-.hero-promo-tag {
-  color: #fff;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  font-size: 11px;
-  background-color: var(--accent-pink);
-  padding: 3px 10px;
-  border-radius: 3px;
-  align-self: flex-start;
-}
-
-/* Main headline */
-.hero-title {
-  font-size: clamp(20px, 3.2vw, 36px);
-  font-weight: 800;
-  color: #fff;
-  line-height: 1.15;
+  line-height: 1.25;
+  color: #ffffff;
   margin: 0;
-  letter-spacing: -0.3px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  letter-spacing: -0.2px;
 }
 
-/* Subline */
-.hero-subtitle {
-  color: rgba(255, 255, 255, 0.80);
-  font-size: 14px;
-  margin: 0;
-  line-height: 1.55;
-}
-
-/* CTA row */
-.hero-cta-row {
-  display: flex;
-  gap: 10px;
-  margin-top: 8px;
-  flex-wrap: wrap;
-}
-
-.hero-btn {
-  height: 44px;
-  min-height: 0 !important; /* Overrides base.css min-height 44px */
-  padding: 0 24px;
-  border-radius: var(--border-radius-full);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
+/* Bank Offer Strip (like Flipkart Axis / ICICI Bank) */
+.flipkart-bank-strip {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  white-space: nowrap;
-  border: none;
-  transition: transform 0.2s, box-shadow 0.2s;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 4px 10px;
+  border-radius: 6px;
+  width: fit-content;
+  margin-top: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.bank-pill {
+  font-size: 9px;
+  font-weight: 800;
+  color: #991b1b;
+  border-right: 1px solid #d1d5db;
+  padding-right: 6px;
+  text-transform: uppercase;
   letter-spacing: 0.2px;
 }
 
-.hero-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+.bank-text {
+  font-size: 9px;
+  font-weight: 700;
+  color: #18181b;
 }
 
-.hero-btn-primary {
-  background-color: var(--accent-pink);
-  color: #fff;
-}
-
-.hero-btn-ghost {
-  background-color: rgba(255, 255, 255, 0.18);
-  color: #fff;
-  border: 1.5px solid rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(4px);
-}
-
-/* Arrow navigation */
-.carousel-arrow {
+/* AD / Sponsored chip */
+.flipkart-ad-tag {
   position: absolute;
-  top: 50%;
+  bottom: 12px;
+  right: 14px;
+  z-index: 3;
+  font-size: 9px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.65);
+  background: rgba(0, 0, 0, 0.4);
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+}
+
+/* ─── Flipkart Signature Pill Indicators ─── */
+.flipkart-indicators {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.flipkart-indicator-dot {
+  height: 4px;
+  border-radius: 4px;
+  background-color: #d1d5db;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+.dark-theme .flipkart-indicator-dot,
+.dark .flipkart-indicator-dot {
+  background-color: #3f3f46;
+}
+
+.flipkart-indicator-dot.active {
+  width: 32px !important;
+  background-color: #000000;
+}
+
+.dark-theme .flipkart-indicator-dot.active,
+.dark .flipkart-indicator-dot.active {
+  background-color: #ffffff;
+}
+
+.flipkart-indicator-dot.inactive {
+  width: 8px;
+}
+
+.flipkart-indicator-dot:hover:not(.active) {
+  background-color: #9ca3af;
+}
+
+/* ─── Floating Desktop Navigation Arrows ─── */
+.flipkart-nav-arrow {
+  position: absolute;
+  top: 48%;
   transform: translateY(-50%);
-  z-index: 10;
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: none;
-  background-color: rgba(255, 255, 255, 0.20);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.95);
+  color: #09090b;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  backdrop-filter: blur(8px);
-  transition: background-color 0.2s;
-}
-
-.carousel-arrow:hover {
-  background-color: rgba(255, 255, 255, 0.38);
-}
-
-.carousel-arrow-left  { left: 16px; }
-.carousel-arrow-right { right: 16px; }
-
-/* Dot indicators */
-.carousel-dots {
-  position: absolute;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 6px;
   z-index: 10;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  backdrop-filter: blur(6px);
 }
 
-.carousel-dot {
-  height: 6px;
-  width: 6px;
-  border-radius: 3px;
-  border: none;
-  cursor: pointer;
-  background-color: rgba(255, 255, 255, 0.4);
-  padding: 0;
-  transition: width 0.3s ease, background-color 0.3s ease;
+.flipkart-nav-arrow:hover {
+  background: #ffffff;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
-.carousel-dot.active {
-  width: 20px;
-  background-color: #fff;
+.flipkart-nav-arrow.prev {
+  left: 20px;
 }
 
-/* ── Mobile ─────────────────────────────────────────────── */
-@media (max-width: 768px) {
-  .hero-carousel,
-  .hero-slide {
-    height: clamp(220px, 55vw, 300px);
-  }
-
-  .hero-content { max-width: 88%; gap: 7px; }
-  .hero-title { font-size: clamp(18px, 5.5vw, 26px); }
-  .hero-subtitle { display: none; }
-  .hero-btn { height: 38px; padding: 0 16px; font-size: 12px; }
-  .carousel-arrow { width: 32px; height: 32px; }
-  .carousel-arrow-left  { left: 8px; }
-  .carousel-arrow-right { right: 8px; }
+.flipkart-nav-arrow.next {
+  right: 20px;
 }
 
-@media (max-width: 480px) {
-  .hero-carousel,
-  .hero-slide { height: 240px; }
-  .demo-bar { font-size: 10px; padding: 6px 10px; }
-  .demo-bar svg { display: none; }
-  .hero-content { max-width: 92%; gap: 4px; }
-  .hero-title { font-size: clamp(12px, 3.5vw, 15px); line-height: 1.25; font-weight: 700; }
-  .hero-promo-tag, .hero-tag { font-size: 8.5px; padding: 2px 6px; letter-spacing: 1px; }
-  .hero-btn { height: 30px; padding: 0 10px; font-size: 10px; }
-  .carousel-arrow { display: none; }
-}
-
-/* ============================================================
-   React Bootstrap Carousel Override Styles
-   ============================================================ */
-.carousel {
+/* Loading Skeleton */
+.flipkart-skeleton-card {
   width: 100%;
-  height: clamp(280px, 48vw, 500px);
-}
-
-.carousel-inner {
-  width: 100%;
-  height: 100%;
-}
-
-.carousel-item {
-  width: 100%;
-  height: 100%;
-}
-
-.hero-slide {
-  height: 100% !important; /* Let parent carousel control height */
-}
-
-/* Indicators/Dots override */
-.carousel-indicators {
-  margin-bottom: 16px !important;
-  gap: 6px !important;
-  z-index: 15 !important;
-}
-
-.carousel-indicators [data-bs-target] {
-  box-sizing: content-box;
-  flex: 0 1 auto;
-  width: 6px !important;
-  height: 6px !important;
-  min-height: 0 !important; /* Overrides base.css button min-height 44px */
-  padding: 0 !important;
-  margin-right: 3px !important;
-  margin-left: 3px !important;
-  text-indent: -999px;
-  cursor: pointer;
-  background-color: rgba(255, 255, 255, 0.4) !important;
-  background-clip: padding-box;
-  border: none !important;
-  border-radius: 50% !important;
-  transition: width 0.3s ease, background-color 0.3s ease !important;
-  opacity: 0.7 !important;
-}
-
-.carousel-indicators .active {
-  width: 20px !important;
-  border-radius: 3px !important;
-  background-color: #fff !important;
-  opacity: 1 !important;
-}
-
-/* Prev/Next arrows override */
-.carousel-control-prev,
-.carousel-control-next {
-  width: 40px !important;
-  height: 40px !important;
-  border-radius: 50% !important;
-  background-color: rgba(255, 255, 255, 0.20) !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
-  opacity: 0.85 !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-  transition: all 0.2s !important;
-  margin: 0 16px !important;
-}
-
-.carousel-control-prev:hover,
-.carousel-control-next:hover {
-  background-color: rgba(255, 255, 255, 0.38) !important;
-  opacity: 1 !important;
-  transform: translateY(-50%) scale(1.08) !important;
-}
-
-.carousel-control-prev-icon,
-.carousel-control-next-icon {
-  width: 18px !important;
-  height: 18px !important;
-  background-size: 100% !important;
-}
-
-/* Mobile responsive carousel overrides */
-@media (max-width: 768px) {
-  .carousel {
-    height: clamp(220px, 55vw, 300px) !important;
-  }
-  .carousel-control-prev,
-  .carousel-control-next {
-    width: 32px !important;
-    height: 32px !important;
-    margin: 0 8px !important;
-  }
-  .carousel-control-prev-icon,
-  .carousel-control-next-icon {
-    width: 12px !important;
-    height: 12px !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .carousel {
-    height: 240px !important;
-  }
-  .carousel-control-prev,
-  .carousel-control-next {
-    display: none !important;
-  }
-}
-
-/* ── Shimmer Loader Skeleton for Banners ── */
-.hero-slide-skeleton {
-  width: 100%;
-  height: clamp(280px, 48vw, 500px);
-  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-tertiary) 50%, var(--bg-secondary) 75%);
+  height: 260px;
+  border-radius: 18px;
+  background: linear-gradient(90deg, rgba(200, 200, 200, 0.15) 25%, rgba(200, 200, 200, 0.3) 50%, rgba(200, 200, 200, 0.15) 75%);
   background-size: 200% 100%;
-  animation: shimmerAnim 1.6s infinite linear;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 0 clamp(20px, 6vw, 80px);
-  box-sizing: border-box;
-  gap: 14px;
 }
 
-@keyframes shimmerAnim {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
+/* ─── RESPONSIVE BREAKPOINTS (Matching User Screenshots) ─── */
 
-.shimmer-line {
-  background: rgba(120, 120, 120, 0.12);
-  border-radius: 4px;
-  position: relative;
-  overflow: hidden;
-}
+/* 1. Desktop / Laptop (Screenshot 5: 2.2 cards visible at once) */
+@media (min-width: 1024px) {
+  .flipkart-carousel-wrapper {
+    --slide-step: calc(48% + 16px);
+  }
 
-.shimmer-line::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
-  transform: translateX(-100%);
-  animation: shimmerLineAnim 1.4s infinite;
-}
-
-@keyframes shimmerLineAnim {
-  100% { transform: translateX(100%); }
-}
-
-.tag-shimmer {
-  width: 150px;
-  height: 12px;
-}
-
-.title-shimmer-1 {
-  width: 380px;
-  max-width: 80%;
-  height: 32px;
-}
-
-.title-shimmer-2 {
-  width: 260px;
-  max-width: 60%;
-  height: 32px;
-}
-
-.subtitle-shimmer {
-  width: 440px;
-  max-width: 90%;
-  height: 14px;
-  margin-top: 6px;
-}
-
-.btn-shimmer-row {
-  display: flex;
-  gap: 12px;
-  margin-top: 10px;
-}
-
-.btn-shimmer {
-  width: 120px;
-  height: 38px;
-  border-radius: 20px;
-}
-
-@media (max-width: 768px) {
-  .hero-slide-skeleton {
-    height: clamp(220px, 55vw, 300px);
+  .flipkart-banner-card {
+    width: 48%;
+    margin-right: 16px;
+    min-height: 260px;
   }
 }
 
-@media (max-width: 480px) {
-  .hero-slide-skeleton {
-    height: 240px;
+/* 2. Tablet View */
+@media (min-width: 641px) and (max-width: 1023px) {
+  .flipkart-carousel-wrapper {
+    --slide-step: calc(72% + 14px);
+  }
+
+  .flipkart-banner-card {
+    width: 72%;
+    margin-right: 14px;
+    min-height: 230px;
+  }
+}
+
+/* 3. Mobile View (Screenshots 1-4: 1 full card + peeking edge) */
+@media (max-width: 640px) {
+  .flipkart-carousel-wrapper {
+    margin: 8px auto 16px;
+    --slide-step: calc(88vw + 12px);
+  }
+
+  .flipkart-carousel-viewport {
+    padding: 2px 12px 6px;
+  }
+
+  .flipkart-banner-card {
+    width: 88vw;
+    margin-right: 12px;
+    min-height: 180px;
+    border-radius: 16px;
+  }
+
+  .flipkart-banner-content {
+    max-width: 85%;
+    padding: 14px;
+    gap: 6px;
+  }
+
+  .flipkart-banner-title {
+    font-size: 15px;
+    line-height: 1.25;
+  }
+
+  .flipkart-bank-strip {
+    padding: 3px 8px;
+    margin-top: 2px;
+  }
+
+  .bank-pill, .bank-text {
+    font-size: 8px;
+  }
+
+  .flipkart-nav-arrow {
+    display: none; /* Mobile uses natural touch swipe gesture */
+  }
+
+  .flipkart-indicators {
+    margin-top: 8px;
   }
 }
