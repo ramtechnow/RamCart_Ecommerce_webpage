@@ -308,39 +308,15 @@ export const AdminPanel: React.FC = () => {
           )}
 
           {fetchError && !fetchingData && (
-            <div style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px",
-              padding: "24px",
-              backgroundColor: "#fef2f2",
-              border: "1px solid #fecaca",
-              borderRadius: "16px",
-              marginBottom: "24px"
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "#ef4444" }}>
+            <div className="admin-fetch-error" role="alert">
+              <div className="admin-fetch-error-title">
                 <AlertCircle size={20} />
                 <strong style={{ fontSize: "0.95rem" }}>Database Fetch Error</strong>
               </div>
-              <p style={{ margin: 0, fontSize: "0.85rem", color: "#7f1d1d", lineHeight: "1.5" }}>
-                {fetchError}.
-              </p>
+              <p className="admin-fetch-error-message">{fetchError}.</p>
               <button
+                className="admin-fetch-error-retry"
                 onClick={fetchAllAdminData}
-                style={{
-                  alignSelf: "flex-start",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "8px 16px",
-                  backgroundColor: "#ef4444",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "var(--border-radius-full)",
-                  fontSize: "0.8rem",
-                  fontWeight: "700",
-                  cursor: "pointer"
-                }}
               >
                 <RefreshCw size={12} />
                 Retry connection
