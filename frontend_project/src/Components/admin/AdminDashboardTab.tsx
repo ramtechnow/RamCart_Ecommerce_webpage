@@ -239,9 +239,9 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
       </div>
       
       {/* STATS METRIC GRID */}
-      <div className="metrics-grid" style={{ 
+      <div className="metrics-grid admin-metrics-grid" style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', 
         gap: '24px',
         marginBottom: '32px' 
       }}>
@@ -427,9 +427,9 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
       )}
 
       {/* REVENUE LINE CHART & BEST-SELLER SPLIT */}
-      <div style={{
+      <div className="admin-charts-grid" style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 380px), 1fr))',
         gap: '24px',
         marginBottom: '32px'
       }}>
@@ -516,9 +516,9 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
       </div>
 
       {/* CATEGORY DONUT CHART & QUICK ACTION TILES */}
-      <div style={{
+      <div className="admin-subcharts-grid" style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
         gap: '24px',
         marginBottom: '32px'
       }}>
@@ -709,9 +709,9 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
       </div>
 
       {/* SYSTEM LOGS & RECENT ORDERS TABLE */}
-      <div style={{
+      <div className="admin-tables-grid" style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))',
         gap: '24px'
       }}>
         {/* Recent Orders Overview */}

@@ -1978,7 +1978,25 @@
   }
 
   .admin-topbar {
-    min-height: 48px;
+    min-height: 56px;
+    padding-inline: 12px !important;
+  }
+
+  /* Responsive Admin Dashboard Grids: single-column clean stacking on mobile */
+  .admin-metrics-grid,
+  .admin-charts-grid,
+  .admin-subcharts-grid,
+  .admin-tables-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .admin-panel table th,
+  .admin-panel table td {
+    padding: 10px 8px !important;
+    font-size: 0.75rem !important;
+    white-space: nowrap;
   }
 }
 

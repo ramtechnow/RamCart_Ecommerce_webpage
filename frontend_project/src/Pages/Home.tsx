@@ -127,12 +127,12 @@ export const Home: React.FC = () => {
       {/* Mobile Horizontal categories scroll (Flipkart style) */}
       <div className="mobile-categories-scroll">
         {categories.map((cat) => (
-          <Link to={`/${cat.name.toLowerCase()}s`} key={cat.id} className="mob-cat-pill">
+          <Link to={cat.link || `/${cat.id === "kid" ? "kids" : cat.id + "s"}`} key={cat.id} className="mob-cat-pill">
             <div className="mob-cat-img-wrapper">
               <img src={cat.image} alt={cat.name} className="mob-cat-img" />
             </div>
             <span className="mob-cat-name">
-              {cat.name === "kid" ? "Kids" : cat.name.charAt(0).toUpperCase() + cat.name.slice(1).toLowerCase()}
+              {cat.name}
             </span>
           </Link>
         ))}

@@ -43,21 +43,25 @@ export const adminService = {
     const res = await fetch(`${BACKEND_URL}/allproducts`);
     if (!res.ok) throw new Error("Failed to fetch products");
     const data = await res.json();
-    return data.map((p: any) => ({
-      id: String(p.id),
-      name: p.name || "",
-      description: p.description || `Premium quality ${p.name} from RamCart.`,
-      category: p.category || "men",
-      newPrice: Number(p.new_price || 0),
-      oldPrice: Number(p.old_price || 0),
-      sizes: p.sizes || [],
-      colors: p.colors || [],
-      variants: p.variants || [],
-      stockCount: Number(p.stockCount || 0),
-      image: p.image || "",
-      available: p.available !== false,
-      createdAt: p.date
-    }));
+    return data.map((p: any) => {
+      const rawCat = (p.category || "").toLowerCase().trim();
+      const normCat = (rawCat === "kid" || rawCat === "kids") ? "kids" : rawCat || "men";
+      return {
+        id: String(p.id),
+        name: p.name || "",
+        description: p.description || `Premium quality ${p.name} from RamCart.`,
+        category: normCat,
+        newPrice: Number(p.new_price || 0),
+        oldPrice: Number(p.old_price || 0),
+        sizes: p.sizes || [],
+        colors: p.colors || [],
+        variants: p.variants || [],
+        stockCount: Number(p.stockCount || 0),
+        image: p.image || "",
+        available: p.available !== false,
+        createdAt: p.date
+      };
+    });
   },
 
   async addProduct(productData: Omit<Product, "id" | "createdAt">): Promise<void> {

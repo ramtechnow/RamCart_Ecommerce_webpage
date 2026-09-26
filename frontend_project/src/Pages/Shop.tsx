@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useParams } from "react-router-dom";
 import ProductCard from "../Components/ProductCard";
 import PromoBanner from "../Components/PromoBanner";
 import { fetchProducts } from "../features/catalog/services/productService";
@@ -16,9 +16,24 @@ const AVAILABLE_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const AVAILABLE_COLORS = ['Black', 'White', 'Navy', 'Beige', 'Charcoal', 'Red', 'Blue', 'Green', 'Pink'];
 const ITEMS_PER_PAGE = 8;
 
+const normalizeCatSlug = (val?: string | null): string => {
+  if (!val) return "all";
+  const s = val.toLowerCase().trim();
+  if (s === "kid" || s === "kids") return "kids";
+  if (s === "men" || s === "mens") return "men";
+  if (s === "women" || s === "womens") return "women";
+  return s;
+};
+
 export const Shop: React.FC<ShopProps> = ({ category = "all" }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const params = useParams<{ categorySlug?: string }>();
+
+  // Determine active category from route param (/category/:categorySlug), query param (?category=...), or prop
+  const routeCategoryParam = params.categorySlug || searchParams.get("category");
+  const initialCategory = normalizeCatSlug(routeCategoryParam || category);
+
   const searchParamQuery = searchParams.get("search") || "";
   const suggestionRef = useRef<HTMLDivElement>(null);
 
@@ -27,7 +42,7 @@ export const Shop: React.FC<ShopProps> = ({ category = "all" }) => {
   const [loading, setLoading] = useState(true);
 
   // Filter and Search States
-  const [selectedCategory, setSelectedCategory] = useState(category);
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -53,11 +68,12 @@ export const Shop: React.FC<ShopProps> = ({ category = "all" }) => {
     }
   }, [searchParamQuery]);
 
-  // Sync category prop with state
+  // Sync category prop or route param with state
   useEffect(() => {
-    setSelectedCategory(category);
+    const active = normalizeCatSlug(params.categorySlug || searchParams.get("category") || category);
+    setSelectedCategory(active);
     setCurrentPage(1); // reset to page 1 on category change
-  }, [category]);
+  }, [category, params.categorySlug, searchParams]);
 
   // Load products with auto-retry on cold start
   const [retryCount, setRetryCount] = useState(0);
@@ -116,15 +132,16 @@ export const Shop: React.FC<ShopProps> = ({ category = "all" }) => {
 
   // Handle category navigation/clicks
   const handleCategoryChange = (newCat: string) => {
-    setSelectedCategory(newCat);
+    const normalized = normalizeCatSlug(newCat);
+    setSelectedCategory(normalized);
     setCurrentPage(1);
-    if (newCat === "all") {
+    if (normalized === "all") {
       navigate("/catalog");
-    } else if (newCat === "men") {
+    } else if (normalized === "men") {
       navigate("/mens");
-    } else if (newCat === "women") {
+    } else if (normalized === "women") {
       navigate("/womens");
-    } else if (newCat === "kid") {
+    } else if (normalized === "kids") {
       navigate("/kids");
     }
   };
