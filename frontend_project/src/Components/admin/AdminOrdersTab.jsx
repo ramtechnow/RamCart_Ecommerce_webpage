@@ -74,6 +74,7 @@ export const AdminOrdersTab = ({
     let processing = 0;
     let shipped = 0;
     let delivered = 0;
+    let cancelled = 0;
 
     if (Array.isArray(orders)) {
       orders.forEach((o) => {
@@ -83,10 +84,11 @@ export const AdminOrdersTab = ({
         else if (status === 'Processing') processing++;
         else if (status === 'Shipped') shipped++;
         else if (status === 'Delivered') delivered++;
+        else if (status === 'Cancelled') cancelled++;
       });
     }
 
-    return { pending, processing, shipped, delivered };
+    return { pending, processing, shipped, delivered, cancelled };
   }, [orders]);
 
   // 2. Anomaly Alert detection (e.g. orders pending/processing for more than 48 hours)
@@ -124,6 +126,7 @@ export const AdminOrdersTab = ({
         if (statusFilter === 'Pending') statusMatch = orderStatus === 'Pending';
         else if (statusFilter === 'Processing') statusMatch = orderStatus === 'Processing';
         else if (statusFilter === 'Shipped') statusMatch = orderStatus === 'Shipped' || orderStatus === 'Delivered';
+        else if (statusFilter === 'Cancelled') statusMatch = orderStatus === 'Cancelled';
       }
 
       return searchMatch && statusMatch;
@@ -273,7 +276,7 @@ export const AdminOrdersTab = ({
       <div className="bg-[#ffffff] dark:bg-[#171622] rounded-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden flex flex-col transition-colors duration-200">
         <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex flex-col sm:flex-row justify-between items-center gap-4 bg-zinc-50 dark:bg-zinc-900/40">
           <div className="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1.5 sm:pb-0">
-            {["All", "Pending", "Processing", "Shipped"].map((status) => (
+            {["All", "Pending", "Processing", "Shipped", "Cancelled"].map((status) => (
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
@@ -380,17 +383,26 @@ export const AdminOrdersTab = ({
 
                       {/* Fulfillment Status badge */}
                       <td className="p-4 align-middle">
-                        <span className={`inline-block px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide border ${
-                          o.status === "Delivered"
-                            ? "bg-emerald-100 text-emerald-950 dark:bg-emerald-950 dark:text-emerald-100 border-emerald-500" 
-                            : o.status === "Shipped"
-                              ? "bg-purple-100 text-purple-950 dark:bg-purple-950 dark:text-purple-100 border-purple-500"
-                              : o.status === "Processing"
-                                ? "bg-blue-100 text-blue-950 dark:bg-blue-950 dark:text-blue-100 border-blue-500"
-                                : "bg-amber-100 text-amber-950 dark:bg-amber-950 dark:text-amber-100 border-amber-500"
-                        }`}>
-                          {o.status || "Ordered"}
-                        </span>
+                        <div className="flex flex-col gap-0.5">
+                          <span className={`inline-block px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide border ${
+                            o.status === "Delivered"
+                              ? "bg-emerald-100 text-emerald-950 dark:bg-emerald-950 dark:text-emerald-100 border-emerald-500" 
+                              : o.status === "Shipped"
+                                ? "bg-purple-100 text-purple-950 dark:bg-purple-950 dark:text-purple-100 border-purple-500"
+                                : o.status === "Processing"
+                                  ? "bg-blue-100 text-blue-950 dark:bg-blue-950 dark:text-blue-100 border-blue-500"
+                                  : o.status === "Cancelled"
+                                    ? "bg-red-100 text-red-950 dark:bg-red-950 dark:text-red-100 border-red-500"
+                                    : "bg-amber-100 text-amber-950 dark:bg-amber-950 dark:text-amber-100 border-amber-500"
+                          }`}>
+                            {o.status || "Ordered"}
+                          </span>
+                          {o.status === "Cancelled" && (
+                            <span className="text-[9px] text-red-600 dark:text-red-400 font-bold tracking-tight">
+                              Refund in progress
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       {/* Actions */}
@@ -405,17 +417,26 @@ export const AdminOrdersTab = ({
                             <Eye size={12} />
                           </button>
 
-                          <select
-                            value={o.status}
-                            disabled={o.status === "Delivered" || updatingOrderId === o._id}
-                            onChange={(e) => handleUpdateStatus(o._id, e.target.value)}
-                            className="h-8 px-2 rounded-lg border border-[#e2e4ed] dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] text-[10px] font-bold outline-none cursor-pointer text-[#0f0e17] dark:text-[#fffffe]"
-                          >
-                            <option value="Pending">Ordered</option>
-                            <option value="Processing">Processing</option>
-                            <option value="Shipped">Shipped</option>
-                            <option value="Delivered">Delivered</option>
-                          </select>
+                          {o.status === "Cancelled" ? (
+                            <span 
+                              className="inline-flex items-center px-2 py-1 rounded-lg text-[10px] font-black bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 whitespace-nowrap"
+                              title="Order is cancelled. Refund process is active (3-5 business days). Status cannot be altered."
+                            >
+                              Refund Process Initiated
+                            </span>
+                          ) : (
+                            <select
+                              value={o.status}
+                              disabled={o.status === "Delivered" || updatingOrderId === o._id}
+                              onChange={(e) => handleUpdateStatus(o._id, e.target.value)}
+                              className="h-8 px-2 rounded-lg border border-[#e2e4ed] dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] text-[10px] font-bold outline-none cursor-pointer text-[#0f0e17] dark:text-[#fffffe]"
+                            >
+                              <option value="Pending">Ordered</option>
+                              <option value="Processing">Processing</option>
+                              <option value="Shipped">Shipped</option>
+                              <option value="Delivered">Delivered</option>
+                            </select>
+                          )}
 
                           {updatingOrderId === o._id ? (
                             <Loader2 size={12} className="animate-spin text-black dark:text-white" />
@@ -437,7 +458,23 @@ export const AdminOrdersTab = ({
                     {isExpanded && (
                       <tr className="bg-gray-50/50 dark:bg-[#212030]/20">
                         <td colSpan="7" className="p-5">
-                          <div className="bg-[#ffffff] dark:bg-[#171622] border border-[#e2e4ed]/30 dark:border-white/10 rounded-2xl p-4 shadow-sm animate-slide-down flex flex-col md:flex-row gap-5">
+                          <div className="bg-[#ffffff] dark:bg-[#171622] border border-[#e2e4ed]/30 dark:border-white/10 rounded-2xl p-4 shadow-sm animate-slide-down flex flex-col gap-4">
+                            {o.status === "Cancelled" && (
+                              <div className="p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 rounded-xl text-xs text-red-700 dark:text-red-300 flex items-center justify-between">
+                                <div>
+                                  <span className="font-extrabold">🛑 Order Cancelled:</span> Customer refund process is active (typically 3–5 business days to original payment method).
+                                  {o.cancellationReason && (
+                                    <div className="text-[11px] mt-1 text-red-600 dark:text-red-400 font-semibold">
+                                      Cancellation Reason: {o.cancellationReason}
+                                    </div>
+                                  )}
+                                </div>
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-red-100 text-red-800 dark:bg-red-900/60 dark:text-red-200 uppercase">
+                                  Status Locked
+                                </span>
+                              </div>
+                            )}
+                            <div className="flex flex-col md:flex-row gap-5">
                             
                             {/* Shipping address details */}
                             <div className="flex-1">
@@ -480,8 +517,8 @@ export const AdminOrdersTab = ({
                                 })}
                               </div>
                             </div>
-
                           </div>
+                        </div>
                         </td>
                       </tr>
                     )}

@@ -69,7 +69,11 @@ export const ProductDetail: React.FC = () => {
           );
           setActiveImage(cleanImgs[0] || prod.image || "");
           
-          if (prod.colors && prod.colors.length > 0) setSelectedColor(prod.colors[0]);
+          if (prod.colors && prod.colors.length > 0) {
+            setSelectedColor(prod.colors[0]);
+          } else if (prod.variants && prod.variants.length > 0 && prod.variants[0]?.color) {
+            setSelectedColor(prod.variants[0].color);
+          }
           
           // Load related products
           const related = await fetchRelatedProducts(prod.category, prod.id);
@@ -98,40 +102,71 @@ export const ProductDetail: React.FC = () => {
     if (!product) return [];
     const P = product.newPrice || 243;
 
-    // If explicit variants exist in database
-    if (product.variants && product.variants.length > 0) {
-      return product.variants.map((v) => ({
-        size: v.size,
-        price: v.price && v.price > 0 ? v.price : P,
-        inStock: v.stock > 0,
-        chest: v.size === "S" ? '38"' : v.size === "M" ? '40"' : v.size === "L" ? '42"' : '44"',
-        length: '29"',
-        shoulder: '18"'
-      }));
+    // 1. Check if explicit variants with sizes exist in database
+    const variantsWithSize = (product.variants || []).filter(
+      (v) => v && typeof v.size === "string" && v.size.trim() !== ""
+    );
+    if (variantsWithSize.length > 0) {
+      return variantsWithSize.map((v) => {
+        const s = v.size.trim();
+        return {
+          size: s,
+          price: v.price && v.price > 0 ? v.price : P,
+          inStock: v.stock === undefined || v.stock > 0,
+          chest: s === "S" ? '38"' : s === "M" ? '40"' : s === "L" ? '42"' : '44"',
+          length: '29"',
+          shoulder: '18"'
+        };
+      });
     }
 
-    // Standard Indian apparel size-tier pricing matching user request
+    // 2. If product has explicit sizes array
+    if (product.sizes && Array.isArray(product.sizes) && product.sizes.length > 0) {
+      return product.sizes.map((s) => {
+        const sizeStr = String(s).trim();
+        return {
+          size: sizeStr,
+          price: P,
+          inStock: product.stockCount === undefined || product.stockCount > 0,
+          chest: sizeStr === "S" ? '38"' : sizeStr === "M" ? '40"' : sizeStr === "L" ? '42"' : '44"',
+          length: '29"',
+          shoulder: '18"'
+        };
+      });
+    }
+
+    // 3. Standard Indian apparel size-tier pricing matching catalog
     return [
-      { size: "XXS", price: Math.max(1, Math.round(P * 0.73)), inStock: false, chest: '34"', length: '26"', shoulder: '15.5"' },
       { size: "S", price: Math.max(1, Math.round(P * 0.98)), inStock: true, chest: '38"', length: '28"', shoulder: '17.0"' },
       { size: "M", price: P, inStock: true, chest: '40"', length: '29"', shoulder: '18.0"' },
       { size: "L", price: Math.round(P * 1.04), inStock: true, chest: '42"', length: '30"', shoulder: '19.0"' },
       { size: "XL", price: Math.round(P * 1.06), inStock: true, chest: '44"', length: '31"', shoulder: '20.0"' },
-      { size: "XXL", price: Math.round(P * 1.08), inStock: true, chest: '46"', length: '32"', shoulder: '21.0"' },
-      { size: "XXXL", price: Math.round(P * 1.40), inStock: true, chest: '48"', length: '33"', shoulder: '22.0"' },
-      { size: "4XL", price: Math.round(P * 1.40), inStock: true, chest: '50"', length: '34"', shoulder: '23.0"' },
+      { size: "XXL", price: Math.round(P * 1.08), inStock: true, chest: '46"', length: '32"', shoulder: '21.0"' }
     ];
+  }, [product]);
+
+  // Available colors list from product or its variants
+  const availableColors = useMemo(() => {
+    if (!product) return [];
+    if (product.colors && Array.isArray(product.colors) && product.colors.length > 0) {
+      return product.colors.filter(Boolean);
+    }
+    if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
+      const cols = product.variants.map((v) => v.color).filter(Boolean);
+      if (cols.length > 0) return Array.from(new Set(cols));
+    }
+    return [];
   }, [product]);
 
   // Determine whether to display size chart (hide for Free Size / single size items)
   const isFreeSize = useMemo(() => {
     if (!product) return false;
-    if (product.variants && product.variants.length === 1) {
-      const s = product.variants[0].size.toLowerCase().trim();
+    if (product.variants && product.variants.length === 1 && product.variants[0]?.size) {
+      const s = String(product.variants[0].size).toLowerCase().trim();
       if (s.includes("free") || s.includes("one") || s === "fs" || s === "na") return true;
     }
-    if (product.sizes && product.sizes.length === 1) {
-      const s = product.sizes[0].toLowerCase().trim();
+    if (product.sizes && product.sizes.length === 1 && product.sizes[0]) {
+      const s = String(product.sizes[0]).toLowerCase().trim();
       if (s.includes("free") || s.includes("one") || s === "fs" || s === "na") return true;
     }
     return false;
@@ -209,25 +244,96 @@ export const ProductDetail: React.FC = () => {
 
   if (!product) {
     return (
-      <div className="rc-pdp-container" style={{ textAlign: "center", padding: "64px 0" }}>
-        <h2>Product Not Found</h2>
-        <p style={{ color: "var(--text-muted)", marginTop: "8px" }}>The requested item could not be retrieved from the catalog.</p>
-        <button 
-          onClick={() => navigate("/catalog")}
-          style={{
-            marginTop: "20px",
-            background: "var(--accent-pink)",
-            color: "#fff",
-            border: "none",
-            padding: "10px 24px",
-            borderRadius: "6px",
-            fontWeight: "700",
-            cursor: "pointer"
-          }}
-        >
-          Browse All Products
-        </button>
-      </div>
+      <main className="rc-pdp-container" style={{ minHeight: "65vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 16px" }}>
+        <div style={{
+          maxWidth: "540px",
+          width: "100%",
+          textAlign: "center",
+          backgroundColor: "var(--bg-secondary)",
+          border: "1px solid var(--border-color)",
+          borderRadius: "24px",
+          padding: "48px 24px",
+          boxShadow: "0 12px 32px rgba(0,0,0,0.06)"
+        }}>
+          <div style={{
+            width: "68px",
+            height: "68px",
+            borderRadius: "50%",
+            backgroundColor: "rgba(239, 68, 68, 0.12)",
+            color: "#ef4444",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            marginBottom: "20px"
+          }}>
+            <Store size={34} />
+          </div>
+
+          <div style={{
+            display: "inline-block",
+            padding: "4px 14px",
+            borderRadius: "999px",
+            backgroundColor: "rgba(239, 68, 68, 0.12)",
+            color: "#dc2626",
+            fontSize: "0.75rem",
+            fontWeight: "900",
+            letterSpacing: "0.6px",
+            textTransform: "uppercase",
+            marginBottom: "14px"
+          }}>
+            404 Error • Product Not Found
+          </div>
+
+          <h2 style={{ fontSize: "1.6rem", fontWeight: "900", margin: "0 0 10px 0", color: "var(--text-primary)" }}>
+            Product #{productId} Is Unavailable
+          </h2>
+
+          <p style={{ color: "var(--text-secondary)", fontSize: "0.92rem", lineHeight: "1.6", margin: "0 0 28px 0" }}>
+            We could not find an active product with ID <strong>#{productId}</strong>. This item may have been discontinued, removed by the store manager, or the URL might contain a typo.
+          </p>
+
+          <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
+            <button 
+              type="button"
+              onClick={() => navigate("/catalog")}
+              style={{
+                backgroundColor: "var(--accent-color, #ff8906)",
+                color: "#ffffff",
+                border: "none",
+                padding: "12px 28px",
+                borderRadius: "999px",
+                fontWeight: "800",
+                fontSize: "0.85rem",
+                cursor: "pointer",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "8px",
+                boxShadow: "0 4px 14px rgba(255, 137, 6, 0.3)"
+              }}
+            >
+              <ShoppingCart size={16} />
+              Browse All Products
+            </button>
+
+            <button 
+              type="button"
+              onClick={() => navigate("/")}
+              style={{
+                backgroundColor: "transparent",
+                color: "var(--text-primary)",
+                border: "1px solid var(--border-color)",
+                padding: "12px 24px",
+                borderRadius: "999px",
+                fontWeight: "700",
+                fontSize: "0.85rem",
+                cursor: "pointer"
+              }}
+            >
+              Back to Home
+            </button>
+          </div>
+        </div>
+      </main>
     );
   }
 
@@ -411,6 +517,28 @@ export const ProductDetail: React.FC = () => {
               </span>
             </div>
           </div>
+
+          {/* Color Selection Card (if multiple colors available) */}
+          {availableColors.length > 1 && (
+            <div className="rc-pdp-card">
+              <h3 className="rc-pdp-size-title" style={{ marginBottom: "12px" }}>
+                Select Color: <span style={{ color: "var(--accent-pink, #f25f4c)", fontWeight: "800" }}>{selectedColor}</span>
+              </h3>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                {availableColors.map((col) => (
+                  <button
+                    key={col}
+                    type="button"
+                    onClick={() => setSelectedColor(col)}
+                    className={`rc-pdp-size-pill ${selectedColor === col ? "active" : ""}`}
+                    style={{ padding: "8px 18px", cursor: "pointer" }}
+                  >
+                    {col}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Select Size Card with Individual Prices and Out-of-Stock strike-out */}
           <div className="rc-pdp-card">

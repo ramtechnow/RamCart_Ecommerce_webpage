@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Product = require('../models/Product');
 
 // Add a new product (Admin Only)
@@ -100,6 +101,65 @@ exports.getAllProducts = async (req, res) => {
     res.send(updatedProducts);
   } catch (error) {
     console.error("Error fetching products:", error);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+// Get single product by ID (numeric id or MongoDB _id)
+exports.getProductById = async (req, res) => {
+  try {
+    const rawId = req.params.id;
+    const isNum = !isNaN(Number(rawId));
+    const isValidObjectId = mongoose.Types.ObjectId.isValid(rawId);
+
+    const conditions = [];
+    if (isNum) conditions.push({ id: Number(rawId) });
+    if (isValidObjectId) conditions.push({ _id: rawId });
+
+    if (conditions.length === 0) {
+      return res.status(404).json({ success: false, error: "Invalid product ID format" });
+    }
+
+    const prod = await Product.findOne({ $or: conditions });
+    if (!prod) {
+      return res.status(404).json({ success: false, error: "Product not found" });
+    }
+
+    const host = req.get('host');
+    const protocol = host.includes('localhost') || host.includes('127.0.0.1') || host.includes('192.168.') || host.includes('10.') ? req.protocol : 'https';
+    const prodObj = prod.toObject();
+
+    if (prodObj.image && prodObj.image.includes('/images/')) {
+      const imageName = prodObj.image.split('/images/')[1];
+      prodObj.image = `${protocol}://${host}/images/${imageName}`;
+    }
+
+    if (prodObj.images && Array.isArray(prodObj.images)) {
+      prodObj.images = prodObj.images.map(img => {
+        if (img && img.includes('/images/')) {
+          const imgName = img.split('/images/')[1];
+          return `${protocol}://${host}/images/${imgName}`;
+        }
+        return img;
+      });
+    }
+
+    // Synthesize variants for legacy documents if empty
+    if (!prodObj.variants || prodObj.variants.length === 0) {
+      const colors = prodObj.colors && prodObj.colors.length > 0 ? prodObj.colors : ['Black', 'White'];
+      const totalStock = prodObj.stockCount !== undefined ? prodObj.stockCount : 100;
+      const stockPerColor = Math.floor(totalStock / colors.length);
+      
+      prodObj.variants = colors.map((c, idx) => ({
+        color: c,
+        stock: idx === colors.length - 1 ? totalStock - (stockPerColor * (colors.length - 1)) : stockPerColor,
+        price: prodObj.new_price
+      }));
+    }
+
+    res.json({ success: true, product: prodObj });
+  } catch (error) {
+    console.error("Error fetching product by ID:", error);
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };

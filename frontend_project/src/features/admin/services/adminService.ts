@@ -334,5 +334,85 @@ export const adminService = {
       body: JSON.stringify({ bannerId })
     });
     if (!res.ok) throw new Error("Failed to delete banner");
+  },
+
+  // ── Coupons Management ───────────────────────────────────────────────────
+  async fetchCoupons(): Promise<AdminCoupon[]> {
+    const token = localStorage.getItem("auth-token");
+    const res = await fetch(`${BACKEND_URL}/admin/coupons`, {
+      headers: { "auth-token": token || "" }
+    });
+    if (!res.ok) throw new Error("Failed to fetch coupons");
+    const data = await res.json();
+    return data.coupons || data || [];
+  },
+
+  async createCoupon(couponData: {
+    code: string;
+    discountType: "percentage" | "flat";
+    discountValue: number | string;
+    minOrderAmount?: number | string;
+    maxUses?: number | string;
+    expiresAt?: string | null;
+  }): Promise<any> {
+    const token = localStorage.getItem("auth-token");
+    const payload = {
+      code: String(couponData.code).trim().toUpperCase(),
+      discountType: couponData.discountType || "percentage",
+      discountValue: Number(couponData.discountValue),
+      minOrderAmount: Number(couponData.minOrderAmount || 0),
+      maxUses: Number(couponData.maxUses || 0),
+      expiresAt: couponData.expiresAt && String(couponData.expiresAt).trim() !== "" 
+        ? new Date(couponData.expiresAt).toISOString() 
+        : null
+    };
+
+    const res = await fetch(`${BACKEND_URL}/admin/coupons/create`, {
+      method: "POST",
+      headers: {
+        "auth-token": token || "",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) {
+      throw new Error(data.error || "Failed to create coupon");
+    }
+    return data.coupon;
+  },
+
+  async toggleCoupon(couponId: string): Promise<any> {
+    const token = localStorage.getItem("auth-token");
+    const res = await fetch(`${BACKEND_URL}/admin/coupons/toggle`, {
+      method: "POST",
+      headers: {
+        "auth-token": token || "",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ couponId })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) {
+      throw new Error(data.error || "Failed to toggle coupon");
+    }
+    return data.coupon;
+  },
+
+  async deleteCoupon(couponId: string): Promise<void> {
+    const token = localStorage.getItem("auth-token");
+    const res = await fetch(`${BACKEND_URL}/admin/coupons/delete`, {
+      method: "POST",
+      headers: {
+        "auth-token": token || "",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ couponId })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) {
+      throw new Error(data.error || "Failed to delete coupon");
+    }
   }
 };

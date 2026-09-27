@@ -319,12 +319,18 @@ export const Orders: React.FC = () => {
                             <XCircle size={18} />
                           </div>
                           <div>
-                            <p className="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">
-                              Order Cancelled
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">
+                                Order Cancelled
+                              </p>
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 font-bold border border-red-200 dark:border-red-800">
+                                Refund Process Initiated
+                              </span>
+                            </div>
                             <p className="text-[11px] text-text-muted mt-0.5">
                               {order.cancellationReason ? `Reason: ${order.cancellationReason} • ` : ""}
                               {order.cancelledAt ? new Date(order.cancelledAt).toLocaleString() : "This order has been cancelled."}
+                              {" • Refund of ₹" + order.amount + " will reflect in 3–5 business days."}
                             </p>
                           </div>
                         </div>

@@ -318,6 +318,14 @@ exports.updateOrderStatus = async (req, res) => {
       return res.status(404).json({ success: false, error: "Order not found" });
     }
 
+    // Safety: If order has already been cancelled, do not allow changing its status
+    if (prevOrder.status === "Cancelled") {
+      return res.status(400).json({ 
+        success: false, 
+        error: "This order is cancelled and refund processing is active. Cancelled order status cannot be modified." 
+      });
+    }
+
     const updatedOrder = await Order.findByIdAndUpdate(
       orderId,
       { $set: { status, notificationSeen: false } },

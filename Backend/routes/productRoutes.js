@@ -6,6 +6,9 @@ const { fetchAdmin } = require('../middleware/auth');
 // Public route to get all products
 router.get('/allproducts', productController.getAllProducts);
 
+// Public route to get single product by ID (numeric or ObjectId)
+router.get('/product/:id', productController.getProductById);
+
 // Admin route to add a product
 router.post('/addproduct', fetchAdmin, productController.addProduct);
 
