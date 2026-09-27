@@ -362,7 +362,58 @@ async function sendEmail(email, subject, html) {
     return { success: false, error: 'Invalid recipient email' };
   }
 
-  // Resolve host to direct IPv4 to completely bypass Linux container IPv6 ENETUNREACH issues on cloud hosts
+  // 1. Check for HTTPS Relay / Google Apps Script Webhook (Port 443 - never blocked by Render)
+  const webhookUrl = process.env.EMAIL_WEBHOOK_URL || process.env.MAIL_RELAY_URL;
+  if (webhookUrl) {
+    try {
+      const resp = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: email,
+          subject: subject,
+          html: html,
+          from: user,
+          fromName: 'RamCart Support'
+        })
+      });
+      if (resp.ok) {
+        console.log(`✉️ Email successfully dispatched via HTTPS Relay to ${email}`);
+        return { success: true, messageId: 'https-relay-ok' };
+      }
+    } catch (relayErr) {
+      console.warn('⚠️ HTTPS Relay delivery attempt failed, falling back to SMTP:', relayErr.message);
+    }
+  }
+
+  // 2. Check for Resend HTTPS API (Port 443)
+  const resendApiKey = process.env.RESEND_API_KEY;
+  if (resendApiKey) {
+    try {
+      const resp = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: process.env.RESEND_FROM || `RamCart <onboarding@resend.dev>`,
+          to: [email],
+          subject: subject,
+          html: html
+        })
+      });
+      const data = await resp.json();
+      if (resp.ok && data.id) {
+        console.log(`✉️ Email successfully dispatched via Resend HTTPS API to ${email}. ID: ${data.id}`);
+        return { success: true, messageId: data.id };
+      }
+    } catch (resendErr) {
+      console.warn('⚠️ Resend HTTPS API failed, falling back to SMTP:', resendErr.message);
+    }
+  }
+
+  // 3. Resolve host to direct IPv4 to bypass container IPv6 ENETUNREACH issues
   let targetHost = host;
   try {
     const dns = require('dns').promises;
@@ -381,9 +432,9 @@ async function sendEmail(email, subject, html) {
       port: targetPort,
       secure: isSecure,
       auth: { user, pass },
-      connectionTimeout: 15000,
-      greetingTimeout: 15000,
-      socketTimeout: 15000,
+      connectionTimeout: 8000,
+      greetingTimeout: 8000,
+      socketTimeout: 8000,
       tls: {
         servername: host, // Preserves hostname for TLS SNI validation
         rejectUnauthorized: false
