@@ -362,12 +362,13 @@ async function sendEmail(email, subject, html) {
     return { success: false, error: 'Invalid recipient email' };
   }
 
-  // Helper to create transport with specified port and secure setting
+  // Helper to create transport with specified port, secure setting, and IPv4 enforcement
   const createTransporter = (targetPort, isSecure) => {
     return nodemailer.createTransport({
       host,
       port: targetPort,
       secure: isSecure,
+      family: 4, // Explicitly force IPv4 resolution to eliminate ENETUNREACH errors on Render cloud
       auth: { user, pass },
       connectionTimeout: 15000,
       greetingTimeout: 15000,
