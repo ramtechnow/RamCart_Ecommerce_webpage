@@ -369,6 +369,7 @@ async function sendEmail(email, subject, html) {
       const resp = await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        redirect: 'follow',
         body: JSON.stringify({
           to: email,
           subject: subject,
