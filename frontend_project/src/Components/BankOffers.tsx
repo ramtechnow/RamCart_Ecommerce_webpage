@@ -169,7 +169,7 @@ export const BankOffers: React.FC<BankOffersProps> = ({ offers = [] }) => {
           </div>
         </div>
 
-        {/* Carousel Navigation Buttons (Flipkart/Amazon Style) */}
+        {/* Carousel Navigation Buttons (RamCart Offer Strip) */}
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <button
             type="button"

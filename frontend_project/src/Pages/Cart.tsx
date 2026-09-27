@@ -218,7 +218,7 @@ export const Cart: React.FC = () => {
             {/* Secure note */}
             <div style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }}>
               <ShieldCheck size={14} style={{ color: "var(--rating-green)", flexShrink: 0 }} />
-              <span>Secure simulated transaction (demo only)</span>
+              <span>100% Encrypted SSL Checkout &amp; Safe Transactions</span>
             </div>
           </div>
         </div>

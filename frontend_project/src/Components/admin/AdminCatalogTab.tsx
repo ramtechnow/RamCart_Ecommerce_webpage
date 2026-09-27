@@ -199,10 +199,6 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
     }
   };
 
-  const handleReplaceClick = (idx: number) => {
-    setReplaceIndex(idx);
-    document.getElementById(`edit-image-input-file-${editForm?.id}`)?.click();
-  };
 
   const handleDeleteImage = (idx: number) => {
     if (!editForm) return;
@@ -214,6 +210,20 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
     });
     addToast("Image removed", "info");
   };
+
+  const handleMoveEditImage = (fromIdx: number, toIdx: number) => {
+    if (!editForm || toIdx < 0 || toIdx >= editForm.images.length) return;
+    const updated = [...editForm.images];
+    const item = updated.splice(fromIdx, 1)[0];
+    updated.splice(toIdx, 0, item);
+    setEditForm({
+      ...editForm,
+      images: updated,
+      image: updated[0] || ""
+    });
+  };
+
+  const IMAGE_ROLES = ["1. Front", "2. Back", "3. Side", "4. Detail", "5. Additional"];
 
   const handleSaveEdit = async (id: string) => {
     if (!editForm) return;
@@ -352,6 +362,38 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
         </div>
       </div>
 
+      {/* Laptop-friendly Sticky Quick-Save Bar when editing */}
+      {editingProductId && editForm && (
+        <div className="sticky top-2 z-30 mb-3 p-3 px-4 rounded-xl bg-amber-500/10 border-2 border-[#388E3C] flex items-center justify-between flex-wrap gap-3 shadow-lg backdrop-blur-md bg-white/95 dark:bg-zinc-900/95">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#388E3C] animate-pulse"></span>
+            <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+              Editing: <span className="text-[#e53170] dark:text-[#ff8906] font-black">{editForm.name || "Untitled"}</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button 
+              type="button" 
+              disabled={savingProductId === editingProductId}
+              onClick={() => handleSaveEdit(editingProductId)}
+              className="px-4 py-2 bg-[#388E3C] hover:bg-[#2E7D32] text-white text-xs font-black rounded-xl flex items-center gap-1.5 transition-all shadow-md cursor-pointer border-none"
+            >
+              {savingProductId === editingProductId ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+              Save Changes
+            </button>
+            <button 
+              type="button" 
+              disabled={savingProductId === editingProductId}
+              onClick={() => setEditingProductId(null)}
+              className="px-3.5 py-2 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-all cursor-pointer border-none"
+            >
+              <X size={14} />
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Audit Data Table */}
       <div className="bg-white dark:bg-[#121214] rounded-2xl shadow-sm border border-zinc-200 dark:border-zinc-800 overflow-hidden flex flex-col transition-colors duration-200">
         <div className="overflow-x-auto">
@@ -364,7 +406,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                 <th className="p-4 w-72">Stock Control (Inline)</th>
                 <th className="p-4 w-28">New Price</th>
                 <th className="p-4 w-28">Old Price</th>
-                <th className="p-4 w-44 text-right">Actions</th>
+                <th className="p-4 w-44 text-right sticky right-0 z-20 bg-zinc-50 dark:bg-zinc-900 shadow-[-4px_0_8px_rgba(0,0,0,0.06)]">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -393,41 +435,59 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                       {isEditing && editForm ? (
                         <div className="flex flex-col gap-2 justify-center items-center">
                           {/* Image Thumbnail Grid */}
-                          <div className="flex flex-wrap gap-1.5 justify-center max-w-[120px]">
-                            {editForm.images.map((img, idx) => (
-                              <div 
-                                key={idx} 
-                                className={`relative w-8 h-10 rounded overflow-hidden border ${
-                                  idx === 0 ? "border-black dark:border-white border-2" : "border-[#e2e4ed]/60"
-                                } group`}
+                          <div className="flex flex-col gap-1 items-center max-w-[140px]">
+                            <div className="flex flex-wrap gap-1.5 justify-center">
+                              {editForm.images.map((img, idx) => {
+                                const role = IMAGE_ROLES[idx] || `${idx + 1}. View`;
+                                return (
+                                  <div 
+                                    key={idx} 
+                                    className={`relative w-12 h-14 rounded overflow-hidden border ${
+                                      idx === 0 ? "border-black dark:border-white border-2" : "border-[#e2e4ed]/60"
+                                    } group flex flex-col justify-between`}
+                                  >
+                                    <img src={img} alt={role} className="absolute inset-0 w-full h-full object-cover" />
+                                    <span className="relative z-10 bg-black/80 text-[7px] text-white font-bold px-1 py-0.5 self-start">
+                                      {role.split(" ")[1] || "View"}
+                                    </span>
+                                    <div className="relative z-10 flex items-center justify-between p-0.5 bg-black/70">
+                                      <button
+                                        type="button"
+                                        disabled={idx === 0}
+                                        onClick={() => handleMoveEditImage(idx, idx - 1)}
+                                        className="text-[8px] text-white p-0.5 disabled:opacity-30 cursor-pointer border-none bg-transparent"
+                                      >
+                                        &larr;
+                                      </button>
+                                      <button 
+                                        type="button" 
+                                        onClick={() => handleDeleteImage(idx)} 
+                                        className="text-red-400 hover:text-red-300 p-0.5 cursor-pointer border-none bg-transparent"
+                                      >
+                                        <Trash2 size={8} />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        disabled={idx === editForm.images.length - 1}
+                                        onClick={() => handleMoveEditImage(idx, idx + 1)}
+                                        className="text-[8px] text-white p-0.5 disabled:opacity-30 cursor-pointer border-none bg-transparent"
+                                      >
+                                        &rarr;
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                              {/* Upload New thumbnail trigger */}
+                              <button
+                                type="button"
+                                onClick={() => { setReplaceIndex(null); document.getElementById(`edit-image-input-file-${prod.id}`)?.click(); }}
+                                className="w-12 h-14 border border-dashed border-zinc-400 dark:border-zinc-600 rounded flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white cursor-pointer bg-[#ffffff] dark:bg-[#212030]"
+                                title="Add another view"
                               >
-                                <img src={img} alt={`Preview ${idx}`} className="w-full h-full object-cover" />
-                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex items-center justify-center gap-1">
-                                  <button 
-                                    type="button" 
-                                    onClick={() => handleReplaceClick(idx)} 
-                                    className="p-0.5 bg-[#eff0f6] text-zinc-900 rounded-full hover:bg-white cursor-pointer"
-                                  >
-                                    <Pencil size={8} />
-                                  </button>
-                                  <button 
-                                    type="button" 
-                                    onClick={() => handleDeleteImage(idx)} 
-                                    className="p-0.5 bg-red-600 text-white rounded-full hover:bg-red-700 cursor-pointer"
-                                  >
-                                    <Trash2 size={8} />
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                            {/* Upload New thumbnail trigger */}
-                            <button
-                              type="button"
-                              onClick={() => { setReplaceIndex(null); document.getElementById(`edit-image-input-file-${prod.id}`)?.click(); }}
-                              className="w-8 h-10 border border-dashed border-zinc-400 dark:border-zinc-600 rounded flex items-center justify-center text-zinc-700 dark:text-zinc-300 hover:border-black dark:hover:border-white cursor-pointer bg-[#ffffff] dark:bg-[#212030]"
-                            >
-                              <Plus size={12} />
-                            </button>
+                                <Plus size={14} />
+                              </button>
+                            </div>
                           </div>
 
                           <input 
@@ -560,25 +620,32 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                     {/* Stock Control */}
                     <td className="p-4 align-middle">
                       {isEditing && editForm ? (
-                        <div className="flex flex-col gap-1.5 max-h-40 overflow-y-auto pr-1">
+                        <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto pr-1">
+                          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">Size / Stock / Price (₹)</span>
                           {editForm.variants.map((v, idx) => (
-                            <div key={idx} className="flex items-center gap-2 border-b border-[#e2e4ed]/30 dark:border-white/5 pb-1.5">
-                              <span className="w-2.5 h-2.5 rounded-full border border-gray-400" style={{ backgroundColor: v.color.toLowerCase() }}></span>
-                              <span className="text-[11px] font-black text-zinc-900 dark:text-zinc-100 min-w-[60px]">{v.color}/{v.size}</span>
-                              <input 
-                                type="text" 
-                                value={v.sku || ""}
-                                placeholder="SKU Code"
-                                onChange={(e) => handleVariantFieldChange(idx, "sku", e.target.value.toUpperCase())}
-                                className="flex-1 px-2.5 py-1 text-[11px] font-bold font-mono rounded border-2 border-zinc-200 dark:border-zinc-700 bg-[#ffffff] dark:bg-[#212030] text-[#0f0e17] dark:text-white placeholder-zinc-400"
-                              />
+                            <div key={idx} className="flex items-center gap-1.5 border-b border-[#e2e4ed]/30 dark:border-white/5 pb-1.5">
+                              <span className="text-[11px] font-black text-zinc-900 dark:text-zinc-100 min-w-[50px]">{v.size}</span>
                               <input 
                                 type="number" 
                                 value={v.stock}
+                                title="Available Stock"
+                                placeholder="Units"
                                 onChange={(e) => handleVariantFieldChange(idx, "stock", Math.max(0, Number(e.target.value)))}
                                 min="0"
-                                className="w-16 px-2 py-1 text-[11px] font-bold rounded border-2 border-zinc-200 dark:border-zinc-700 bg-[#ffffff] dark:bg-[#212030] text-[#0f0e17] dark:text-white"
+                                className="w-16 px-1.5 py-1 text-[11px] font-bold rounded border-2 border-zinc-200 dark:border-zinc-700 bg-[#ffffff] dark:bg-[#212030] text-[#0f0e17] dark:text-white"
                               />
+                              <div className="flex items-center relative">
+                                <span className="absolute left-1.5 text-[10px] text-zinc-400 font-bold">₹</span>
+                                <input 
+                                  type="number" 
+                                  value={v.price ?? editForm.newPrice}
+                                  title="Size Price (₹)"
+                                  placeholder="₹"
+                                  onChange={(e) => handleVariantFieldChange(idx, "price", Math.max(0, Number(e.target.value)))}
+                                  min="0"
+                                  className="w-20 pl-4 pr-1 py-1 text-[11px] font-bold rounded border-2 border-zinc-200 dark:border-zinc-700 bg-[#ffffff] dark:bg-[#212030] text-[#ff8906]"
+                                />
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -611,7 +678,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                                   </div>
                                   <div className="flex items-center gap-1">
                                     <button 
-                                      type="button"
+                                      type="button" 
                                       disabled={isBusy}
                                       onClick={() => handleVariantStockAdjust(prod.id, v.color, -5)}
                                       className="w-5 h-5 flex items-center justify-center bg-[#eff0f6] dark:bg-[#212030] border border-[#e2e4ed]/40 dark:border-white/10 hover:bg-[#e6e8eb] rounded text-xs font-bold disabled:opacity-50 cursor-pointer text-[#0f0e17] dark:text-white"
@@ -620,7 +687,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                                     </button>
                                     <span className="w-7 text-center font-bold">{v.stock}</span>
                                     <button 
-                                      type="button"
+                                      type="button" 
                                       disabled={isBusy}
                                       onClick={() => handleVariantStockAdjust(prod.id, v.color, 5)}
                                       className="w-5 h-5 flex items-center justify-center bg-[#eff0f6] dark:bg-[#212030] border border-[#e2e4ed]/40 dark:border-white/10 hover:bg-[#e6e8eb] rounded text-xs font-bold disabled:opacity-50 cursor-pointer text-[#0f0e17] dark:text-white"
@@ -668,7 +735,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                     </td>
 
                     {/* Action buttons */}
-                    <td className="p-4 align-middle text-right">
+                    <td className="p-4 align-middle text-right sticky right-0 z-10 bg-white dark:bg-[#121214] shadow-[-4px_0_8px_rgba(0,0,0,0.06)]">
                       <div className="flex gap-1.5 justify-end">
                         {isEditing ? (
                           <>

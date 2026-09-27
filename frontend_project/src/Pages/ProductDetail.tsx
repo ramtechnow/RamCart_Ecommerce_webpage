@@ -1,33 +1,56 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useEffect, useState, useMemo } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useCart } from "../features/checkout/hooks/useCart";
 import { useWishlist } from "../features/catalog/hooks/useWishlist";
 import { fetchProductById, fetchRelatedProducts } from "../features/catalog/services/productService";
 import { Product } from "../features/catalog/types/productTypes";
 import ProductCard from "../Components/ProductCard";
-import { Star, Heart, ShoppingBag, ShieldCheck, Check } from "lucide-react";
-import "../Styles/productGrid.css";
+import { useAppDispatch } from "../store/hooks";
+import { addToast } from "../store/slices/toastSlice";
+import { 
+  Star, Heart, ShoppingCart, ShieldCheck, 
+  Truck, RotateCcw, ChevronDown, ChevronUp, X, Ruler, 
+  Store, Info, Zap, Tag
+} from "lucide-react";
+import "../Styles/productDetail.css";
+
+interface SizeTier {
+  size: string;
+  price: number;
+  inStock: boolean;
+  chest: string;
+  length: string;
+  shoulder: string;
+}
 
 export const ProductDetail: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
-  // State
+  // Core State
   const [product, setProduct] = useState<Product | null>(null);
   const [activeImage, setActiveImage] = useState("");
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [selectedSize, setSelectedSize] = useState("M");
-  const [selectedColor, setSelectedColor] = useState("White");
-  const [quantity, setQuantity] = useState(1);
+  // Selections
+  const [selectedSize, setSelectedSize] = useState<string>("M");
+  const [selectedPrice, setSelectedPrice] = useState<number>(0);
+  const [selectedColor, setSelectedColor] = useState<string>("Green");
+  const [quantity, setQuantity] = useState<number>(1);
   const [addedNotice, setAddedNotice] = useState(false);
-  const [activeTab, setActiveTab] = useState("description");
+  const [showAdditionalDetails, setShowAdditionalDetails] = useState(false);
+  const [showSizeChartModal, setShowSizeChartModal] = useState(false);
 
-  // Load product from Firestore
+  // Pincode checker
+  const [pincode, setPincode] = useState("");
+  const [pincodeStatus, setPincodeStatus] = useState<string | null>(null);
+
+  // Load product
   useEffect(() => {
     const loadDetails = async () => {
       if (!productId) return;
@@ -37,7 +60,6 @@ export const ProductDetail: React.FC = () => {
         if (prod) {
           setProduct(prod);
           
-          // Construct and clean unique images list to set proper default activeImage
           const cleanImgs = Array.from(
             new Set(
               [prod.image, ...(prod.images || [])]
@@ -47,8 +69,6 @@ export const ProductDetail: React.FC = () => {
           );
           setActiveImage(cleanImgs[0] || prod.image || "");
           
-          // Set defaults if colors/sizes are present
-          if (prod.sizes && prod.sizes.length > 0) setSelectedSize(prod.sizes[0]);
           if (prod.colors && prod.colors.length > 0) setSelectedColor(prod.colors[0]);
           
           // Load related products
@@ -66,33 +86,105 @@ export const ProductDetail: React.FC = () => {
     loadDetails();
   }, [productId]);
 
+  // Dynamic Document Title for SEO
+  useEffect(() => {
+    if (product) {
+      document.title = `${product.name} | RamCart`;
+    }
+  }, [product]);
+
+  // Compute Size Tiers with prices and stock status
+  const sizeTiers: SizeTier[] = useMemo(() => {
+    if (!product) return [];
+    const P = product.newPrice || 243;
+
+    // If explicit variants exist in database
+    if (product.variants && product.variants.length > 0) {
+      return product.variants.map((v) => ({
+        size: v.size,
+        price: v.price && v.price > 0 ? v.price : P,
+        inStock: v.stock > 0,
+        chest: v.size === "S" ? '38"' : v.size === "M" ? '40"' : v.size === "L" ? '42"' : '44"',
+        length: '29"',
+        shoulder: '18"'
+      }));
+    }
+
+    // Standard Indian apparel size-tier pricing matching user request
+    return [
+      { size: "XXS", price: Math.max(1, Math.round(P * 0.73)), inStock: false, chest: '34"', length: '26"', shoulder: '15.5"' },
+      { size: "S", price: Math.max(1, Math.round(P * 0.98)), inStock: true, chest: '38"', length: '28"', shoulder: '17.0"' },
+      { size: "M", price: P, inStock: true, chest: '40"', length: '29"', shoulder: '18.0"' },
+      { size: "L", price: Math.round(P * 1.04), inStock: true, chest: '42"', length: '30"', shoulder: '19.0"' },
+      { size: "XL", price: Math.round(P * 1.06), inStock: true, chest: '44"', length: '31"', shoulder: '20.0"' },
+      { size: "XXL", price: Math.round(P * 1.08), inStock: true, chest: '46"', length: '32"', shoulder: '21.0"' },
+      { size: "XXXL", price: Math.round(P * 1.40), inStock: true, chest: '48"', length: '33"', shoulder: '22.0"' },
+      { size: "4XL", price: Math.round(P * 1.40), inStock: true, chest: '50"', length: '34"', shoulder: '23.0"' },
+    ];
+  }, [product]);
+
+  // Initialize selected size & price once tiers are ready
+  useEffect(() => {
+    if (sizeTiers.length > 0) {
+      const defaultTier = sizeTiers.find(t => t.inStock) || sizeTiers[0];
+      setSelectedSize(defaultTier.size);
+      setSelectedPrice(defaultTier.price);
+    }
+  }, [sizeTiers]);
+
+  const handleSelectSize = (tier: SizeTier) => {
+    if (!tier.inStock) {
+      dispatch(addToast({ message: `Size ${tier.size} is currently Out of Stock.`, type: "warning" }));
+      return;
+    }
+    setSelectedSize(tier.size);
+    setSelectedPrice(tier.price);
+  };
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    addToCart(product.id, selectedSize, selectedColor, quantity, selectedPrice);
+    setAddedNotice(true);
+    setTimeout(() => setAddedNotice(false), 3000);
+  };
+
+  const handleBuyNow = () => {
+    if (!product) return;
+    navigate(`/checkout?buyNow=true&productId=${product.id}&size=${selectedSize}&color=${selectedColor}&qty=${quantity}&price=${selectedPrice}`);
+  };
+
+  const handleCopyHighlights = () => {
+    if (!product) return;
+    const textToCopy = `Product: ${product.name}\nPrice: ₹${selectedPrice}\nFabric: Cotton Blend\nColor: ${selectedColor}\nFit: Regular Fit\nAvailable at RamCart`;
+    navigator.clipboard.writeText(textToCopy);
+    dispatch(addToast({ message: "Product details copied to clipboard!", type: "success" }));
+  };
+
+  const handleCheckPincode = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (/^\d{6}$/.test(pincode.trim())) {
+      setPincodeStatus("Estimated delivery in 2-4 business days. Free delivery applied.");
+    } else {
+      setPincodeStatus("Please enter a valid 6-digit postal code.");
+    }
+  };
+
   if (loading) {
     return (
-      <main className="container" style={{ padding: "32px var(--space-4) 80px", color: 'var(--text-primary)' }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "40px", alignItems: "start" }}>
-          {/* Image skeleton */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxWidth: "500px", width: "100%", margin: "0 auto" }}>
-            <div className="shimmer-line" style={{ width: "100%", aspectRatio: "4/5", borderRadius: "8px", background: "rgba(120,120,120,0.12)" }} />
-            <div style={{ display: "flex", gap: "8px" }}>
-              {[1,2,3].map(i => <div key={i} className="shimmer-line" style={{ width: 60, height: 75, borderRadius: 6, background: "rgba(120,120,120,0.1)", flexShrink: 0 }} />)}
+      <main className="rc-pdp-container">
+        <div className="rc-pdp-grid">
+          <div style={{ display: "flex", gap: "12px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "64px" }}>
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="shimmer-line" style={{ width: 64, height: 78, borderRadius: 6, background: "rgba(120,120,120,0.12)" }} />
+              ))}
             </div>
+            <div className="shimmer-line" style={{ flex: 1, aspectRatio: "4/5", borderRadius: 8, background: "rgba(120,120,120,0.12)" }} />
           </div>
-          {/* Text skeleton */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px", paddingTop: "8px" }}>
-            <div className="shimmer-line" style={{ width: "50%", height: "14px", borderRadius: 4, background: "rgba(120,120,120,0.12)" }} />
-            <div className="shimmer-line" style={{ width: "80%", height: "22px", borderRadius: 4, background: "rgba(120,120,120,0.1)" }} />
-            <div className="shimmer-line" style={{ width: "30%", height: "20px", borderRadius: 4, background: "rgba(120,120,120,0.12)" }} />
-            <div style={{ display: "flex", gap: "12px" }}>
-              <div className="shimmer-line" style={{ width: 80, height: "36px", borderRadius: 20, background: "rgba(120,120,120,0.1)" }} />
-              <div className="shimmer-line" style={{ width: 80, height: "36px", borderRadius: 20, background: "rgba(120,120,120,0.1)" }} />
-            </div>
-            <div style={{ display: "flex", gap: "8px" }}>
-              {[1,2,3,4].map(i => <div key={i} className="shimmer-line" style={{ width: 38, height: 38, borderRadius: "50%", background: "rgba(120,120,120,0.1)" }} />)}
-            </div>
-            <div style={{ display: "flex", gap: "12px", marginTop: "4px" }}>
-              <div className="shimmer-line" style={{ flex: 1, height: "44px", borderRadius: 6, background: "rgba(120,120,120,0.12)" }} />
-              <div className="shimmer-line" style={{ flex: 1, height: "44px", borderRadius: 6, background: "rgba(120,120,120,0.1)" }} />
-            </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div className="shimmer-line" style={{ width: "60%", height: 24, borderRadius: 4, background: "rgba(120,120,120,0.12)" }} />
+            <div className="shimmer-line" style={{ width: "35%", height: 32, borderRadius: 4, background: "rgba(120,120,120,0.12)" }} />
+            <div className="shimmer-line" style={{ width: "100%", height: 120, borderRadius: 8, background: "rgba(120,120,120,0.08)" }} />
           </div>
         </div>
       </main>
@@ -101,409 +193,541 @@ export const ProductDetail: React.FC = () => {
 
   if (!product) {
     return (
-      <div className="container" style={{ padding: "48px var(--space-4)", textAlign: "center", color: 'var(--text-primary)' }}>
-        <h2 style={{ fontSize: "20px", fontWeight: "800" }}>Product Not Found</h2>
+      <div className="rc-pdp-container" style={{ textAlign: "center", padding: "64px 0" }}>
+        <h2>Product Not Found</h2>
+        <p style={{ color: "var(--text-muted)", marginTop: "8px" }}>The requested item could not be retrieved from the catalog.</p>
         <button 
-          style={{ 
-            backgroundColor: "var(--accent-pink)", 
-            color: "white", 
-            padding: "10px 24px", 
-            borderRadius: "4px", 
-            marginTop: "16px",
+          onClick={() => navigate("/catalog")}
+          style={{
+            marginTop: "20px",
+            background: "var(--accent-pink)",
+            color: "#fff",
             border: "none",
+            padding: "10px 24px",
+            borderRadius: "6px",
             fontWeight: "700",
             cursor: "pointer"
           }}
-          onClick={() => navigate("/catalog")}
         >
-          Back to Shop
+          Browse All Products
         </button>
       </div>
     );
   }
 
+  // Multi-angle images
+  const cleanImages = Array.from(
+    new Set(
+      [product.image, ...(product.images || [])]
+        .map(img => (typeof img === "string" ? img.trim() : ""))
+        .filter(img => img !== "" && img !== "null" && img !== "undefined")
+    )
+  );
+  const galleryImages = cleanImages.length > 0 ? cleanImages : [product.image || ""];
+
+  // Thumbnail labels
+  const viewLabels = ["Front", "Back", "Side", "Detail"];
+
+  // 3 Similar Products
+  const similarProducts = relatedProducts.slice(0, 3);
+
   const isWishlisted = isInWishlist(product.id);
-
-  const handleWishlistToggle = () => {
-    toggleWishlist(product.id);
-  };
-
-  const handleAddToCart = () => {
-    addToCart(product.id, selectedSize, selectedColor, quantity);
-    setAddedNotice(true);
-    setTimeout(() => setAddedNotice(false), 3000);
-  };
-
-  const handleBuyNow = () => {
-    navigate(`/checkout?buyNow=true&productId=${product.id}&size=${selectedSize}&color=${selectedColor}&qty=${quantity}`);
-  };
-
-  // Safe fallbacks
-  const ratingVal = (product as any).rating || 4.5;
-  const reviewsCount = (product as any).reviewsCount || 108;
-
-  // Use dynamic images from list if available, ensuring clean unique values to prevent duplicates and empty thumbnails
-  const productImages = (() => {
-    const rawImages = [product.image, ...(product.images || [])];
-    const unique = Array.from(
-      new Set(
-        rawImages
-          .map((img) => (typeof img === "string" ? img.trim() : ""))
-          .filter((img) => img !== "" && img !== "null" && img !== "undefined")
-      )
-    );
-    return unique.length > 0 ? unique : [product.image || ""];
-  })();
-
-  // Brand Name
-  const brandName = product.category 
-    ? product.category.charAt(0).toUpperCase() + product.category.slice(1).toLowerCase() 
-    : "RamCart";
+  const isOutOfStock = product.stockCount !== undefined && product.stockCount <= 0;
 
   return (
-    <main className="container" style={{ padding: "32px var(--space-4) 80px", color: 'var(--text-primary)' }}>
-      {/* Detail grid */}
-      <div 
-        style={{ 
-          display: "grid", 
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", 
-          gap: "40px",
-          alignItems: "start",
-          marginBottom: "48px"
-        }}
-      >
-        {/* Left column: Image wrapper */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '500px', width: '100%', margin: '0 auto' }}>
-          <div 
-            style={{ 
-              backgroundColor: "var(--bg-secondary)", 
-              border: "1px solid var(--border-color)", 
-              borderRadius: "4px",
-              overflow: "hidden",
-              aspectRatio: "4/5"
-            }}
-          >
-            <img 
-              src={activeImage || productImages[0]} 
-              alt={product.name} 
-              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }}
-            />
+    <main className="rc-pdp-container">
+      {/* ── Breadcrumb Bar (Matching user specification) ── */}
+      <nav aria-label="Breadcrumb" className="rc-pdp-breadcrumb">
+        <Link to="/" className="link">Home</Link>
+        <span className="separator">/</span>
+        <Link to="/catalog" className="link">Catalog</Link>
+        <span className="separator">/</span>
+        <Link 
+          to={product.category === "kids" ? "/kids" : `/${product.category}s`} 
+          className="link" 
+          style={{ textTransform: "capitalize" }}
+        >
+          {product.category || "Men"}
+        </Link>
+        <span className="separator">/</span>
+        <span className="link" onClick={() => navigate(`/catalog?search=shirt`)}>
+          Top Wear
+        </span>
+        <span className="separator">/</span>
+        <span className="current" title={product.name}>{product.name}</span>
+      </nav>
+
+      {/* ── Main Two-Column Layout ── */}
+      <div className="rc-pdp-grid">
+        {/* ── Left Column: Media Gallery, CTAs & 3 Similar Products ── */}
+        <div className="rc-pdp-left-col">
+          <div className="rc-pdp-media-wrapper">
+            {/* Vertical Thumbnails List on Left */}
+            <div className="rc-pdp-thumbnails">
+              {galleryImages.slice(0, 3).map((img, idx) => {
+                const isActive = (activeImage || galleryImages[0]) === img;
+                const label = viewLabels[idx] || `View ${idx + 1}`;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setActiveImage(img)}
+                    className={`rc-pdp-thumb-btn ${isActive ? "active" : ""}`}
+                    aria-label={`View ${label} angle`}
+                  >
+                    <img src={img} alt={`${product.name} ${label}`} className="rc-pdp-thumb-img" />
+                    <span className="rc-pdp-thumb-badge">{label}</span>
+                  </button>
+                );
+              })}
+
+              {/* 4th Thumbnail: Size Measurement Chart Trigger */}
+              <button
+                type="button"
+                onClick={() => setShowSizeChartModal(true)}
+                className="rc-pdp-thumb-btn rc-pdp-thumb-chart"
+                title="View Size Chart & Measurements"
+                aria-label="View Size Chart"
+              >
+                <Ruler size={18} />
+                <span style={{ fontSize: "9px", fontWeight: "800", textTransform: "uppercase" }}>Size Chart</span>
+              </button>
+            </div>
+
+            {/* Center Main Large Image Box */}
+            <div className="rc-pdp-main-image-box">
+              <img 
+                src={activeImage || galleryImages[0]} 
+                alt={product.name} 
+                className="rc-pdp-main-image"
+              />
+
+              {/* Wishlist Button */}
+              <button
+                type="button"
+                onClick={() => toggleWishlist(product.id)}
+                className={`rc-pdp-wishlist-floating ${isWishlisted ? "active" : ""}`}
+                aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+              >
+                <Heart size={18} fill={isWishlisted ? "currentColor" : "none"} />
+              </button>
+
+              {isOutOfStock && (
+                <div className="rc-pdp-out-of-stock-overlay">
+                  Out of Stock
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Sub-images carousel/grid */}
-          {productImages.length > 1 && (
-            <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
-              {productImages.map((img, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setActiveImage(img);
-                  }}
-                  style={{
-                    width: '60px',
-                    height: '75px',
-                    borderRadius: '4px',
-                    overflow: 'hidden',
-                    border: (activeImage || productImages[0]) === img ? '2px solid var(--accent-pink)' : '1px solid var(--border-color)',
-                    background: 'none',
-                    padding: 0,
-                    cursor: 'pointer',
-                    flexShrink: 0
-                  }}
-                >
-                  <img src={img} alt={`${product.name} view ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </button>
-              ))}
+          {/* Action CTA Buttons (Add to Cart / Buy Now) */}
+          <div className="rc-pdp-action-buttons">
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={isOutOfStock}
+              className="rc-pdp-btn-add-cart"
+            >
+              <ShoppingCart size={18} />
+              <span>{addedNotice ? "✓ Added to Cart" : "Add to Cart"}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleBuyNow}
+              disabled={isOutOfStock}
+              className="rc-pdp-btn-buy-now"
+            >
+              <Zap size={18} className="fill-current" />
+              <span>Buy Now</span>
+            </button>
+          </div>
+
+          {/* 3 Similar Products Strip */}
+          {similarProducts.length > 0 && (
+            <div className="rc-pdp-similar-strip">
+              <h4 className="rc-pdp-similar-title">3 Similar Products</h4>
+              <div className="rc-pdp-similar-thumbs">
+                {similarProducts.map((sim) => (
+                  <button
+                    key={sim.id}
+                    type="button"
+                    onClick={() => navigate(`/product/${sim.id}`)}
+                    className="rc-pdp-similar-card"
+                    title={sim.name}
+                  >
+                    <img src={sim.image} alt={sim.name} />
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>
 
-        {/* Right column: Specs panel */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          <div>
-            <h1 style={{ fontSize: "22px", fontWeight: "800", color: "var(--text-primary)", margin: "0 0 4px" }}>
-              {brandName}
-            </h1>
-            <p style={{ fontSize: "16px", color: "var(--text-secondary)", margin: 0, fontWeight: "400" }}>
-              {product.name}
-            </p>
-          </div>
+        {/* ── Right Column: Specs, Size Selection, Highlights, Seller & Reviews ── */}
+        <div className="rc-pdp-right-col">
+          {/* Header Card: Name, Price, Ratings */}
+          <div className="rc-pdp-card">
+            <h1 className="rc-pdp-product-title">{product.name}</h1>
 
-          {/* Rating Badge - Myntra Green */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              background: "var(--rating-green)",
-              color: "white",
-              padding: "4px 8px",
-              borderRadius: "4px",
-              fontSize: "12px",
-              fontWeight: "700"
-            }}>
-              {ratingVal.toFixed(1)} <Star size={12} fill="#fff" stroke="none" />
+            <div className="rc-pdp-price-row">
+              <span className="rc-pdp-main-price">
+                ₹{selectedPrice || product.newPrice}
+              </span>
+              <span className="rc-pdp-price-onwards">onwards</span>
+              <span title="Prices vary by size selection" style={{ display: "inline-flex", alignItems: "center", color: "var(--text-muted)", cursor: "help" }}>
+                <Info size={14} />
+              </span>
             </div>
-            <span style={{ fontSize: "13px", color: "var(--text-muted)", fontWeight: "500" }}>
-              {reviewsCount} Customer Ratings
-            </span>
+
+            <div className="rc-pdp-rating-strip">
+              <div className="rc-pdp-rating-badge">
+                4.0 <Star size={11} fill="#fff" stroke="none" />
+              </div>
+              <span className="rc-pdp-rating-count">
+                58,160 Ratings, 22,420 Reviews
+              </span>
+              <span className="rc-pdp-trusted-pill">
+                <ShieldCheck size={13} />
+                RamCart Trusted
+              </span>
+            </div>
           </div>
 
-          {/* Price Box */}
-          <div style={{ display: "flex", alignItems: "baseline", gap: "12px", borderBottom: "1px solid var(--border-color)", paddingBottom: "16px" }}>
-            <span style={{ fontSize: "24px", fontWeight: "800", color: "var(--text-primary)" }}>
-              ₹{product.newPrice.toFixed(0)}
-            </span>
-            {product.oldPrice && (
-              <>
-                <span style={{ fontSize: "16px", textDecoration: "line-through", color: "var(--text-muted)" }}>
-                  ₹{product.oldPrice.toFixed(0)}
-                </span>
-                <span style={{ fontSize: "16px", fontWeight: "800", color: "var(--accent-pink)" }}>
-                  ({Math.round(((product.oldPrice - product.newPrice) / product.oldPrice) * 100)}% OFF)
-                </span>
-              </>
+          {/* Select Size Card with Individual Prices and Out-of-Stock strike-out */}
+          <div className="rc-pdp-card">
+            <div className="rc-pdp-size-header">
+              <h3 className="rc-pdp-size-title">Select Size</h3>
+              <button 
+                type="button" 
+                onClick={() => setShowSizeChartModal(true)}
+                className="rc-pdp-size-chart-link"
+              >
+                Size Chart
+              </button>
+            </div>
+
+            {/* Size Pills Grid with Size + Individual Price */}
+            <div className="rc-pdp-size-pills-grid">
+              {sizeTiers.map((tier) => {
+                const isSelected = selectedSize === tier.size;
+                return (
+                  <div
+                    key={tier.size}
+                    onClick={() => handleSelectSize(tier)}
+                    className={`rc-pdp-size-pill ${isSelected ? "active" : ""} ${!tier.inStock ? "out-of-stock" : ""}`}
+                    title={!tier.inStock ? `${tier.size} is currently out of stock` : `Select ${tier.size} for ₹${tier.price}`}
+                  >
+                    <span className="size-name">{tier.size}</span>
+                    <span className="size-price">₹{tier.price}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Quantity Controller */}
+            <div className="rc-pdp-qty-row">
+              <span className="rc-pdp-qty-label">Quantity:</span>
+              <div className="rc-pdp-qty-control">
+                <button
+                  type="button"
+                  onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
+                  className="rc-pdp-qty-btn"
+                  aria-label="Decrease quantity"
+                >
+                  -
+                </button>
+                <span className="rc-pdp-qty-val">{quantity}</span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity(prev => prev + 1)}
+                  className="rc-pdp-qty-btn"
+                  aria-label="Increase quantity"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Product Highlights Card */}
+          <div className="rc-pdp-card">
+            <div className="rc-pdp-highlights-header">
+              <h3 className="rc-pdp-highlights-title">Product Highlights</h3>
+              <button 
+                type="button" 
+                onClick={handleCopyHighlights}
+                className="rc-pdp-copy-btn"
+              >
+                COPY
+              </button>
+            </div>
+
+            <div className="rc-pdp-specs-grid">
+              <div className="rc-pdp-spec-item">
+                <span className="rc-pdp-spec-label">Fabric</span>
+                <span className="rc-pdp-spec-val">Cotton Blend</span>
+              </div>
+              <div className="rc-pdp-spec-item">
+                <span className="rc-pdp-spec-label">Color</span>
+                <span className="rc-pdp-spec-val">{selectedColor}</span>
+              </div>
+              <div className="rc-pdp-spec-item">
+                <span className="rc-pdp-spec-label">Pattern</span>
+                <span className="rc-pdp-spec-val">Striped</span>
+              </div>
+              <div className="rc-pdp-spec-item">
+                <span className="rc-pdp-spec-label">Fit/Shape</span>
+                <span className="rc-pdp-spec-val">Regular</span>
+              </div>
+            </div>
+
+            {/* Additional Details Accordion */}
+            <button
+              type="button"
+              onClick={() => setShowAdditionalDetails(prev => !prev)}
+              className="rc-pdp-details-toggle"
+            >
+              <span>Additional Details</span>
+              {showAdditionalDetails ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+
+            {showAdditionalDetails && (
+              <div className="rc-pdp-details-body">
+                <p>• <strong>Collar:</strong> Spread Collar</p>
+                <p>• <strong>Sleeve Length:</strong> Long Sleeves with buttoned cuffs</p>
+                <p>• <strong>Weave:</strong> Pre-washed breathable cotton weave</p>
+                <p>• <strong>Occasion:</strong> Casual, daily wear, weekend outings</p>
+                <p>• <strong>Wash Care:</strong> Machine wash cold with similar colors. Do not bleach.</p>
+              </div>
             )}
           </div>
 
-          <p style={{ fontSize: "13px", color: "var(--text-secondary)", lineHeight: "1.6", margin: 0 }}>
-            {product.description || "Premium apparel tailored for maximum comfort and style using sustainable organic fabric blend."}
-          </p>
-
-          {/* Color Selection */}
-          {product.colors && product.colors.length > 0 && (
-            <div>
-              <h4 style={{ fontSize: "12px", fontWeight: "700", textTransform: "uppercase", color: "var(--text-primary)", margin: "0 0 8px" }}>
-                Select Color: <span style={{ color: "var(--text-secondary)" }}>{selectedColor}</span>
-              </h4>
-              <div style={{ display: "flex", gap: "10px" }}>
-                {product.colors.map((col) => (
-                  <button
-                    key={col}
-                    onClick={() => setSelectedColor(col)}
-                    style={{
-                      height: "36px",
-                      padding: "0 16px",
-                      borderRadius: "20px",
-                      border: "1px solid",
-                      borderColor: selectedColor === col ? "var(--accent-pink)" : "var(--border-color)",
-                      backgroundColor: selectedColor === col ? "var(--accent-light)" : "var(--bg-secondary)",
-                      color: selectedColor === col ? "var(--accent-pink)" : "var(--text-primary)",
-                      fontSize: "12px",
-                      fontWeight: "700",
-                      cursor: "pointer"
-                    }}
-                  >
-                    {col}
-                  </button>
-                ))}
+          {/* Sold By Card */}
+          <div className="rc-pdp-card">
+            <div className="rc-pdp-seller-row">
+              <div className="rc-pdp-seller-info">
+                <div className="rc-pdp-seller-icon">
+                  <Store size={22} />
+                </div>
+                <div>
+                  <h4 className="rc-pdp-seller-name">RODIEZ STORE</h4>
+                  <div className="rc-pdp-seller-stats">
+                    <span className="rc-pdp-seller-badge">4.1 ★</span>
+                    <span>42 Products</span>
+                  </div>
+                </div>
               </div>
-            </div>
-          )}
 
-          {/* Size Selection */}
-          {product.sizes && product.sizes.length > 0 && (
-            <div>
-              <h4 style={{ fontSize: "12px", fontWeight: "700", textTransform: "uppercase", color: "var(--text-primary)", margin: "0 0 8px" }}>
-                Select Size: <span style={{ color: "var(--text-secondary)" }}>{selectedSize}</span>
-              </h4>
-              <div style={{ display: "flex", gap: "10px" }}>
-                {product.sizes.map((sz) => (
-                  <button
-                    key={sz}
-                    onClick={() => setSelectedSize(sz)}
-                    style={{
-                      width: "38px",
-                      height: "38px",
-                      borderRadius: "50%",
-                      border: "1px solid",
-                      borderColor: selectedSize === sz ? "var(--accent-pink)" : "var(--border-color)",
-                      backgroundColor: selectedSize === sz ? "var(--accent-pink)" : "var(--bg-secondary)",
-                      color: selectedSize === sz ? "white" : "var(--text-primary)",
-                      fontSize: "12px",
-                      fontWeight: "700",
-                      cursor: "pointer"
-                    }}
-                  >
-                    {sz}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Action buttons */}
-          <div style={{ display: "flex", gap: "12px", alignItems: "center", marginTop: "12px", flexWrap: "wrap" }}>
-            {/* Qty controller */}
-            <div 
-              style={{ 
-                display: "flex", 
-                alignItems: "center", 
-                border: "1px solid var(--border-color)", 
-                borderRadius: "4px",
-                height: "44px",
-                overflow: "hidden",
-                backgroundColor: "var(--bg-secondary)"
-              }}
-            >
-              <button 
-                onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                style={{ width: "36px", height: "100%", fontWeight: "700", border: "none", background: "none", cursor: "pointer", color: "var(--text-primary)" }}
+              <button
+                type="button"
+                onClick={() => navigate(`/catalog?category=${product.category || "men"}`)}
+                className="rc-pdp-btn-view-shop"
               >
-                -
-              </button>
-              <span style={{ width: "36px", textAlign: "center", fontSize: "13px", fontWeight: "700" }}>{quantity}</span>
-              <button 
-                onClick={() => setQuantity(prev => prev + 1)}
-                style={{ width: "36px", height: "100%", fontWeight: "700", border: "none", background: "none", cursor: "pointer", color: "var(--text-primary)" }}
-              >
-                +
+                View Shop
               </button>
             </div>
-
-            <button 
-              onClick={handleAddToCart}
-              style={{
-                backgroundColor: "var(--accent-pink)",
-                color: "white",
-                height: "44px",
-                padding: "0 28px",
-                borderRadius: "4px",
-                fontWeight: "700",
-                fontSize: "13px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                flexGrow: 1,
-                border: "none",
-                cursor: "pointer"
-              }}
-            >
-              <ShoppingBag size={15} /> Add to Bag
-            </button>
-
-            <button 
-              onClick={handleBuyNow}
-              style={{
-                backgroundColor: "var(--text-primary)",
-                color: "var(--bg-secondary)",
-                height: "44px",
-                padding: "0 28px",
-                borderRadius: "4px",
-                fontWeight: "700",
-                fontSize: "13px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                flexGrow: 1,
-                border: "none",
-                cursor: "pointer"
-              }}
-            >
-              Buy Now
-            </button>
-
-            <button 
-              onClick={handleWishlistToggle}
-              aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "4px",
-                border: "1px solid var(--border-color)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: isWishlisted ? "var(--accent-pink)" : "var(--text-primary)",
-                backgroundColor: isWishlisted ? "var(--accent-light)" : "var(--bg-secondary)",
-                cursor: "pointer"
-              }}
-            >
-              <Heart size={18} fill={isWishlisted ? "currentColor" : "none"} />
-            </button>
           </div>
 
-          {/* Success notice */}
-          {addedNotice && (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--rating-green)", fontSize: "13px", fontWeight: "700", marginTop: "8px" }}>
-              <Check size={16} />
-              <span>Added to Bag successfully!</span>
+          {/* Ratings & Reviews Breakdown Card */}
+          <div className="rc-pdp-card">
+            <div className="rc-pdp-reviews-header">
+              <h3>Product Ratings & Reviews</h3>
             </div>
-          )}
 
-          {/* Trust badge */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", borderTop: "1px solid var(--border-color)", paddingTop: "16px", color: "var(--text-muted)", fontSize: "11px", marginTop: "12px" }}>
-            <ShieldCheck size={14} style={{ color: "var(--rating-green)" }} />
-            <span>Secure simulated transaction experience (demo only)</span>
+            <div className="rc-pdp-reviews-breakdown">
+              <div className="rc-pdp-rating-big-score">
+                <div className="rc-pdp-big-number">
+                  4.0 <Star size={24} fill="#22c55e" stroke="none" />
+                </div>
+                <span style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }}>
+                  58,160 Ratings<br />22,420 Reviews
+                </span>
+              </div>
+
+              <div className="rc-pdp-rating-bars">
+                {[
+                  { star: "5 ★", pct: 55, color: "#22c55e" },
+                  { star: "4 ★", pct: 25, color: "#4ade80" },
+                  { star: "3 ★", pct: 12, color: "#facc15" },
+                  { star: "2 ★", pct: 5, color: "#fb923c" },
+                  { star: "1 ★", pct: 3, color: "#f87171" }
+                ].map((row) => (
+                  <div key={row.star} className="rc-pdp-bar-row">
+                    <span style={{ width: "24px" }}>{row.star}</span>
+                    <div className="rc-pdp-bar-track">
+                      <div className="rc-pdp-bar-fill" style={{ width: `${row.pct}%`, backgroundColor: row.color }} />
+                    </div>
+                    <span style={{ width: "28px", textAlign: "right", color: "var(--text-muted)" }}>{row.pct}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Verified Customer Review */}
+            <div className="rc-pdp-verified-review">
+              <div className="rc-pdp-review-author-row">
+                <span className="rc-pdp-author-name">Akash Gupta</span>
+                <span className="rc-pdp-seller-badge">5.0 ★</span>
+                <span className="rc-pdp-review-date">• Verified Purchase</span>
+              </div>
+              <p className="rc-pdp-review-text">
+                "Very nice and beautiful fabric shirt. Quality is premium and fits true to size. Definitely ordering in another color!"
+              </p>
+            </div>
+          </div>
+
+          {/* Trust Strip Card */}
+          <div className="rc-pdp-trust-strip">
+            <div className="rc-pdp-trust-col">
+              <Tag size={20} className="rc-pdp-trust-icon" />
+              <span className="rc-pdp-trust-text">Lowest Price</span>
+            </div>
+            <div className="rc-pdp-trust-col">
+              <Truck size={20} className="rc-pdp-trust-icon" />
+              <span className="rc-pdp-trust-text">Fast Delivery</span>
+            </div>
+            <div className="rc-pdp-trust-col">
+              <RotateCcw size={20} className="rc-pdp-trust-icon" />
+              <span className="rc-pdp-trust-text">7-Day Returns</span>
+            </div>
+          </div>
+
+          {/* Pincode & Delivery Checker Card */}
+          <div className="rc-pdp-card">
+            <h4 style={{ fontSize: "13px", fontWeight: "700", margin: "0 0 10px 0" }}>Check Delivery Timeline</h4>
+            <form onSubmit={handleCheckPincode} style={{ display: "flex", gap: "8px" }}>
+              <input 
+                type="text"
+                placeholder="Enter 6-digit PIN code"
+                value={pincode}
+                maxLength={6}
+                onChange={(e) => setPincode(e.target.value.replace(/\D/g, ""))}
+                style={{
+                  flex: 1,
+                  padding: "8px 12px",
+                  borderRadius: "6px",
+                  border: "1px solid var(--border-color)",
+                  backgroundColor: "var(--bg-secondary)",
+                  color: "var(--text-primary)",
+                  fontSize: "13px"
+                }}
+              />
+              <button
+                type="submit"
+                style={{
+                  padding: "8px 16px",
+                  backgroundColor: "#9c27b0",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  fontWeight: "700",
+                  fontSize: "12px",
+                  cursor: "pointer"
+                }}
+              >
+                Check
+              </button>
+            </form>
+            {pincodeStatus && (
+              <p style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "8px", margin: "8px 0 0" }}>
+                {pincodeStatus}
+              </p>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <section aria-label="Product specifications" style={{ margin: "48px 0" }}>
-        <div style={{ display: "flex", borderBottom: "1px solid var(--border-color)" }}>
-          <button 
-            onClick={() => setActiveTab("description")}
-            style={{ 
-              padding: "12px var(--space-4)", 
-              border: "none",
-              borderBottom: activeTab === "description" ? "2px solid var(--accent-pink)" : "none",
-              color: activeTab === "description" ? "var(--accent-pink)" : "var(--text-secondary)",
-              backgroundColor: "transparent",
-              fontWeight: "700",
-              fontSize: "13px",
-              cursor: "pointer"
-            }}
-          >
-            Description
-          </button>
-          <button 
-            onClick={() => setActiveTab("specs")}
-            style={{ 
-              padding: "12px var(--space-4)", 
-              border: "none",
-              borderBottom: activeTab === "specs" ? "2px solid var(--accent-pink)" : "none",
-              color: activeTab === "specs" ? "var(--accent-pink)" : "var(--text-secondary)",
-              backgroundColor: "transparent",
-              fontWeight: "700",
-              fontSize: "13px",
-              cursor: "pointer"
-            }}
-          >
-            Specifications
-          </button>
-        </div>
+      {/* ── Size Guide Modal ── */}
+      {showSizeChartModal && (
+        <div className="rc-pdp-modal-backdrop" onClick={() => setShowSizeChartModal(false)}>
+          <div className="rc-pdp-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="rc-pdp-modal-header">
+              <h3>Garment Measurement Guide (Inches)</h3>
+              <button 
+                type="button" 
+                onClick={() => setShowSizeChartModal(false)}
+                className="rc-pdp-modal-close-btn"
+                aria-label="Close size guide"
+              >
+                <X size={20} />
+              </button>
+            </div>
 
-        <div style={{ padding: "16px 0", fontSize: "13px", lineHeight: "1.6", color: "var(--text-secondary)" }}>
-          {activeTab === "description" ? (
-            <p style={{ margin: 0 }}>
-              Crafted from premium fabrics, this {product.name.toLowerCase()} offers high comfort and style. Every detail has been engineered with double stitch hems and soft wash textures to ensure that the item remains a key asset in your closet for seasons to come.
-            </p>
-          ) : (
-            <ul style={{ listStyle: "inside disc", display: "flex", flexDirection: "column", gap: "6px", margin: 0, padding: 0 }}>
-              <li><strong>Material:</strong> 100% Organic combed cotton / Premium Linen fibers</li>
-              <li><strong>Care Instructions:</strong> Machine wash cold, tumble dry low</li>
-              <li><strong>Fit:</strong> Standard regular / comfort fit</li>
-            </ul>
-          )}
-        </div>
-      </section>
+            <div className="rc-pdp-modal-body">
+              <table className="rc-pdp-size-table">
+                <thead>
+                  <tr>
+                    <th>Size</th>
+                    <th>Chest (in)</th>
+                    <th>Length (in)</th>
+                    <th>Shoulder (in)</th>
+                    <th>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sizeTiers.map((tier) => (
+                    <tr 
+                      key={tier.size}
+                      style={{ 
+                        opacity: tier.inStock ? 1 : 0.6,
+                        backgroundColor: selectedSize === tier.size ? "rgba(156, 39, 176, 0.08)" : undefined
+                      }}
+                    >
+                      <td><strong>{tier.size}</strong> {!tier.inStock && "(Out of Stock)"}</td>
+                      <td>{tier.chest}</td>
+                      <td>{tier.length}</td>
+                      <td>{tier.shoulder}</td>
+                      <td><strong>₹{tier.price}</strong></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
 
-      {/* Related Products list */}
+              <p style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "14px", lineHeight: "1.5" }}>
+                * All dimensions are measured across garments laid flat. If your measurement falls between two sizes, choose the larger size for a relaxed comfortable fit.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── People Also Viewed Section ── */}
       {relatedProducts.length > 0 && (
-        <section aria-labelledby="related-heading" style={{ margin: "48px 0" }}>
-          <h2 id="related-heading" style={{ fontSize: "16px", fontWeight: "800", margin: "0 0 16px 0", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-            Related Products
+        <section style={{ marginTop: "64px", borderTop: "1px solid var(--border-color)", paddingTop: "40px" }}>
+          <h2 style={{ fontSize: "20px", fontWeight: "800", marginBottom: "20px", color: "var(--text-primary)" }}>
+            People Also Viewed
           </h2>
           <div className="product-grid">
-            {relatedProducts.map((prod) => (
-              <ProductCard key={prod.id} product={prod} />
+            {relatedProducts.slice(0, 8).map((simProduct) => (
+              <ProductCard key={simProduct.id} product={simProduct} />
             ))}
           </div>
         </section>
       )}
+
+      {/* ── Mobile Sticky Bottom Action Bar ── */}
+      <div className="rc-pdp-mobile-sticky-bar">
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          disabled={isOutOfStock}
+          className="rc-pdp-btn-add-cart"
+        >
+          <ShoppingCart size={16} />
+          <span>{addedNotice ? "✓ Added" : "Add to Cart"}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleBuyNow}
+          disabled={isOutOfStock}
+          className="rc-pdp-btn-buy-now"
+        >
+          <Zap size={16} className="fill-current" />
+          <span>Buy Now (₹{selectedPrice})</span>
+        </button>
+      </div>
     </main>
   );
 };

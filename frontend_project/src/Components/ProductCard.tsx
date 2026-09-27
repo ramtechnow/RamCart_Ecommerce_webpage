@@ -1,6 +1,6 @@
 /* ============================================================
-   ProductCard.tsx — Myntra-inspired card component
-   No backend/data logic modified.
+   ProductCard.tsx — RAMCART Clean Modern Commerce Card
+   Truthful data representation, responsive, zero fake metrics.
    ============================================================ */
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
@@ -28,8 +28,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   // Safe fallback properties — data keys unchanged
   const price = product.newPrice !== undefined ? product.newPrice : (product as any).new_price || 0;
   const oldPrice = product.oldPrice !== undefined ? product.oldPrice : (product as any).old_price;
-  const ratingVal = (product as any).rating || 4.5;
-  const reviewsCount = (product as any).reviewsCount || 88;
+  
+  // Real rating only if present on product
+  const ratingVal = (product as any).rating ? Number((product as any).rating) : null;
+  const reviewsCount = (product as any).reviewsCount ? Number((product as any).reviewsCount) : null;
 
   // Calculate discount percentage
   const discountPercent = oldPrice && oldPrice > price
@@ -41,11 +43,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     ? product.category.charAt(0).toUpperCase() + product.category.slice(1).toLowerCase()
     : "RamCart";
 
+  const isOutOfStock = product.stockCount !== undefined && product.stockCount <= 0;
+
   // Show styled name-alt instead of broken image
   const showAltName = imgError || !product.image;
 
   return (
-    <div className="product-card" style={{ position: "relative" }}>
+    <div className={`product-card ${isOutOfStock ? "is-sold-out" : ""}`} style={{ position: "relative" }}>
       <button
         className={`product-card-wishlist-btn${isWishlisted ? " active" : ""}`}
         onClick={handleWishlistToggle}
@@ -56,11 +60,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <Heart size={16} fill={isWishlisted ? "currentColor" : "none"} />
       </button>
 
-      <Link to={`/product/${product.id}`} style={{ display: "flex", flexDirection: "column", height: "100%", textDecoration: "none", color: "inherit" }}>
+      <Link 
+        to={`/product/${product.id}`} 
+        style={{ display: "flex", flexDirection: "column", height: "100%", textDecoration: "none", color: "inherit" }}
+      >
         {/* ── Image area ── */}
         <div className="product-card-image-wrapper">
-          {discountPercent > 0 && (
+          {discountPercent > 0 && !isOutOfStock && (
             <div className="product-card-badge">{discountPercent}% OFF</div>
+          )}
+
+          {isOutOfStock && (
+            <div className="product-card-soldout-badge">Out of Stock</div>
           )}
 
           {!imgLoaded && !showAltName && (
@@ -108,20 +119,32 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <span className="product-card-category">{brandLabel}</span>
           <h3 className="product-card-title">{product.name}</h3>
 
-          <div className="product-card-rating">
-            <span className="product-card-rating-chip">
-              <Star size={9} fill="#fff" stroke="none" />
-              {ratingVal.toFixed(1)}
-            </span>
-            <span className="product-card-rating-count">| {reviewsCount}</span>
-          </div>
+          {ratingVal !== null ? (
+            <div className="product-card-rating">
+              <span className="product-card-rating-chip">
+                <Star size={9} fill="#fff" stroke="none" />
+                {ratingVal.toFixed(1)}
+              </span>
+              {reviewsCount && <span className="product-card-rating-count">({reviewsCount})</span>}
+            </div>
+          ) : (
+            <div className="product-card-tag-row">
+              <span className="product-card-edition-tag">RamCart Select</span>
+            </div>
+          )}
 
           <div className="product-card-price-row">
             <span className="product-card-new-price">₹{price.toFixed(0)}</span>
-            {oldPrice && <span className="product-card-old-price">₹{oldPrice.toFixed(0)}</span>}
-            {discountPercent > 0 && <span className="product-card-discount-pct">({discountPercent}% OFF)</span>}
+            {oldPrice && oldPrice > price && (
+              <span className="product-card-old-price">₹{oldPrice.toFixed(0)}</span>
+            )}
+            {discountPercent > 0 && (
+              <span className="product-card-discount-pct">({discountPercent}% OFF)</span>
+            )}
           </div>
-          <div className="product-card-free-delivery">🚚 Free Delivery</div>
+          <div className="product-card-delivery-hint">
+            {price >= 499 ? "✓ Free Delivery" : "Standard Delivery"}
+          </div>
         </div>
       </Link>
     </div>

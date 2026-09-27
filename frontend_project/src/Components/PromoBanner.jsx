@@ -6,54 +6,54 @@ import "../Styles/promobanner.css";
 
 const DEFAULT_FALLBACK_BANNERS = [
   {
-    _id: "flipkart-bbd-1",
-    description: "The Big Billion Days — Early Bird Deals Live Now",
+    _id: "ramcart-showcase-1",
+    description: "Grand Wardrobe Festival — Exclusive Seasonal Drops",
     image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1600&auto=format&fit=crop",
     discountType: "percentage",
-    discountValue: 60,
+    discountValue: 50,
     targetLink: "/womens",
-    tag: "EARLY BIRD DEALS",
-    badge: "BBD SPECIAL"
+    tag: "RAMCART EXCLUSIVE",
+    badge: "SEASON SPECIAL"
   },
   {
-    _id: "flipkart-bbd-2",
-    description: "Shirts, Tees & Casual Outerwear Under ₹499",
+    _id: "ramcart-showcase-2",
+    description: "Everyday Classics, Polos & Tailored Outerwear",
     image: "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?q=80&w=1600&auto=format&fit=crop",
     discountType: "percentage",
     discountValue: 40,
     targetLink: "/mens",
-    tag: "BEST SELLING STYLES",
+    tag: "BESTSELLER EDIT",
     badge: "TRENDING NOW"
   },
   {
-    _id: "flipkart-bbd-3",
-    description: "Travel Gear, Backpacks & Luggage Predator Series From ₹999",
+    _id: "ramcart-showcase-3",
+    description: "Urban Travel Gear & Structured Essentials",
     image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=1600&auto=format&fit=crop",
     discountType: "percentage",
-    discountValue: 50,
-    targetLink: "/product/1",
-    tag: "LOWEST PRICE EVER",
-    badge: "TOP OFFER"
+    discountValue: 35,
+    targetLink: "/catalog",
+    tag: "NEW DROP",
+    badge: "TOP PICK"
   },
   {
-    _id: "flipkart-bbd-4",
-    description: "Audio & Smart Wearables — Wireless Headphones & Speakers",
+    _id: "ramcart-showcase-4",
+    description: "High-Performance Layers & Studio Comfortwear",
     image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1600&auto=format&fit=crop",
     discountType: "percentage",
-    discountValue: 70,
-    targetLink: "/product/2",
-    tag: "LIMITED TIME DEAL",
-    badge: "MEGA SALE"
+    discountValue: 45,
+    targetLink: "/catalog",
+    tag: "LIMITED EDITION",
+    badge: "FEATURED"
   },
   {
-    _id: "flipkart-bbd-5",
-    description: "Kids & Youth Festive Collection — Bright & Playful Wear",
+    _id: "ramcart-showcase-5",
+    description: "Kids & Juniors Vibrant Play Collection",
     image: "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?q=80&w=1600&auto=format&fit=crop",
     discountType: "percentage",
-    discountValue: 45,
+    discountValue: 30,
     targetLink: "/kids",
-    tag: "FESTIVE ARRIVALS",
-    badge: "NEW LAUNCH"
+    tag: "PLAYFUL STYLES",
+    badge: "NEW ARRIVAL"
   }
 ];
 
@@ -183,28 +183,28 @@ export const PromoBanner = ({ page = "home" }) => {
 
   if (loading) {
     return (
-      <div className="flipkart-carousel-wrapper">
-        <div className="flipkart-skeleton-card animate-pulse" />
+      <div className="ramcart-promo-carousel-wrapper">
+        <div className="ramcart-promo-skeleton-card animate-pulse" />
       </div>
     );
   }
 
   return (
     <section 
-      className="flipkart-carousel-wrapper"
+      className="ramcart-promo-carousel-wrapper"
       aria-label="Promotional Deals Carousel"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* ─── Main Carousel Container ─── */}
       <div 
-        className="flipkart-carousel-viewport"
+        className="ramcart-promo-carousel-viewport"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
         <div 
-          className="flipkart-carousel-track"
+          className="ramcart-promo-carousel-track"
           style={{
             transform: `translateX(calc(-${currentIndex} * var(--slide-step, 100%)))`
           }}
@@ -221,7 +221,7 @@ export const PromoBanner = ({ page = "home" }) => {
               <div
                 key={ban._id || idx}
                 onClick={() => handleBannerClick(ban)}
-                className={`flipkart-banner-card ${isSlideActive ? 'is-active' : ''}`}
+                className={`ramcart-promo-banner-card ${isSlideActive ? 'is-active' : ''}`}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
@@ -236,44 +236,44 @@ export const PromoBanner = ({ page = "home" }) => {
                 <img
                   src={ban.image}
                   alt={ban.description || "Special offer banner"}
-                  className="flipkart-banner-img"
+                  className="ramcart-promo-banner-img"
                   loading={idx < 2 ? "eager" : "lazy"}
                   decoding="async"
                 />
 
                 {/* Subtle dark gradient overlay for text readability */}
-                <div className="flipkart-banner-gradient" />
+                <div className="ramcart-promo-banner-gradient" />
 
-                {/* Flipkart Style Content & Badges */}
-                <div className="flipkart-banner-content">
+                {/* RAMCART Style Content & Badges */}
+                <div className="ramcart-promo-banner-content">
                   {/* Top Tags */}
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="flipkart-badge-earlybird">
+                    <span className="ramcart-promo-badge-earlybird">
                       <Zap size={11} className="fill-current" />
                       {ban.tag || "EARLY BIRD DEALS"}
                     </span>
                     {discountLabel && (
-                      <span className="flipkart-badge-discount">
+                      <span className="ramcart-promo-badge-discount">
                         {discountLabel}
                       </span>
                     )}
                   </div>
 
                   {/* Main Title / Description */}
-                  <h2 className="flipkart-banner-title">
+                  <h2 className="ramcart-promo-banner-title">
                     {ban.description}
                   </h2>
 
                   {/* Partner / Bank Offers Strip */}
-                  <div className="flipkart-bank-strip">
-                    <span className="bank-pill">ICICI Bank</span>
-                    <span className="bank-pill">Axis Bank</span>
-                    <span className="bank-text">10% Instant Discount*</span>
+                  <div className="ramcart-promo-bank-strip">
+                    <span className="bank-pill">RamCart Pay</span>
+                    <span className="bank-pill">All Cards</span>
+                    <span className="bank-text">{ban.bankOfferText || "Instant Discount on Prepaid Orders*"}</span>
                   </div>
                 </div>
 
-                {/* AD / Sponsored tag */}
-                <div className="flipkart-ad-tag">OFFER</div>
+                {/* Offer tag */}
+                <div className="ramcart-promo-ad-tag">OFFER</div>
               </div>
             );
           })}
@@ -288,7 +288,7 @@ export const PromoBanner = ({ page = "home" }) => {
                 e.stopPropagation();
                 handlePrev();
               }}
-              className="flipkart-nav-arrow prev"
+              className="ramcart-promo-nav-arrow prev"
               aria-label="Previous Slide"
             >
               <ChevronLeft size={20} />
@@ -299,7 +299,7 @@ export const PromoBanner = ({ page = "home" }) => {
                 e.stopPropagation();
                 handleNext();
               }}
-              className="flipkart-nav-arrow next"
+              className="ramcart-promo-nav-arrow next"
               aria-label="Next Slide"
             >
               <ChevronRight size={20} />
@@ -308,15 +308,15 @@ export const PromoBanner = ({ page = "home" }) => {
         )}
       </div>
 
-      {/* ─── Flipkart Signature Elongated Pill Indicators ─── */}
+      {/* ─── RAMCART Signature Elongated Pill Indicators ─── */}
       {totalSlides > 1 && (
-        <div className="flipkart-indicators" aria-label="Slide Indicators">
+        <div className="ramcart-promo-indicators" aria-label="Slide Indicators">
           {activeSlides.map((_, idx) => (
             <button
               key={idx}
               type="button"
               onClick={() => setCurrentIndex(idx)}
-              className={`flipkart-indicator-dot ${idx === currentIndex ? "active" : "inactive"}`}
+              className={`ramcart-promo-indicator-dot ${idx === currentIndex ? "active" : "inactive"}`}
               aria-label={`Go to slide ${idx + 1}`}
               aria-current={idx === currentIndex ? "true" : undefined}
             />

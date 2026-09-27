@@ -152,7 +152,7 @@ export default function ProductDemo() {
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {[
                 { icon: "🏦", text: "10% Off on HDFC Bank Credit Card, up to ₹500" },
-                { icon: "🎁", text: "Get ₹100 Cashback on first Myntra Pay transaction" },
+                { icon: "🎁", text: "Get ₹100 Cashback on first RamCart Pay transaction" },
                 { icon: "🛒", text: "Buy 2 Get 1 Free on select items" },
               ].map((offer, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 12, color: "var(--text-secondary)" }}>

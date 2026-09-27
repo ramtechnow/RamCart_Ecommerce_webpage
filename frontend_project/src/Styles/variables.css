@@ -1,5 +1,5 @@
 /* ============================================================
-   RamCart Design Tokens — Myntra-Inspired Palette
+   RamCart Design Tokens — RamCart Design System Palette
    No backend/data logic. Style tokens only.
    ============================================================ */
 :root {
@@ -38,7 +38,7 @@
   --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* ── Light Theme — Myntra Palette ────────────────────────── */
+  /* ── Light Theme — RamCart Palette ────────────────────────── */
   --bg-primary: #FAFAFA;
   --bg-secondary: #FFFFFF;
   --bg-tertiary: #F5F5F6;
@@ -57,7 +57,7 @@
   --border-color: #EAEAEC;
   --border-focus: #FF3F6C;
 
-  /* Rating chip colour (Myntra green) */
+  /* Rating chip colour (RamCart Emerald) */
   --rating-green: #14958F;
   --rating-green-bg: #E8F8F7;
 
@@ -76,7 +76,7 @@
   --warning-bg: #FFFBEB;
 }
 
-/* ── Dark Theme — Myntra Dark Palette ────────────────────── */
+/* ── Dark Theme — RamCart Dark Palette ────────────────────── */
 .dark-theme {
   --bg-primary: #1C1C1C;
   --bg-secondary: #282828;

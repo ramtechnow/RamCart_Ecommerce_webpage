@@ -1,3 +1,16 @@
-# https://www.robotstxt.org/robotstxt.html
+# RamCart Production robots.txt
 User-agent: *
-Disallow:
+Disallow: /admin
+Disallow: /checkout
+Disallow: /orders
+Disallow: /profile
+
+Allow: /
+Allow: /catalog
+Allow: /category/
+Allow: /product/
+Allow: /mens
+Allow: /womens
+Allow: /kids
+
+Sitemap: https://ecommerce-website-dfd55.web.app/sitemap.xml

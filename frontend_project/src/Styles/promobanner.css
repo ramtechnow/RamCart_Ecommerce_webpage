@@ -1,9 +1,9 @@
 /* ============================================================
-   FLIPKART STYLE MULTI-CARD CAROUSEL (Mobile & Laptop)
-   Matches Flipkart BBD Banner Design with Peeking & Pill Indicators
+   RAMCART MULTI-CARD PROMO CAROUSEL (Mobile & Laptop)
+   RAMCART Signature Showcase Banner with Multi-Card Peeking & Dynamic Indicators
    ============================================================ */
 
-.flipkart-carousel-wrapper {
+.ramcart-promo-carousel-wrapper {
   width: 100%;
   max-width: 1440px;
   margin: 12px auto 24px;
@@ -13,21 +13,21 @@
   --slide-step: calc(48% + 16px);
 }
 
-.flipkart-carousel-viewport {
+.ramcart-promo-carousel-viewport {
   width: 100%;
   overflow: hidden;
   padding: 4px 16px 8px;
   box-sizing: border-box;
 }
 
-.flipkart-carousel-track {
+.ramcart-promo-carousel-track {
   display: flex;
   transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
   will-change: transform;
 }
 
-/* Individual Flipkart Banner Card */
-.flipkart-banner-card {
+/* Individual RAMCART Banner Card */
+.ramcart-promo-banner-card {
   flex-shrink: 0;
   width: 48%;
   margin-right: 16px;
@@ -46,12 +46,12 @@
   justify-content: flex-end;
 }
 
-.flipkart-banner-card:hover {
+.ramcart-promo-banner-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
 }
 
-.flipkart-banner-img {
+.ramcart-promo-banner-img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -63,12 +63,12 @@
   z-index: 1;
 }
 
-.flipkart-banner-card:hover .flipkart-banner-img {
+.ramcart-promo-banner-card:hover .ramcart-promo-banner-img {
   transform: scale(1.02);
 }
 
 /* Dark gradient overlay so text is 100% readable over any photo */
-.flipkart-banner-gradient {
+.ramcart-promo-banner-gradient {
   position: absolute;
   inset: 0;
   background: linear-gradient(
@@ -82,7 +82,7 @@
 }
 
 /* Banner Content Text & Offer Badges */
-.flipkart-banner-content {
+.ramcart-promo-banner-content {
   position: relative;
   z-index: 3;
   padding: clamp(16px, 3vw, 28px);
@@ -94,7 +94,7 @@
 }
 
 /* Yellow / Blue Early Bird Badge */
-.flipkart-badge-earlybird {
+.ramcart-promo-badge-earlybird {
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -109,7 +109,7 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-.flipkart-badge-discount {
+.ramcart-promo-badge-discount {
   display: inline-flex;
   align-items: center;
   background: #ef4444;
@@ -122,7 +122,7 @@
 }
 
 /* Headline */
-.flipkart-banner-title {
+.ramcart-promo-banner-title {
   font-size: clamp(16px, 2.2vw, 24px);
   font-weight: 800;
   line-height: 1.25;
@@ -132,8 +132,8 @@
   letter-spacing: -0.2px;
 }
 
-/* Bank Offer Strip (like Flipkart Axis / ICICI Bank) */
-.flipkart-bank-strip {
+/* Bank Offer Strip (like RAMCART Axis / ICICI Bank) */
+.ramcart-promo-bank-strip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -162,7 +162,7 @@
 }
 
 /* AD / Sponsored chip */
-.flipkart-ad-tag {
+.ramcart-promo-ad-tag {
   position: absolute;
   bottom: 12px;
   right: 14px;
@@ -176,8 +176,8 @@
   letter-spacing: 0.5px;
 }
 
-/* ─── Flipkart Signature Pill Indicators ─── */
-.flipkart-indicators {
+/* ─── RAMCART Signature Pill Indicators ─── */
+.ramcart-promo-indicators {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -185,7 +185,7 @@
   margin-top: 10px;
 }
 
-.flipkart-indicator-dot {
+.ramcart-promo-indicator-dot {
   height: 4px;
   border-radius: 4px;
   background-color: #d1d5db;
@@ -195,31 +195,31 @@
   padding: 0;
 }
 
-.dark-theme .flipkart-indicator-dot,
-.dark .flipkart-indicator-dot {
+.dark-theme .ramcart-promo-indicator-dot,
+.dark .ramcart-promo-indicator-dot {
   background-color: #3f3f46;
 }
 
-.flipkart-indicator-dot.active {
+.ramcart-promo-indicator-dot.active {
   width: 32px !important;
   background-color: #000000;
 }
 
-.dark-theme .flipkart-indicator-dot.active,
-.dark .flipkart-indicator-dot.active {
+.dark-theme .ramcart-promo-indicator-dot.active,
+.dark .ramcart-promo-indicator-dot.active {
   background-color: #ffffff;
 }
 
-.flipkart-indicator-dot.inactive {
+.ramcart-promo-indicator-dot.inactive {
   width: 8px;
 }
 
-.flipkart-indicator-dot:hover:not(.active) {
+.ramcart-promo-indicator-dot:hover:not(.active) {
   background-color: #9ca3af;
 }
 
 /* ─── Floating Desktop Navigation Arrows ─── */
-.flipkart-nav-arrow {
+.ramcart-promo-nav-arrow {
   position: absolute;
   top: 48%;
   transform: translateY(-50%);
@@ -239,22 +239,22 @@
   backdrop-filter: blur(6px);
 }
 
-.flipkart-nav-arrow:hover {
+.ramcart-promo-nav-arrow:hover {
   background: #ffffff;
   transform: translateY(-50%) scale(1.1);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
-.flipkart-nav-arrow.prev {
+.ramcart-promo-nav-arrow.prev {
   left: 20px;
 }
 
-.flipkart-nav-arrow.next {
+.ramcart-promo-nav-arrow.next {
   right: 20px;
 }
 
 /* Loading Skeleton */
-.flipkart-skeleton-card {
+.ramcart-promo-skeleton-card {
   width: 100%;
   height: 260px;
   border-radius: 18px;
@@ -266,11 +266,11 @@
 
 /* 1. Desktop / Laptop (Screenshot 5: 2.2 cards visible at once) */
 @media (min-width: 1024px) {
-  .flipkart-carousel-wrapper {
+  .ramcart-promo-carousel-wrapper {
     --slide-step: calc(48% + 16px);
   }
 
-  .flipkart-banner-card {
+  .ramcart-promo-banner-card {
     width: 48%;
     margin-right: 16px;
     min-height: 260px;
@@ -279,11 +279,11 @@
 
 /* 2. Tablet View */
 @media (min-width: 641px) and (max-width: 1023px) {
-  .flipkart-carousel-wrapper {
+  .ramcart-promo-carousel-wrapper {
     --slide-step: calc(72% + 14px);
   }
 
-  .flipkart-banner-card {
+  .ramcart-promo-banner-card {
     width: 72%;
     margin-right: 14px;
     min-height: 230px;
@@ -292,34 +292,34 @@
 
 /* 3. Mobile View (Screenshots 1-4: 1 full card + peeking edge) */
 @media (max-width: 640px) {
-  .flipkart-carousel-wrapper {
+  .ramcart-promo-carousel-wrapper {
     margin: 8px auto 16px;
     --slide-step: calc(88vw + 12px);
   }
 
-  .flipkart-carousel-viewport {
+  .ramcart-promo-carousel-viewport {
     padding: 2px 12px 6px;
   }
 
-  .flipkart-banner-card {
+  .ramcart-promo-banner-card {
     width: 88vw;
     margin-right: 12px;
     min-height: 180px;
     border-radius: 16px;
   }
 
-  .flipkart-banner-content {
+  .ramcart-promo-banner-content {
     max-width: 85%;
     padding: 14px;
     gap: 6px;
   }
 
-  .flipkart-banner-title {
+  .ramcart-promo-banner-title {
     font-size: 15px;
     line-height: 1.25;
   }
 
-  .flipkart-bank-strip {
+  .ramcart-promo-bank-strip {
     padding: 3px 8px;
     margin-top: 2px;
   }
@@ -328,11 +328,11 @@
     font-size: 8px;
   }
 
-  .flipkart-nav-arrow {
+  .ramcart-promo-nav-arrow {
     display: none; /* Mobile uses natural touch swipe gesture */
   }
 
-  .flipkart-indicators {
+  .ramcart-promo-indicators {
     margin-top: 8px;
   }
 }

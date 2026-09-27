@@ -23,6 +23,8 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
   const [uploading, setUploading] = useState(false);
 
   const [description, setDescription] = useState('');
+  const [tag, setTag] = useState('EARLY BIRD DEALS');
+  const [bankOfferText, setBankOfferText] = useState('Instant Discount on Prepaid Orders*');
   const [targetLink, setTargetLink] = useState('');
   const [targetProductId, setTargetProductId] = useState('');
   const [discountType, setDiscountType] = useState<string>('none');
@@ -35,6 +37,8 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
   // Edit banner modal state
   const [editingBanner, setEditingBanner] = useState<any | null>(null);
   const [editDescription, setEditDescription] = useState('');
+  const [editTag, setEditTag] = useState('');
+  const [editBankOfferText, setEditBankOfferText] = useState('');
   const [editTargetLink, setEditTargetLink] = useState('');
   const [editDiscountType, setEditDiscountType] = useState('none');
   const [editDiscountValue, setEditDiscountValue] = useState('');
@@ -161,6 +165,8 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
         image: finalImageUrl,
         description: description.trim(),
         targetLink: targetLink.trim(),
+        tag: tag.trim() || 'EARLY BIRD DEALS',
+        bankOfferText: bankOfferText.trim() || 'Instant Discount on Prepaid Orders*',
         discountType: discountType === 'none' ? null : discountType,
         discountValue: discountType === 'none' ? 0 : Number(discountValue || 0),
         page
@@ -171,6 +177,8 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
 
       clearImage();
       setDescription('');
+      setTag('EARLY BIRD DEALS');
+      setBankOfferText('Instant Discount on Prepaid Orders*');
       setTargetLink('');
       setTargetProductId('');
       setDiscountType('none');
@@ -189,6 +197,8 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
   const openEditModal = (b: any) => {
     setEditingBanner(b);
     setEditDescription(b.description || '');
+    setEditTag(b.tag || 'EARLY BIRD DEALS');
+    setEditBankOfferText(b.bankOfferText || 'Instant Discount on Prepaid Orders*');
     setEditTargetLink(b.targetLink || '');
     setEditDiscountType(b.discountType || 'none');
     setEditDiscountValue(b.discountValue ? String(b.discountValue) : '');
@@ -204,6 +214,8 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
         image: editImageUrl,
         description: editDescription,
         targetLink: editTargetLink,
+        tag: editTag.trim() || 'EARLY BIRD DEALS',
+        bankOfferText: editBankOfferText.trim() || 'Instant Discount on Prepaid Orders*',
         discountType: editDiscountType === 'none' ? null : editDiscountType,
         discountValue: editDiscountType === 'none' ? 0 : Number(editDiscountValue || 0),
         page: editPage
@@ -301,15 +313,20 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
 
                 {/* Info and Actions */}
                 <div className="p-4 flex flex-col flex-1 gap-2 bg-[#eff0f6]/20 dark:bg-[#212030]/20">
-                  <div className="flex justify-between items-start gap-2">
+                  <div className="flex justify-between items-start gap-2 flex-wrap">
                     <h4 className="text-xs font-extrabold text-[#0f0e17] dark:text-white line-clamp-1">
                       {b.description}
                     </h4>
-                    {b.discountType && (
-                      <span className="bg-[#eff0f6] text-[#e53170] text-[9px] font-black px-2 py-0.5 rounded-full shrink-0">
-                        {b.discountType === 'percentage' ? `${b.discountValue}% OFF` : `₹${b.discountValue} OFF`}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[9px] font-black px-2 py-0.5 rounded-full border border-amber-500/20">
+                        {b.tag || "EARLY BIRD DEALS"}
                       </span>
-                    )}
+                      {b.discountType && (
+                        <span className="bg-[#eff0f6] text-[#e53170] text-[9px] font-black px-2 py-0.5 rounded-full">
+                          {b.discountType === 'percentage' ? `${b.discountValue}% OFF` : `₹${b.discountValue} OFF`}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <p className="text-[10px] text-[#717388] font-semibold flex items-center gap-1 mt-1 truncate">
@@ -416,6 +433,30 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                   placeholder="e.g. End of Season Sale &bull; Up to 50% Off"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
+                  className="w-full h-10 px-3 text-xs rounded-xl border border-[#e2e4ed]/40 bg-[#ffffff] dark:bg-[#212030] outline-none"
+                />
+              </div>
+
+              {/* Carousel Badge Tag */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-[#2e2f3e] dark:text-[#a7a9be]">Carousel Badge Tag</label>
+                <input
+                  type="text"
+                  placeholder="e.g. EARLY BIRD DEALS, RAMCART EXCLUSIVE, FESTIVE DROP"
+                  value={tag}
+                  onChange={(e) => setTag(e.target.value)}
+                  className="w-full h-10 px-3 text-xs rounded-xl border border-[#e2e4ed]/40 bg-[#ffffff] dark:bg-[#212030] outline-none"
+                />
+              </div>
+
+              {/* Bank Offer Strip Text */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-[#2e2f3e] dark:text-[#a7a9be]">Bank / Payment Offer Subtext</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Instant Discount on Prepaid Orders*"
+                  value={bankOfferText}
+                  onChange={(e) => setBankOfferText(e.target.value)}
                   className="w-full h-10 px-3 text-xs rounded-xl border border-[#e2e4ed]/40 bg-[#ffffff] dark:bg-[#212030] outline-none"
                 />
               </div>
@@ -531,6 +572,30 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                   type="text" 
                   value={editDescription} 
                   onChange={(e) => setEditDescription(e.target.value)} 
+                  className="w-full h-9 px-3 rounded-lg border border-[#e2e4ed]/40 bg-[#ffffff] dark:bg-[#212030] outline-none text-xs"
+                />
+              </div>
+
+              {/* Badge Tag */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-[#2e2f3e] dark:text-[#a7a9be]">Carousel Badge Tag</label>
+                <input 
+                  type="text" 
+                  value={editTag} 
+                  onChange={(e) => setEditTag(e.target.value)} 
+                  placeholder="e.g. EARLY BIRD DEALS"
+                  className="w-full h-9 px-3 rounded-lg border border-[#e2e4ed]/40 bg-[#ffffff] dark:bg-[#212030] outline-none text-xs"
+                />
+              </div>
+
+              {/* Bank Offer Strip Text */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-[#2e2f3e] dark:text-[#a7a9be]">Bank / Payment Offer Subtext</label>
+                <input 
+                  type="text" 
+                  value={editBankOfferText} 
+                  onChange={(e) => setEditBankOfferText(e.target.value)} 
+                  placeholder="e.g. Instant Discount on Prepaid Orders*"
                   className="w-full h-9 px-3 rounded-lg border border-[#e2e4ed]/40 bg-[#ffffff] dark:bg-[#212030] outline-none text-xs"
                 />
               </div>

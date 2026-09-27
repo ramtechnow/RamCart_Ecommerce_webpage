@@ -325,11 +325,11 @@ export const Orders: React.FC = () => {
                           </div>
 
                           <div className="info-card bg-bg-secondary border border-border rounded-xl p-4">
-                            <h4 className="text-xs font-extrabold text-text-primary mb-2.5">Simulated Receipt</h4>
+                            <h4 className="text-xs font-extrabold text-text-primary mb-2.5">Order Invoice &amp; Receipt</h4>
                             <div className="payment-row flex justify-between text-xs py-1.5 border-b border-border">
                               <span>Payment Status:</span>
-                              <span className={`pay-badge text-[9px] font-bold py-0.5 px-2 rounded-full ${order.payment ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-                                {order.payment ? "PAID (DEMO)" : "UNPAID"}
+                              <span className={`pay-badge text-[9px] font-bold py-0.5 px-2 rounded-full ${order.payment ? "bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-300" : "bg-amber-100 text-amber-800"}`}>
+                                {order.payment ? "PAID" : "PENDING"}
                               </span>
                             </div>
                             <div className="payment-row flex justify-between text-xs py-1.5 border-b border-border">

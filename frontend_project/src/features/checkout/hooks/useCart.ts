@@ -80,7 +80,7 @@ export const useCart = () => {
     }
   }, [cartItems, user]);
 
-  const addToCart = async (productId: string, size = "M", color = "White", quantity = 1) => {
+  const addToCart = async (productId: string, size = "M", color = "White", quantity = 1, customPrice?: number) => {
     // 1. Fetch product detail to get metadata (name, image, price)
     const product = await fetchProductById(productId);
     if (!product) {
@@ -88,6 +88,7 @@ export const useCart = () => {
       return;
     }
 
+    const itemPrice = customPrice !== undefined && customPrice > 0 ? customPrice : product.newPrice;
     const docId = `${user?.uid || "guest"}_${productId}_${size}_${color}`;
     const cartItem: CartItem = {
       id: docId,
@@ -98,7 +99,7 @@ export const useCart = () => {
       size,
       color,
       quantity,
-      price: product.newPrice
+      price: itemPrice
     };
 
     // 2. Update Redux optimistically

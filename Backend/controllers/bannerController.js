@@ -3,7 +3,7 @@ const Banner = require('../models/Banner');
 // Create a new banner (Admin Only)
 exports.createBanner = async (req, res) => {
   try {
-    const { image, description, targetLink, discountType, discountValue, page } = req.body;
+    const { image, description, targetLink, tag, bankOfferText, discountType, discountValue, page } = req.body;
     if (!image || !description || !targetLink || !page) {
       return res.status(400).json({ success: false, error: "Missing required fields for banner creation" });
     }
@@ -12,6 +12,8 @@ exports.createBanner = async (req, res) => {
       image,
       description,
       targetLink,
+      tag: tag || 'EARLY BIRD DEALS',
+      bankOfferText: bankOfferText || 'Instant Discount on Prepaid Orders*',
       discountType,
       discountValue,
       page
@@ -29,14 +31,14 @@ exports.createBanner = async (req, res) => {
 // Update an existing banner (Admin Only)
 exports.updateBanner = async (req, res) => {
   try {
-    const { bannerId, image, description, targetLink, discountType, discountValue, page } = req.body;
+    const { bannerId, image, description, targetLink, tag, bankOfferText, discountType, discountValue, page } = req.body;
     if (!bannerId) {
       return res.status(400).json({ success: false, error: "Missing bannerId field" });
     }
 
     const updated = await Banner.findByIdAndUpdate(
       bannerId,
-      { $set: { image, description, targetLink, discountType, discountValue, page } },
+      { $set: { image, description, targetLink, tag, bankOfferText, discountType, discountValue, page } },
       { new: true }
     );
 

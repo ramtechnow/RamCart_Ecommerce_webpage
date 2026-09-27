@@ -126,6 +126,11 @@ export const AdminPanel: React.FC = () => {
     setAdminNotifications(prev => prev.map(n => ({ ...n, unread: false })));
   };
 
+  const handleClearAllNotifications = () => {
+    setAdminNotifications([]);
+    dispatch(addToast({ message: "Cleared all admin notifications", type: "info" }));
+  };
+
   const handleMarkSingleNotificationRead = (id: any) => {
     setAdminNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
   };
@@ -159,6 +164,26 @@ export const AdminPanel: React.FC = () => {
       if (ordersData.status === "fulfilled") {
         const freshOrders = ordersData.value;
         setOrders(freshOrders);
+
+        // Populate notification drawer with initial recent orders if empty
+        setAdminNotifications(prevNotifs => {
+          if (prevNotifs.length === 0 && freshOrders && freshOrders.length > 0) {
+            return freshOrders.slice(0, 10).map((o: any) => {
+              const oId = String(o.id || o._id || "");
+              const orderDate = o.date ? new Date(o.date).toLocaleDateString() : "Recent";
+              return {
+                id: `init-${oId}-${Date.now()}`,
+                title: `Order #${oId.substring(0, 8).toUpperCase()}`,
+                message: `Placed by ${o.userName || o.userEmail || "Customer"} (₹${o.amount}) • Status: ${o.status || 'Ordered'}`,
+                time: orderDate,
+                type: "order",
+                unread: false,
+                orderId: oId
+              };
+            });
+          }
+          return prevNotifs;
+        });
 
         // Detect new incoming orders for real-time pop-up notification
         setKnownOrderIds(prev => {
@@ -282,6 +307,7 @@ export const AdminPanel: React.FC = () => {
           notifications={adminNotifications as any}
           onMarkAllRead={handleMarkAllNotificationsRead}
           onMarkSingleRead={handleMarkSingleNotificationRead}
+          onClearAll={handleClearAllNotifications}
           onProcessOrder={handleProcessOrder}
           onToggleMobileSidebar={() => setMobileSidebarOpen(prev => !prev)}
         />

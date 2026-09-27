@@ -9,15 +9,25 @@ import {
   sendPasswordResetEmail
 } from "firebase/auth";
 
-// Environment variables configuration
+// Environment variables configuration with safe browser Vite & Node fallbacks
+const getEnv = (key, viteKey, fallback) => {
+  if (typeof import.meta !== "undefined" && import.meta.env && import.meta.env[viteKey]) {
+    return import.meta.env[viteKey];
+  }
+  if (typeof process !== "undefined" && process.env && process.env[key]) {
+    return process.env[key];
+  }
+  return fallback;
+};
+
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "AIzaSyAbhOjpXJb88Dan3-tWS9rkBUOX0ND_6kI",
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "ecommerce-website-dfd55.firebaseapp.com",
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "ecommerce-website-dfd55",
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "ecommerce-website-dfd55.firebasestorage.app",
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || "128549464864",
-  appId: process.env.REACT_APP_FIREBASE_APP_ID || "1:128549464864:web:f6d80c86bf13ccdd30c545",
-  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID || "G-L194PK372N"
+  apiKey: getEnv("REACT_APP_FIREBASE_API_KEY", "VITE_FIREBASE_API_KEY", "AIzaSyAbhOjpXJb88Dan3-tWS9rkBUOX0ND_6kI"),
+  authDomain: getEnv("REACT_APP_FIREBASE_AUTH_DOMAIN", "VITE_FIREBASE_AUTH_DOMAIN", "ecommerce-website-dfd55.firebaseapp.com"),
+  projectId: getEnv("REACT_APP_FIREBASE_PROJECT_ID", "VITE_FIREBASE_PROJECT_ID", "ecommerce-website-dfd55"),
+  storageBucket: getEnv("REACT_APP_FIREBASE_STORAGE_BUCKET", "VITE_FIREBASE_STORAGE_BUCKET", "ecommerce-website-dfd55.firebasestorage.app"),
+  messagingSenderId: getEnv("REACT_APP_FIREBASE_MESSAGING_SENDER_ID", "VITE_FIREBASE_MESSAGING_SENDER_ID", "128549464864"),
+  appId: getEnv("REACT_APP_FIREBASE_APP_ID", "VITE_FIREBASE_APP_ID", "1:128549464864:web:f6d80c86bf13ccdd30c545"),
+  measurementId: getEnv("REACT_APP_FIREBASE_MEASUREMENT_ID", "VITE_FIREBASE_MEASUREMENT_ID", "G-L194PK372N")
 };
 
 let app = null;

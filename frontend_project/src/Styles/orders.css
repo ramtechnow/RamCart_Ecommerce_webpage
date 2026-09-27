@@ -1,5 +1,5 @@
 /* ============================================================
-   Orders Page Styles — Myntra-Inspired Clean Look
+   Orders Page Styles — RamCart Design System Clean Look
    No backend/data logic. Style only.
    ============================================================ */
 
@@ -515,27 +515,75 @@
   letter-spacing: 0.3px;
 }
 
-.status-badge.placed {
-  background-color: #fef3c7;
-  color: #d97706;
+/* High-Contrast Order Status Badges */
+.status-badge.placed,
+.status-badge.status-placed,
+.status-badge.status-pending,
+.status-badge.status-ordered {
+  background-color: #fef3c7 !important;
+  color: #78350f !important;
+  border: 1.5px solid #f59e0b !important;
 }
 
-.status-badge.processing {
-  background-color: #dbeafe;
-  color: #2563eb;
+.status-badge.processing,
+.status-badge.status-processing {
+  background-color: #dbeafe !important;
+  color: #1e3a8a !important;
+  border: 1.5px solid #3b82f6 !important;
 }
 
-.status-badge.shipped {
-  background-color: #fae8ff;
-  color: #c084fc;
+.status-badge.shipped,
+.status-badge.status-shipped {
+  background-color: #f3e8ff !important;
+  color: #581c87 !important;
+  border: 1.5px solid #9333ea !important;
 }
 
-.status-badge.delivered {
-  background-color: #dcfce7;
-  color: #15803d;
+.status-badge.delivered,
+.status-badge.status-delivered {
+  background-color: #d1fae5 !important;
+  color: #064e3b !important;
+  border: 1.5px solid #10b981 !important;
 }
 
-.status-badge.cancelled {
-  background-color: #fee2e2;
-  color: #b91c1c;
+.status-badge.cancelled,
+.status-badge.status-cancelled {
+  background-color: #fee2e2 !important;
+  color: #7f1d1d !important;
+  border: 1.5px solid #ef4444 !important;
+}
+
+/* Dark mode badge overrides */
+.dark .status-badge.placed,
+.dark .status-badge.status-placed,
+.dark .status-badge.status-pending,
+.dark .status-badge.status-ordered,
+.dark-theme .status-badge.status-pending {
+  background-color: #451a03 !important;
+  color: #fef3c7 !important;
+  border-color: #b45309 !important;
+}
+
+.dark .status-badge.processing,
+.dark .status-badge.status-processing,
+.dark-theme .status-badge.status-processing {
+  background-color: #172554 !important;
+  color: #dbeafe !important;
+  border-color: #2563eb !important;
+}
+
+.dark .status-badge.shipped,
+.dark .status-badge.status-shipped,
+.dark-theme .status-badge.status-shipped {
+  background-color: #3b0764 !important;
+  color: #f3e8ff !important;
+  border-color: #a855f7 !important;
+}
+
+.dark .status-badge.delivered,
+.dark .status-badge.status-delivered,
+.dark-theme .status-badge.status-delivered {
+  background-color: #022c22 !important;
+  color: #a7f3d0 !important;
+  border-color: #059669 !important;
 }

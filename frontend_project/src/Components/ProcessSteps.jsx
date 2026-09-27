@@ -5,18 +5,18 @@ const ProcessSteps = () => {
   const steps = [
     {
       icon: <Truck size={32} style={{ color: "var(--accent-pink)" }} />,
-      title: "Global Express Delivery",
-      description: "Fast, reliable shipping directly to your doorstep with real-time tracking updates."
+      title: "Fast Doorstep Delivery",
+      description: "Quick, dependable shipping across India with real-time tracking updates."
     },
     {
       icon: <ShieldCheck size={32} style={{ color: "var(--accent-pink)" }} />,
-      title: "Secure Checkout (Demo)",
-      description: "SSL encrypted checkout simulation. No real payments or credit cards are charged."
+      title: "100% Secure Payments",
+      description: "256-bit encrypted checkout supporting UPI, NetBanking, and all major cards."
     },
     {
       icon: <RefreshCw size={32} style={{ color: "var(--accent-pink)" }} />,
       title: "Easy 30-Day Returns",
-      description: "Not the perfect fit? Hassle-free exchanges or refund simulation within 30 days."
+      description: "Not the perfect fit? Enjoy hassle-free exchanges or refunds within 30 days."
     }
   ];
 

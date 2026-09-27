@@ -19,6 +19,49 @@
   gap: 0;
 }
 
+/* ── Category Sub-Navbar Strip (Desktop) ─────────────────── */
+.nav-sub-categories-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+  scrollbar-width: none;
+  white-space: nowrap;
+}
+
+.nav-sub-categories-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.nav-sub-categories-inner {
+  display: flex;
+  gap: 22px;
+  padding: 0 24px;
+  align-items: center;
+}
+
+.nav-sub-category-link {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+  white-space: nowrap;
+}
+
+.nav-sub-category-link:hover {
+  color: var(--accent-pink);
+}
+
+@media (max-width: 768px) {
+  .nav-sub-categories-bar {
+    display: none;
+  }
+}
+
 /* Logo */
 .nav-logo-text {
   display: flex;

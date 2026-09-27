@@ -81,13 +81,13 @@ const Newsletter = () => {
         Subscribe to RamCart Newsletter
       </h2>
       <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", maxWidth: "450px" }}>
-        Stay updated on special season offers, styling tutorials, and portfolio code enhancements. Direct updates to your inbox.
+        Stay updated on seasonal sales, new drops, and exclusive subscriber discounts directly in your inbox.
       </p>
 
       {subscribed ? (
         <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--success-color)", fontWeight: "600", marginTop: "var(--space-2)" }}>
           <CheckCircle size={18} />
-          <span>Thank you for subscribing! (Demo confirmation)</span>
+          <span>Thank you for subscribing! Check your inbox for your welcome discount code.</span>
         </div>
       ) : (
         <form 

@@ -4,7 +4,7 @@ import { adminApi } from '../../Utils/adminApi';
 import { compressImageToBase64 } from '../../Utils/adminHelpers';
 import { ProductVariant } from '../../features/catalog/types/productTypes';
 
-const PRESET_SIZES = ['Free Size', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '28', '30', '32', '34', '36'];
+const PRESET_SIZES = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '4XL', 'Free Size'];
 const PRESET_COLORS = ['Black', 'White', 'Navy Blue', 'Beige', 'Charcoal', 'Red', 'Blue', 'Green', 'Pink', 'Sandal', 'Maroon', 'Olive'];
 
 interface AdminAddProductTabProps {
@@ -26,7 +26,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
   const [oldPrice, setOldPrice] = useState("");
   
   // Chip selections
-  const [selectedSizes, setSelectedSizes] = useState<string[]>(['S', 'M', 'L', 'XL']);
+  const [selectedSizes, setSelectedSizes] = useState<string[]>(['S', 'M', 'L', 'XL', 'XXL']);
   const [selectedColors, setSelectedColors] = useState<string[]>(['Black', 'White']);
   const [customSizeInput, setCustomSizeInput] = useState("");
   const [customColorInput, setCustomColorInput] = useState("");
@@ -41,8 +41,17 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
   const [saving, setSaving] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string | null>>({});
 
-  // Manual overrides for variants (price & stock per size/color)
-  const [manualVariants, setManualVariants] = useState<Partial<ProductVariant>[]>([]);
+  // Size-specific Pricing & Stock state
+  const [sizeDetails, setSizeDetails] = useState<Record<string, { price?: number; stock: number; inStock: boolean }>>({
+    'XXS': { price: 178, stock: 0, inStock: false },
+    'S': { price: 238, stock: 25, inStock: true },
+    'M': { price: 243, stock: 40, inStock: true },
+    'L': { price: 253, stock: 30, inStock: true },
+    'XL': { price: 258, stock: 20, inStock: true },
+    'XXL': { price: 262, stock: 15, inStock: true },
+    'XXXL': { price: 342, stock: 10, inStock: true },
+    '4XL': { price: 342, stock: 8, inStock: true },
+  });
 
   // Size/Color chip toggle handlers
   const toggleSize = (size: string) => {
@@ -139,7 +148,55 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
     addToast("Image removed from uploader", "info");
   };
 
-  // Variant Builder
+  const handleMoveImage = (fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= images.length) return;
+    setImages(prev => {
+      const updated = [...prev];
+      const item = updated.splice(fromIndex, 1)[0];
+      updated.splice(toIndex, 0, item);
+      return updated;
+    });
+  };
+
+  const IMAGE_ROLES = ["1. Front", "2. Back", "3. Side", "4. Detail", "5. Additional"];
+
+  const handleSizePriceChange = (size: string, val: number) => {
+    setSizeDetails(prev => ({
+      ...prev,
+      [size]: {
+        ...(prev[size] || { stock: 15, inStock: true }),
+        price: val
+      }
+    }));
+  };
+
+  const handleToggleSizeStock = (size: string) => {
+    setSizeDetails(prev => {
+      const current = prev[size] || { price: Number(newPrice) || 0, stock: 15, inStock: true };
+      const nextInStock = !current.inStock;
+      return {
+        ...prev,
+        [size]: {
+          ...current,
+          inStock: nextInStock,
+          stock: nextInStock ? (current.stock || 15) : 0
+        }
+      };
+    });
+  };
+
+  const handleSizeUnitsChange = (size: string, units: number) => {
+    setSizeDetails(prev => ({
+      ...prev,
+      [size]: {
+        ...(prev[size] || { price: Number(newPrice) || 0, inStock: true }),
+        stock: units,
+        inStock: units > 0
+      }
+    }));
+  };
+
+  // Generate size-tier variants
   const generatedVariants = useMemo(() => {
     const list: ProductVariant[] = [];
     const baseSlugName = name
@@ -148,47 +205,28 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
       .replace(/[^A-Z0-9]/g, '-')
       .substring(0, 15) || "ITEM";
 
-    selectedColors.forEach(color => {
-      selectedSizes.forEach(size => {
-        const skuPattern = `RC-${category.substring(0, 3).toUpperCase()}-${baseSlugName}-${color.toUpperCase()}-${size}`;
-        const override = manualVariants.find(v => v.color === color && v.size === size);
+    const defaultPrice = Number(newPrice) || 0;
+    const primaryColor = selectedColors[0] || "Standard";
 
-        list.push({
-          sku: override?.sku || skuPattern,
-          color,
-          size,
-          stock: override?.stock !== undefined ? override.stock : 10,
-          price: override?.price !== undefined ? override.price : Number(newPrice) || 0
-        });
+    selectedSizes.forEach(size => {
+      const detail = sizeDetails[size];
+      const sizePrice = detail?.price !== undefined ? detail.price : defaultPrice;
+      const sizeStock = detail?.inStock !== false ? (detail?.stock ?? 15) : 0;
+
+      list.push({
+        sku: `RC-${category.substring(0, 3).toUpperCase()}-${baseSlugName}-${size}`,
+        color: primaryColor,
+        size,
+        stock: sizeStock,
+        price: sizePrice
       });
     });
     return list;
-  }, [selectedColors, selectedSizes, name, category, newPrice, manualVariants]);
+  }, [selectedSizes, selectedColors, name, category, newPrice, sizeDetails]);
 
   const totalCalculatedStock = useMemo(() => {
     return generatedVariants.reduce((sum, v) => sum + v.stock, 0);
   }, [generatedVariants]);
-
-  const updateVariantField = (color: string, size: string, field: keyof ProductVariant, value: any) => {
-    setManualVariants(prev => {
-      const idx = prev.findIndex(v => v.color === color && v.size === size);
-      const updated = [...prev];
-      if (idx !== -1) {
-        updated[idx] = { ...updated[idx], [field]: value };
-      } else {
-        const currentGenerated = generatedVariants.find(v => v.color === color && v.size === size);
-        updated.push({
-          color,
-          size,
-          sku: currentGenerated?.sku || "",
-          stock: currentGenerated?.stock || 10,
-          price: currentGenerated?.price || Number(newPrice) || 0,
-          [field]: value
-        });
-      }
-      return updated;
-    });
-  };
 
   // Validation
   const validateForm = () => {
@@ -463,9 +501,19 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
           <div className="flex flex-col gap-6">
             {/* Image Upload card */}
             <div className="bg-[#ffffff] dark:bg-[#171622] rounded-2xl shadow-sm border border-[#e2e4ed]/40 dark:border-white/10 p-6 flex flex-col gap-4">
-              <h3 className="text-sm font-black text-[#e53170] dark:text-[#ff8906] uppercase tracking-wider flex items-center gap-2 border-b border-[#e2e4ed]/20 dark:border-white/5 pb-3">
-                <ImageIcon size={18} /> Media Files
-              </h3>
+              <div className="flex justify-between items-center border-b border-[#e2e4ed]/20 dark:border-white/5 pb-3">
+                <h3 className="text-sm font-black text-[#e53170] dark:text-[#ff8906] uppercase tracking-wider flex items-center gap-2">
+                  <ImageIcon size={18} /> Media Files (Up to 5 Views)
+                </h3>
+                <span className="text-[11px] font-bold text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">
+                  {images.length}/5 Added
+                </span>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-900 dark:text-amber-200">
+                <p className="font-semibold">Recommended 5 views: 1. Front (Cover), 2. Back, 3. Side, 4. Detail, 5. Size Chart.</p>
+                <p className="text-[10px] opacity-80 mt-0.5">Use the &larr; and &rarr; arrow buttons below to reorder images easily.</p>
+              </div>
               
               {/* Drag zone */}
               <div 
@@ -485,7 +533,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                 <Upload size={28} className="text-[#ff8906] animate-bounce" />
                 <div>
                   <p className="text-xs font-bold text-[#0f0e17] dark:text-white">Drag &amp; drop product images</p>
-                  <p className="text-[10px] text-[#717388] mt-0.5">or click to browse from device</p>
+                  <p className="text-[10px] text-[#717388] mt-0.5">or click to browse from device (PNG, JPG, WebP)</p>
                 </div>
                 <input 
                   id="add-multiple-file-input" 
@@ -498,31 +546,68 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
               </div>
               {fieldErrors.images && <span className="text-[10px] text-red-500 font-bold mt-0.5">{fieldErrors.images}</span>}
 
-              {/* Upload Previews */}
+              {/* Upload Previews with Ordering & Roles */}
               {images.length > 0 && (
-                <div className="grid grid-cols-3 gap-2 mt-2">
-                  {images.map((img, idx) => (
-                    <div 
-                      key={idx} 
-                      className={`relative aspect-square rounded-xl overflow-hidden border ${
-                        idx === 0 ? "border-2 border-[#ff8906]" : "border-[#e2e4ed]/40"
-                      } group`}
-                    >
-                      <img src={img} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
-                      <button 
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); handleDeleteImage(idx); }}
-                        className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 shadow hover:bg-red-700 cursor-pointer border-none opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 size={10} />
-                      </button>
-                      {idx === 0 && (
-                        <span className="absolute bottom-1 left-1 bg-[#ff8906] text-white text-[8px] font-black px-1.5 py-0.5 rounded">
-                          Cover
-                        </span>
-                      )}
-                    </div>
-                  ))}
+                <div className="flex flex-col gap-2 mt-2">
+                  <div className="flex items-center justify-between text-[11px] font-bold text-zinc-500">
+                    <span>Ordered Views ({images.length}/5)</span>
+                    <span className="text-[10px] text-zinc-400">Re-order using &larr; / &rarr;</span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {images.map((img, idx) => {
+                      const roleLabel = IMAGE_ROLES[idx] || `${idx + 1}. Additional`;
+                      return (
+                        <div 
+                          key={idx} 
+                          className={`relative aspect-[3/4] rounded-xl overflow-hidden border bg-zinc-100 dark:bg-zinc-800 ${
+                            idx === 0 ? "border-2 border-black dark:border-white shadow-sm" : "border-zinc-200 dark:border-zinc-700"
+                          } group flex flex-col justify-between`}
+                        >
+                          <img src={img} alt={roleLabel} className="absolute inset-0 w-full h-full object-cover" />
+                          
+                          {/* Role Badge */}
+                          <div className="relative z-10 p-1.5 flex justify-between items-start">
+                            <span className="bg-black/80 text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow">
+                              {roleLabel}
+                            </span>
+                            <button 
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); handleDeleteImage(idx); }}
+                              className="bg-red-600 text-white rounded-full p-1 shadow hover:bg-red-700 cursor-pointer border-none opacity-0 group-hover:opacity-100 transition-opacity"
+                              title="Delete view"
+                            >
+                              <Trash2 size={10} />
+                            </button>
+                          </div>
+
+                          {/* Re-order controls at bottom */}
+                          <div className="relative z-10 p-1.5 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-center justify-between mt-auto">
+                            <button
+                              type="button"
+                              disabled={idx === 0}
+                              onClick={(e) => { e.stopPropagation(); handleMoveImage(idx, idx - 1); }}
+                              className="p-1 rounded bg-white/20 hover:bg-white/40 disabled:opacity-30 disabled:cursor-not-allowed text-white text-[10px] cursor-pointer border-none"
+                              title="Move view earlier"
+                            >
+                              &larr;
+                            </button>
+                            <span className="text-[9px] text-white/90 font-mono font-bold">
+                              #{idx + 1}
+                            </span>
+                            <button
+                              type="button"
+                              disabled={idx === images.length - 1}
+                              onClick={(e) => { e.stopPropagation(); handleMoveImage(idx, idx + 1); }}
+                              className="p-1 rounded bg-white/20 hover:bg-white/40 disabled:opacity-30 disabled:cursor-not-allowed text-white text-[10px] cursor-pointer border-none"
+                              title="Move view later"
+                            >
+                              &rarr;
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
@@ -552,66 +637,80 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
           </div>
         </div>
 
-        {/* Dynamic SKU & Variants Editor Grid */}
-        {generatedVariants.length > 0 && (
+        {/* Size-Specific Pricing & Stock Control Table */}
+        {selectedSizes.length > 0 && (
           <div className="bg-[#ffffff] dark:bg-[#171622] rounded-2xl shadow-sm border border-[#e2e4ed]/40 dark:border-white/10 p-6 flex flex-col gap-4 mt-2">
             <div className="flex justify-between items-center flex-wrap gap-4 border-b border-[#e2e4ed]/20 dark:border-white/5 pb-3">
               <div>
-                <h3 className="text-sm font-black text-[#0f0e17] dark:text-white uppercase tracking-wider">Generated Stock Variants</h3>
-                <p className="text-[11px] text-[#717388] font-medium mt-1">Audit or overwrite default pricing and stock items per size/color.</p>
+                <h3 className="text-sm font-black text-[#0f0e17] dark:text-white uppercase tracking-wider">Size-Specific Pricing &amp; Stock Control</h3>
+                <p className="text-[11px] text-[#717388] font-medium mt-1">Set customized prices and stock availability per size. Out-of-stock sizes will be struck out on the storefront.</p>
               </div>
-              <span className="text-xs font-extrabold text-[#ff8906] bg-[#eff0f6]/30 px-3 py-1 rounded-full border border-[#ff8906]/20">
-                Total Stock Count: {totalCalculatedStock} units
+              <span className="text-xs font-extrabold text-[#ff8906] bg-[#eff0f6]/50 dark:bg-white/5 px-3 py-1 rounded-full border border-[#ff8906]/20">
+                Total Available Units: {totalCalculatedStock}
               </span>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[700px]">
+              <table className="w-full text-left border-collapse min-w-[600px]">
                 <thead>
-                  <tr className="border-b border-[#e2e4ed]/30 text-xs font-bold text-[#717388]">
-                    <th className="p-3">Color / Size Variant</th>
-                    <th className="p-3">SKU Code</th>
-                    <th className="p-3 w-40">Stock Units</th>
-                    <th className="p-3 w-48">Variant Price (₹)</th>
+                  <tr className="border-b border-[#e2e4ed]/30 dark:border-white/10 text-xs font-bold text-[#717388]">
+                    <th className="p-3">Size Tier</th>
+                    <th className="p-3 w-44">Price for this Size (₹)</th>
+                    <th className="p-3 w-40">Stock Status</th>
+                    <th className="p-3 w-36">Units in Stock</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#e2e4ed]/20 dark:divide-white/5">
-                  {generatedVariants.map((v, idx) => (
-                    <tr key={`${v.color}_${v.size}_${idx}`} className="text-xs">
-                      <td className="p-3">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full border border-gray-400" style={{ backgroundColor: v.color.toLowerCase() }}></span>
-                          <span className="font-bold text-[#2e2f3e] dark:text-[#a7a9be]">{v.color} / {v.size}</span>
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        <input 
-                          type="text"
-                          value={v.sku}
-                          onChange={(e) => updateVariantField(v.color, v.size, "sku", e.target.value.toUpperCase())}
-                          className="w-full h-8 px-2.5 text-xs font-mono rounded-lg border border-[#e2e4ed]/40 bg-[#ffffff] dark:bg-[#212030] outline-none"
-                        />
-                      </td>
-                      <td className="p-3">
-                        <input 
-                          type="number"
-                          value={v.stock}
-                          min="0"
-                          onChange={(e) => updateVariantField(v.color, v.size, "stock", Math.max(0, Number(e.target.value)))}
-                          className="w-28 h-8 px-2 text-xs rounded-lg border border-[#e2e4ed]/40 bg-[#ffffff] dark:bg-[#212030] outline-none"
-                        />
-                      </td>
-                      <td className="p-3">
-                        <input 
-                          type="number"
-                          value={v.price}
-                          min="0"
-                          onChange={(e) => updateVariantField(v.color, v.size, "price", Math.max(0, Number(e.target.value)))}
-                          className="w-32 h-8 px-2 text-xs font-bold rounded-lg border border-[#e2e4ed]/40 bg-[#ffffff] dark:bg-[#212030] outline-none text-[#ff8906]"
-                        />
-                      </td>
-                    </tr>
-                  ))}
+                  {selectedSizes.map((sz) => {
+                    const detail = sizeDetails[sz] || { price: Number(newPrice) || 0, stock: 15, inStock: true };
+                    const currentPrice = detail.price !== undefined ? detail.price : (Number(newPrice) || 0);
+                    const isInStock = detail.inStock !== false;
+
+                    return (
+                      <tr key={sz} className={`text-xs ${!isInStock ? 'opacity-60 bg-red-500/5' : ''}`}>
+                        <td className="p-3">
+                          <span className={`inline-block px-3 py-1 font-bold rounded-lg ${isInStock ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100' : 'bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400 line-through'}`}>
+                            {sz}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          <div className="relative flex items-center">
+                            <span className="absolute left-2.5 text-xs text-zinc-400 font-bold">₹</span>
+                            <input 
+                              type="number"
+                              min="0"
+                              value={currentPrice}
+                              onChange={(e) => handleSizePriceChange(sz, Math.max(0, Number(e.target.value)))}
+                              className="w-36 h-9 pl-6 pr-2.5 text-xs font-bold rounded-lg border border-[#e2e4ed]/40 dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] outline-none text-[#ff8906] focus:border-[#ff8906]"
+                            />
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleSizeStock(sz)}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
+                              isInStock 
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800' 
+                                : 'bg-red-50 text-red-700 border-red-300 dark:bg-red-950/40 dark:text-red-400 dark:border-red-800'
+                            }`}
+                          >
+                            {isInStock ? "● In Stock" : "✕ Out of Stock"}
+                          </button>
+                        </td>
+                        <td className="p-3">
+                          <input 
+                            type="number"
+                            min="0"
+                            disabled={!isInStock}
+                            value={isInStock ? detail.stock : 0}
+                            onChange={(e) => handleSizeUnitsChange(sz, Math.max(0, Number(e.target.value)))}
+                            className="w-24 h-9 px-2 text-xs font-semibold rounded-lg border border-[#e2e4ed]/40 dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] outline-none disabled:opacity-40 disabled:cursor-not-allowed"
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

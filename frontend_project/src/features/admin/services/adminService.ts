@@ -58,6 +58,7 @@ export const adminService = {
         variants: p.variants || [],
         stockCount: Number(p.stockCount || 0),
         image: p.image || "",
+        images: p.images || (p.image ? [p.image] : []),
         available: p.available !== false,
         createdAt: p.date
       };

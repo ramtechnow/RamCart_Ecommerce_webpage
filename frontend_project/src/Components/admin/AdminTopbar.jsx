@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { User, Eye, Bell, CheckCheck, ShoppingBag, AlertCircle, X, ArrowRight, Sun, Moon, Menu } from 'lucide-react';
+import { User, Eye, Bell, CheckCheck, ShoppingBag, AlertCircle, X, ArrowRight, Sun, Moon, Menu, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeContext } from '../../Context/ThemeContext';
 
@@ -8,6 +8,7 @@ export const AdminTopbar = ({
   notifications = [], 
   onMarkAllRead, 
   onMarkSingleRead, 
+  onClearAll,
   onProcessOrder,
   onToggleMobileSidebar
 }) => {
@@ -119,13 +120,23 @@ export const AdminTopbar = ({
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
+                  {notifications.length > 0 && (
+                    <button
+                      onClick={onClearAll || onMarkAllRead}
+                      className="text-zinc-500 hover:text-red-600 dark:hover:text-red-400 text-[10px] font-bold flex items-center gap-1 cursor-pointer bg-transparent border-none p-0 transition-colors"
+                      title="Clear all notifications"
+                    >
+                      <Trash2 size={11} /> Clear
+                    </button>
+                  )}
                   {unreadCount > 0 && (
                     <button
                       onClick={onMarkAllRead}
                       className="text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer bg-transparent border-none p-0 transition-colors"
+                      title="Mark all as read"
                     >
-                      <CheckCheck size={12} /> Clear All
+                      <CheckCheck size={12} /> Mark Read
                     </button>
                   )}
                   <button

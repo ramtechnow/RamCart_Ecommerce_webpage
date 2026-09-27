@@ -29,8 +29,6 @@ const Login = lazy(() => import("./Pages/Login"));
 const AdminPanel = lazy(() => import("./Pages/AdminPanel"));
 const NotFound = lazy(() => import("./Pages/NotFound"));
 const Profile = lazy(() => import("./Pages/Profile"));
-const ProductDemo = lazy(() => import("./Pages/ProductDemo"));
-const TestimonialsDemo = lazy(() => import("./Pages/TestimonialsDemo"));
 
 const FestiveParticlesWrapper: React.FC<{ promo: SeasonalPromo | null }> = ({ promo }) => {
   const location = useLocation();
@@ -186,8 +184,6 @@ export const App: React.FC = () => {
               />
               
               
-              <Route path="/product-demo" element={<ProductDemo />} />
-              <Route path="/testimonials-demo" element={<TestimonialsDemo />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

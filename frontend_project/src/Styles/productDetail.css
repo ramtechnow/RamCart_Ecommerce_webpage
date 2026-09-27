@@ -1,0 +1,960 @@
+/* ============================================================
+   RamCart Product Detail Page — Production UI
+   Multi-Angle Gallery, Size-Tier Pricing, Highlights & Reviews
+   ============================================================ */
+
+.rc-pdp-container {
+  padding: 24px var(--space-4) 80px;
+  max-width: 1280px;
+  margin: 0 auto;
+  color: var(--text-primary);
+}
+
+/* ── Breadcrumb Bar ────────────────────────────────────────── */
+.rc-pdp-breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.rc-pdp-breadcrumb a,
+.rc-pdp-breadcrumb span.link {
+  color: #717388;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.rc-pdp-breadcrumb a:hover,
+.rc-pdp-breadcrumb span.link:hover {
+  color: var(--accent-pink);
+  text-decoration: underline;
+}
+
+.rc-pdp-breadcrumb span.separator {
+  color: var(--border-color);
+  user-select: none;
+}
+
+.rc-pdp-breadcrumb span.current {
+  color: var(--text-primary);
+  font-weight: 600;
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Main Layout Grid (Left: Gallery & Actions, Right: Details) ─ */
+.rc-pdp-grid {
+  display: grid;
+  grid-template-columns: 460px 1fr;
+  gap: 36px;
+  align-items: start;
+}
+
+@media (max-width: 992px) {
+  .rc-pdp-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}
+
+/* ── Left Column: Media Gallery & CTA Buttons ──────────────── */
+.rc-pdp-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 80px;
+}
+
+@media (max-width: 992px) {
+  .rc-pdp-left-col {
+    position: static;
+  }
+}
+
+/* Media Gallery with Vertical Thumbnails on Left + Main Image Center */
+.rc-pdp-media-wrapper {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+/* Vertical Thumbnails List */
+.rc-pdp-thumbnails {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+  width: 64px;
+}
+
+.rc-pdp-thumb-btn {
+  width: 64px;
+  height: 78px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-secondary);
+  overflow: hidden;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.rc-pdp-thumb-btn:hover {
+  border-color: var(--accent-pink);
+  transform: scale(1.02);
+}
+
+.rc-pdp-thumb-btn.active {
+  border-color: #9c27b0;
+  box-shadow: 0 0 0 2px rgba(156, 39, 176, 0.25);
+}
+
+.rc-pdp-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.rc-pdp-thumb-badge {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  text-align: center;
+  padding: 2px 0;
+  text-transform: uppercase;
+}
+
+/* Size Chart Thumbnail Special Card */
+.rc-pdp-thumb-chart {
+  background: #f8f9fa;
+  color: #4b5563;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 1.5px dashed #9ca3af;
+}
+
+.dark .rc-pdp-thumb-chart,
+.dark-theme .rc-pdp-thumb-chart {
+  background: #1f2937;
+  color: #d1d5db;
+  border-color: #4b5563;
+}
+
+/* Center Large Main Image Display */
+.rc-pdp-main-image-box {
+  flex: 1;
+  aspect-ratio: 4 / 5;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rc-pdp-main-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  transition: transform 0.3s ease;
+}
+
+.rc-pdp-wishlist-floating {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  transition: all 0.2s ease;
+}
+
+.rc-pdp-wishlist-floating:hover {
+  transform: scale(1.1);
+}
+
+.rc-pdp-wishlist-floating.active {
+  color: var(--accent-pink);
+  background: #fff;
+}
+
+.rc-pdp-out-of-stock-overlay {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #dc2626;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ── Primary Action Buttons (Under Main Image) ─────────────── */
+.rc-pdp-action-buttons {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.rc-pdp-btn-add-cart {
+  flex: 1;
+  height: 48px;
+  border-radius: 8px;
+  border: 1.5px solid #9c27b0;
+  background: #ffffff;
+  color: #9c27b0;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dark .rc-pdp-btn-add-cart,
+.dark-theme .rc-pdp-btn-add-cart {
+  background: #171622;
+  color: #d946ef;
+  border-color: #d946ef;
+}
+
+.rc-pdp-btn-add-cart:hover:not(:disabled) {
+  background: rgba(156, 39, 176, 0.08);
+  transform: translateY(-1px);
+}
+
+.rc-pdp-btn-buy-now {
+  flex: 1;
+  height: 48px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #9c27b0 0%, #831843 100%);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(156, 39, 176, 0.3);
+  transition: all 0.2s ease;
+}
+
+.rc-pdp-btn-buy-now:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.rc-pdp-btn-add-cart:disabled,
+.rc-pdp-btn-buy-now:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+}
+
+/* ── 3 Similar Products Strip (Under Action Buttons) ──────── */
+.rc-pdp-similar-strip {
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rc-pdp-similar-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.rc-pdp-similar-thumbs {
+  display: flex;
+  gap: 10px;
+}
+
+.rc-pdp-similar-card {
+  width: 76px;
+  height: 96px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-secondary);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  padding: 0;
+}
+
+.rc-pdp-similar-card:hover {
+  border-color: #9c27b0;
+  transform: scale(1.05);
+}
+
+.rc-pdp-similar-card.active {
+  border-color: #9c27b0;
+  box-shadow: 0 0 0 2px rgba(156, 39, 176, 0.25);
+}
+
+.rc-pdp-similar-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+/* ── Right Column: Info Cards & Size Selection ─────────────── */
+.rc-pdp-right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Card Container Style (Meesho / RamCart Card Style) */
+.rc-pdp-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Header & Price Block */
+.rc-pdp-product-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.35;
+  margin: 0 0 8px 0;
+}
+
+.rc-pdp-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.rc-pdp-main-price {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.rc-pdp-price-onwards {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.rc-pdp-rating-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.rc-pdp-rating-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #22c55e;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.rc-pdp-rating-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.rc-pdp-trusted-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(156, 39, 176, 0.1);
+  color: #9c27b0;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  margin-left: auto;
+}
+
+/* ── Select Size Card with Individual Prices ───────────────── */
+.rc-pdp-size-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.rc-pdp-size-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.rc-pdp-size-chart-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: #9c27b0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.rc-pdp-size-pills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Individual Size Pill with Price Tag underneath */
+.rc-pdp-size-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  padding: 8px 12px;
+  border-radius: 9999px;
+  border: 1.5px solid var(--border-color);
+  background: var(--bg-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  position: relative;
+}
+
+.rc-pdp-size-pill:hover:not(.out-of-stock) {
+  border-color: #9c27b0;
+}
+
+.rc-pdp-size-pill.active {
+  border-color: #9c27b0;
+  background: rgba(156, 39, 176, 0.06);
+}
+
+.rc-pdp-size-pill.active .size-name {
+  color: #9c27b0;
+  font-weight: 800;
+}
+
+.rc-pdp-size-pill.active .size-price {
+  color: #9c27b0;
+  font-weight: 800;
+}
+
+.rc-pdp-size-pill .size-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.rc-pdp-size-pill .size-price {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+/* Out of Stock Size Pill (Strikethrough diagonal & disabled) */
+.rc-pdp-size-pill.out-of-stock {
+  border-color: #e5e7eb;
+  background: #f9fafb;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.dark .rc-pdp-size-pill.out-of-stock,
+.dark-theme .rc-pdp-size-pill.out-of-stock {
+  background: #1f2937;
+  border-color: #374151;
+}
+
+.rc-pdp-size-pill.out-of-stock::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  right: 10%;
+  height: 1.5px;
+  background: #9ca3af;
+  transform: rotate(-25deg);
+  pointer-events: none;
+}
+
+.rc-pdp-size-pill.out-of-stock .size-name,
+.rc-pdp-size-pill.out-of-stock .size-price {
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+
+/* Quantity Selection Row */
+.rc-pdp-qty-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-color);
+}
+
+.rc-pdp-qty-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.rc-pdp-qty-control {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg-secondary);
+}
+
+.rc-pdp-qty-btn {
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rc-pdp-qty-val {
+  min-width: 36px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ── Product Highlights Card ───────────────────────────────── */
+.rc-pdp-highlights-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.rc-pdp-highlights-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.rc-pdp-copy-btn {
+  font-size: 11px;
+  font-weight: 800;
+  color: #9c27b0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+
+.rc-pdp-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  font-size: 12px;
+}
+
+.rc-pdp-spec-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rc-pdp-spec-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.rc-pdp-spec-val {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.rc-pdp-details-toggle {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  width: 100%;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.rc-pdp-details-body {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ── Sold By Card ─────────────────────────────────────────── */
+.rc-pdp-seller-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rc-pdp-seller-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rc-pdp-seller-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: rgba(156, 39, 176, 0.1);
+  color: #9c27b0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rc-pdp-seller-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.rc-pdp-seller-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.rc-pdp-seller-badge {
+  background: #22c55e;
+  color: white;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 700;
+  font-size: 10px;
+}
+
+.rc-pdp-btn-view-shop {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1.5px solid #9c27b0;
+  color: #9c27b0;
+  background: none;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.rc-pdp-btn-view-shop:hover {
+  background: rgba(156, 39, 176, 0.08);
+}
+
+/* ── Ratings & Reviews Breakdown Card ─────────────────────── */
+.rc-pdp-reviews-header {
+  margin-bottom: 16px;
+}
+
+.rc-pdp-reviews-header h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.rc-pdp-reviews-breakdown {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.rc-pdp-rating-big-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 90px;
+}
+
+.rc-pdp-big-number {
+  font-size: 32px;
+  font-weight: 800;
+  color: #22c55e;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rc-pdp-rating-bars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rc-pdp-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.rc-pdp-bar-track {
+  flex: 1;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--bg-tertiary);
+  overflow: hidden;
+}
+
+.rc-pdp-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  background: #22c55e;
+}
+
+/* Customer Review Cards inside Reviews */
+.rc-pdp-verified-review {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+  font-size: 12px;
+}
+
+.rc-pdp-review-author-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.rc-pdp-author-name {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.rc-pdp-review-date {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.rc-pdp-review-text {
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Trust Strip Card ─────────────────────────────────────── */
+.rc-pdp-trust-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.rc-pdp-trust-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.rc-pdp-trust-icon {
+  color: #9c27b0;
+}
+
+.rc-pdp-trust-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ── Size Guide Modal ─────────────────────────────────────── */
+.rc-pdp-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.rc-pdp-modal-card {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.rc-pdp-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rc-pdp-modal-header h3 {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.rc-pdp-modal-close-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  padding: 4px;
+}
+
+.rc-pdp-modal-body {
+  padding: 20px;
+}
+
+.rc-pdp-size-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.rc-pdp-size-table th {
+  background: var(--bg-secondary);
+  padding: 10px 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.rc-pdp-size-table td {
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.rc-pdp-size-table tr:hover td {
+  background: rgba(156, 39, 176, 0.05);
+}
+
+/* ── Mobile Sticky Bottom Action Bar ──────────────────────── */
+.rc-pdp-mobile-sticky-bar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .rc-pdp-mobile-sticky-bar {
+    display: flex;
+    position: fixed;
+    bottom: 56px; /* Sits cleanly above MobileBottomNav */
+    left: 0;
+    right: 0;
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-color);
+    padding: 10px 16px max(10px, env(safe-area-inset-bottom));
+    gap: 10px;
+    z-index: 100;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  .rc-pdp-mobile-sticky-bar .rc-pdp-btn-add-cart,
+  .rc-pdp-mobile-sticky-bar .rc-pdp-btn-buy-now {
+    height: 44px;
+    font-size: 13px;
+  }
+}

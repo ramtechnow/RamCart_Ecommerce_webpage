@@ -8,8 +8,8 @@ export interface BrandItem {
   discountBadge?: string;
 }
 
-// Sample Meesho-inspired brand data
-const MEESHO_BRANDS: BrandItem[] = [
+// Curated partner brand collection
+const RAMCART_PARTNER_BRANDS: BrandItem[] = [
   { id: '1', name: 'Plum', logoUrl: 'https://placehold.co/150x60/ffffff/581c87?text=Plum', discountBadge: 'Up to 50% OFF' },
   { id: '2', name: 'Nivea', logoUrl: 'https://placehold.co/150x60/ffffff/1e3a8a?text=NIVEA', discountBadge: 'Min 30% OFF' },
   { id: '3', name: 'Himalaya', logoUrl: 'https://placehold.co/150x60/ffffff/047857?text=Himalaya', discountBadge: 'Flat ₹100 OFF' },
@@ -24,7 +24,7 @@ interface BrandCarouselProps {
 }
 
 export const BrandCarousel: React.FC<BrandCarouselProps> = ({
-  brands = MEESHO_BRANDS,
+  brands = RAMCART_PARTNER_BRANDS,
   speedInSeconds = 25,
 }) => {
   // Duplicate array for seamless infinite looping
@@ -49,7 +49,7 @@ export const BrandCarousel: React.FC<BrandCarouselProps> = ({
         <div className="absolute right-0 top-0 bottom-0 w-12 z-10 bg-gradient-to-l from-[#f6efff] to-transparent pointer-events-none" />
 
         <div
-          className="flex gap-4 sm:gap-6 w-max animate-meesho-scroll hover:[animation-play-state:paused]"
+          className="flex gap-4 sm:gap-6 w-max animate-pulse hover:[animation-play-state:paused]"
           style={{ animationDuration: `${speedInSeconds}s` }}
         >
           {loopedBrands.map((brand, index) => (
@@ -57,7 +57,7 @@ export const BrandCarousel: React.FC<BrandCarouselProps> = ({
               key={`${brand.id}-${index}`}
               className="group relative flex flex-col items-center justify-center bg-white rounded-2xl p-4 w-[160px] sm:w-[200px] h-[100px] sm:h-[110px] flex-shrink-0 shadow-sm border border-purple-50 transition-all duration-300 hover:shadow-md hover:-translate-y-1 cursor-pointer"
             >
-              {/* Optional Discount Badge (Meesho Style) */}
+              {/* Optional Discount Badge */}
               {brand.discountBadge && (
                 <span className="absolute -top-2.5 bg-[#f43f5e] text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
                   {brand.discountBadge}

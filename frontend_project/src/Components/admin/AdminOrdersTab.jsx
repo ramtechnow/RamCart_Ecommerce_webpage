@@ -249,20 +249,20 @@ export const AdminOrdersTab = ({
         <div className="bg-[#ffffff] dark:bg-[#171622] rounded-2xl border border-[#e2e4ed]/40 dark:border-white/10 p-5 shadow-sm transition-colors duration-200 flex flex-col justify-between">
           <div>
             <h3 className="text-xs font-black text-[#0f0e17] dark:text-[#fffffe] uppercase tracking-wider mb-1">
-              Today's Performance
+              Store Performance
             </h3>
             <p className="text-[11px] text-[#717388] font-semibold leading-relaxed">
-              Fulfillment rate is looking good.
+              Order processing and fulfillment summary.
             </p>
           </div>
           <div className="mt-4">
             <span className="text-[9px] font-black text-[#717388] uppercase tracking-wider">
-              Orders Processed
+              Total Recorded Orders
             </span>
             <div className="flex items-baseline gap-2 mt-0.5">
-              <span className="text-2xl font-black text-zinc-900 dark:text-zinc-100">{orders.length * 3 + 14}</span>
+              <span className="text-2xl font-black text-zinc-900 dark:text-zinc-100">{orders.length}</span>
               <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5">
-                📈 +12%
+                Active Store
               </span>
             </div>
           </div>
@@ -340,7 +340,7 @@ export const AdminOrdersTab = ({
                         <div className="flex items-center gap-1.5">
                           <span className={`w-1.5 h-1.5 rounded-full bg-black dark:bg-white ${isDelayedRow ? 'animate-ping' : ''}`}></span>
                           <span className="text-xs font-bold font-mono text-[#0f0e17] dark:text-[#fffffe]">
-                            #ORD-{o._id ? o._id.substring(0, 4).toUpperCase() : '9021'}
+                            #ORD-{o._id ? o._id.slice(-6).toUpperCase() : 'N/A'}
                           </span>
                         </div>
                       </td>
@@ -349,10 +349,10 @@ export const AdminOrdersTab = ({
                       <td className="p-4 align-middle">
                         <div className="flex flex-col">
                           <span className="text-xs font-bold text-[#0f0e17] dark:text-[#fffffe]">
-                            {o.userName || o.address?.fullName || "Sarah Jenkins"}
+                            {o.userName || o.address?.fullName || (o.userId ? `User #${o.userId.slice(-6)}` : "Customer")}
                           </span>
                           <span className="text-[10px] text-[#717388] font-semibold">
-                            {o.userEmail || o.address?.email || "sarah.j@example.com"}
+                            {o.userEmail || o.address?.email || "—"}
                           </span>
                         </div>
                       </td>
@@ -380,14 +380,14 @@ export const AdminOrdersTab = ({
 
                       {/* Fulfillment Status badge */}
                       <td className="p-4 align-middle">
-                        <span className={`inline-block px-3 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wide ${
-                          o.status === "Delivered" || o.status === "Shipped"
-                            ? "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 border border-emerald-100" 
-                            : o.status === "Processing"
-                              ? "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700"
-                              : o.status === "Out for Delivery"
-                                ? "bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 border border-zinc-300 dark:border-zinc-600"
-                                : "bg-[#eff0f6] dark:bg-[#212030] text-[#2e2f3e] dark:text-[#a7a9be] border border-[#e2e4ed]"
+                        <span className={`inline-block px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wide border ${
+                          o.status === "Delivered"
+                            ? "bg-emerald-100 text-emerald-950 dark:bg-emerald-950 dark:text-emerald-100 border-emerald-500" 
+                            : o.status === "Shipped"
+                              ? "bg-purple-100 text-purple-950 dark:bg-purple-950 dark:text-purple-100 border-purple-500"
+                              : o.status === "Processing"
+                                ? "bg-blue-100 text-blue-950 dark:bg-blue-950 dark:text-blue-100 border-blue-500"
+                                : "bg-amber-100 text-amber-950 dark:bg-amber-950 dark:text-amber-100 border-amber-500"
                         }`}>
                           {o.status || "Ordered"}
                         </span>

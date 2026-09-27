@@ -124,7 +124,7 @@ export const Home: React.FC = () => {
 
   return (
     <>
-      {/* Mobile Horizontal categories scroll (Flipkart style) */}
+      {/* Mobile Horizontal categories scroll (RamCart quick browse) */}
       <div className="mobile-categories-scroll">
         {categories.map((cat) => (
           <Link to={cat.link || `/${cat.id === "kid" ? "kids" : cat.id + "s"}`} key={cat.id} className="mob-cat-pill">
@@ -141,7 +141,7 @@ export const Home: React.FC = () => {
       {/* 1. Hero Promo Banner */}
       <PromoBanner />
 
-      {/* ── Trust Bar (Flipkart-style strip) ── */}
+      {/* ── Trust Bar (RamCart authentic customer assurances) ── */}
       <div className="home-trust-bar">
         <div className="home-trust-item">
           <Truck size={18} className="home-trust-icon" />

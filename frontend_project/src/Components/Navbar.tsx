@@ -163,10 +163,9 @@ export const Navbar: React.FC = () => {
   };
 
   const navLinks = [
-    { to: "/catalog", label: "Shop All", icon: <LayoutGrid size={17} /> },
-    { to: "/mens",    label: "Men",      icon: <User size={17} /> },
-    { to: "/womens",  label: "Women",    icon: <User size={17} /> },
-    { to: "/kids",    label: "Kids",     icon: <Home size={17} /> },
+    { to: "/",        label: "Home",      icon: <Home size={17} /> },
+    { to: "/catalog", label: "Catalog",   icon: <LayoutGrid size={17} /> },
+    { to: "/orders",  label: "Orders",    icon: <Package size={17} /> },
   ];
 
   return (
@@ -190,7 +189,7 @@ export const Navbar: React.FC = () => {
             ))}
           </ul>
 
-          {/* Desktop search bar (Flipkart style) */}
+          {/* Desktop search bar (RamCart instant catalog search) */}
           <form onSubmit={handleSearchSubmit} className="desktop-search-form">
             <Search size={16} className="desktop-search-icon" />
             <input
@@ -374,6 +373,27 @@ export const Navbar: React.FC = () => {
             </button>
           </div>
         </nav>
+
+        {/* Desktop Category Sub-Nav Strip */}
+        <div className="nav-sub-categories-bar">
+          <div className="nav-sub-categories-inner">
+            {[
+              { label: "Popular", path: "/catalog" },
+              { label: "Men's Wear", path: "/mens" },
+              { label: "Women's Fashion", path: "/womens" },
+              { label: "Kids Collection", path: "/kids" },
+              { label: "Shirts", path: "/catalog?search=shirt" },
+              { label: "T-Shirts", path: "/catalog?search=t-shirt" },
+              { label: "Kurtis & Ethnic", path: "/catalog?search=kurti" },
+              { label: "Western Wear", path: "/catalog?category=women" },
+              { label: "Festive Deals", path: "/catalog?sort=price-low" },
+            ].map((item, idx) => (
+              <Link key={idx} to={item.path} className="nav-sub-category-link">
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </div>
 
         {/* Mobile Search Row — only on Home and catalog pages */}
         {showMobileSearch && (

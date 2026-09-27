@@ -225,7 +225,7 @@ export const Shop: React.FC<ShopProps> = ({ category = "all" }) => {
     } else if (sortOption === "price-high") {
       result.sort((a, b) => b.newPrice - a.newPrice);
     } else if (sortOption === "rating") {
-      result.sort((a, b) => ((b as any).rating || 4) - ((a as any).rating || 4));
+      result.sort((a, b) => ((b as any).rating || 0) - ((a as any).rating || 0));
     } else if (sortOption === "newest") {
       result.sort((a, b) => {
         const timeA = a.createdAt?.seconds || new Date(a.createdAt).getTime() || 0;
@@ -329,6 +329,13 @@ export const Shop: React.FC<ShopProps> = ({ category = "all" }) => {
     </div>
   );
 
+  const activeFiltersCount = 
+    (selectedCategory !== "all" ? 1 : 0) +
+    selectedSizes.length +
+    selectedColors.length +
+    (priceRange < maxProductPrice ? 1 : 0) +
+    (searchQuery.trim() ? 1 : 0);
+
   return (
     <main className="container" style={{ padding: "32px var(--space-4) 80px", color: 'var(--text-primary)' }}>
       {/* Category Promotion Header Banner */}
@@ -394,7 +401,10 @@ export const Shop: React.FC<ShopProps> = ({ category = "all" }) => {
           className="mobile-action-btn"
         >
           <SlidersHorizontal size={14} />
-          Filters
+          <span>Filters</span>
+          {activeFiltersCount > 0 && (
+            <span className="active-filters-count-pill">{activeFiltersCount}</span>
+          )}
         </button>
         <div className="mobile-sort-select-wrapper">
           <ArrowUpDown size={12} className="sort-icon-mobile" />
@@ -440,6 +450,55 @@ export const Shop: React.FC<ShopProps> = ({ category = "all" }) => {
               </select>
             </div>
           </div>
+
+          {/* Active Filter Chips Bar */}
+          {activeFiltersCount > 0 && (
+            <div className="active-filter-chips-bar">
+              {selectedCategory !== "all" && (
+                <span className="active-filter-pill">
+                  Category: <strong>{selectedCategory === "kid" ? "Kids" : selectedCategory}</strong>
+                  <button onClick={() => handleCategoryChange("all")} aria-label="Remove category filter">
+                    <X size={12} />
+                  </button>
+                </span>
+              )}
+              {selectedSizes.map(sz => (
+                <span key={sz} className="active-filter-pill">
+                  Size: <strong>{sz}</strong>
+                  <button onClick={() => handleSizeToggle(sz)} aria-label={`Remove size ${sz}`}>
+                    <X size={12} />
+                  </button>
+                </span>
+              ))}
+              {selectedColors.map(col => (
+                <span key={col} className="active-filter-pill">
+                  Color: <strong>{col}</strong>
+                  <button onClick={() => handleColorToggle(col)} aria-label={`Remove color ${col}`}>
+                    <X size={12} />
+                  </button>
+                </span>
+              ))}
+              {priceRange < maxProductPrice && (
+                <span className="active-filter-pill">
+                  Under <strong>₹{priceRange}</strong>
+                  <button onClick={() => setPriceRange(maxProductPrice)} aria-label="Reset max price">
+                    <X size={12} />
+                  </button>
+                </span>
+              )}
+              {searchQuery.trim() && (
+                <span className="active-filter-pill">
+                  Search: <em>"{searchQuery}"</em>
+                  <button onClick={() => { setSearchQuery(""); setDebouncedSearch(""); }} aria-label="Clear search">
+                    <X size={12} />
+                  </button>
+                </span>
+              )}
+              <button onClick={handleResetFilters} className="clear-all-chips-btn">
+                Clear All
+              </button>
+            </div>
+          )}
 
           {loading ? (
             <div className="product-grid">
