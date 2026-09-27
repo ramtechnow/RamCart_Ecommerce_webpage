@@ -73,7 +73,7 @@ function getOrderPlacedTemplate({ orderId, customerName, items = [], totalAmount
   <div style="max-width:600px;margin:20px auto;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e5e7eb;box-shadow:0 4px 16px rgba(0,0,0,0.04);">
     <!-- Brand Header -->
     <div style="background:linear-gradient(135deg,#ff8906 0%,#e53170 100%);padding:28px 24px;text-align:center;">
-      <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:900;letter-spacing:1px;">🛒 RamCart</h1>
+      <h1 style="margin:0;color:#ffffff;font-size:26px;font-weight:900;letter-spacing:2px;text-transform:uppercase;">RAMCART</h1>
       <p style="margin:6px 0 0;color:rgba(255,255,255,0.92);font-size:13px;font-weight:600;">Order Placed Successfully</p>
     </div>
 
@@ -84,19 +84,19 @@ function getOrderPlacedTemplate({ orderId, customerName, items = [], totalAmount
         Thank you for shopping with RamCart! Your order has been placed and is currently being prepared for dispatch.
       </p>
 
-      <!-- Key Info Banner -->
-      <div style="background:#fef3c7;border-left:4px solid #f59e0b;padding:12px 16px;border-radius:8px;margin-bottom:20px;">
-        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-          <div>
-            <span style="font-size:11px;color:#92400e;text-transform:uppercase;font-weight:700;display:block;">Order ID</span>
-            <span style="font-size:14px;font-weight:800;color:#78350f;font-family:monospace;">#${orderId}</span>
-          </div>
-          <div>
-            <span style="font-size:11px;color:#92400e;text-transform:uppercase;font-weight:700;display:block;">Estimated Delivery</span>
-            <span style="font-size:13px;font-weight:800;color:#78350f;">📅 ${expectedDelivery}</span>
-          </div>
-        </div>
-      </div>
+      <!-- Key Info Banner (Table layout for universal email client compatibility) -->
+      <table style="width:100%;background:#fef3c7;border-left:4px solid #f59e0b;padding:12px 16px;border-radius:8px;margin-bottom:20px;border-collapse:collapse;">
+        <tr>
+          <td style="vertical-align:top;padding:4px 6px;">
+            <span style="font-size:11px;color:#92400e;text-transform:uppercase;font-weight:700;display:block;margin-bottom:3px;">Order ID</span>
+            <span style="font-size:13px;font-weight:800;color:#78350f;font-family:monospace;">#${orderId}</span>
+          </td>
+          <td style="vertical-align:top;text-align:right;padding:4px 6px;">
+            <span style="font-size:11px;color:#92400e;text-transform:uppercase;font-weight:700;display:block;margin-bottom:3px;">Estimated Delivery</span>
+            <span style="font-size:13px;font-weight:800;color:#78350f;">${expectedDelivery}</span>
+          </td>
+        </tr>
+      </table>
 
       <!-- Items Table -->
       <h3 style="margin:0 0 10px;font-size:14px;font-weight:800;color:#111827;text-transform:uppercase;letter-spacing:0.5px;">Purchased Items</h3>
@@ -198,8 +198,8 @@ function getOrderDeliveredTemplate({ orderId, customerName, items = [], address,
   <div style="max-width:600px;margin:20px auto;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e5e7eb;box-shadow:0 4px 16px rgba(0,0,0,0.04);">
     <!-- Celebratory Header -->
     <div style="background:linear-gradient(135deg,#10b981 0%,#059669 100%);padding:28px 24px;text-align:center;">
-      <div style="font-size:36px;margin-bottom:6px;">📦 🎉</div>
-      <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:900;">Your Package Has Arrived!</h1>
+      <h2 style="margin:0 0 6px;color:#ffffff;font-size:24px;font-weight:900;letter-spacing:2px;text-transform:uppercase;">RAMCART</h2>
+      <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:800;">Your Package Has Arrived!</h1>
       <p style="margin:6px 0 0;color:rgba(255,255,255,0.92);font-size:13px;font-weight:600;">Delivered on ${deliveryTime}</p>
     </div>
 
@@ -223,7 +223,7 @@ function getOrderDeliveredTemplate({ orderId, customerName, items = [], address,
         <h3 style="margin:0 0 6px;font-size:15px;font-weight:800;color:#1e40af;">How was your fit &amp; shopping experience?</h3>
         <p style="margin:0 0 14px;font-size:12px;color:#3b82f6;">Your feedback helps us continuously improve product quality and delivery standards.</p>
         <a href="mailto:feedback@ramcart.com?subject=Feedback%20for%20Order%20%23${orderId}" style="display:inline-block;padding:10px 22px;background:#2563eb;color:#ffffff;font-size:12px;font-weight:700;border-radius:8px;text-decoration:none;">
-          ★ Share Your Feedback
+          Share Your Feedback
         </a>
       </div>
 
@@ -273,8 +273,8 @@ function getOrderCancelledTemplate({ orderId, customerName, items = [], totalAmo
   <div style="max-width:600px;margin:20px auto;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e5e7eb;box-shadow:0 4px 16px rgba(0,0,0,0.04);">
     <!-- Header -->
     <div style="background:linear-gradient(135deg,#ef4444 0%,#b91c1c 100%);padding:28px 24px;text-align:center;">
-      <div style="font-size:32px;margin-bottom:6px;">✕</div>
-      <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:900;">Order Cancellation Confirmed</h1>
+      <h2 style="margin:0 0 6px;color:#ffffff;font-size:24px;font-weight:900;letter-spacing:2px;text-transform:uppercase;">RAMCART</h2>
+      <h1 style="margin:0;color:#ffffff;font-size:20px;font-weight:800;">Order Cancellation Confirmed</h1>
       <p style="margin:6px 0 0;color:rgba(255,255,255,0.92);font-size:13px;">Order #${orderId}</p>
     </div>
 
@@ -293,7 +293,7 @@ function getOrderCancelledTemplate({ orderId, customerName, items = [], totalAmo
 
       <!-- Refund Notice -->
       <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px 18px;margin-bottom:20px;">
-        <h4 style="margin:0 0 6px;font-size:13px;font-weight:800;color:#111827;">💳 Refund Information</h4>
+        <h4 style="margin:0 0 6px;font-size:13px;font-weight:800;color:#111827;">Refund Information</h4>
         <p style="margin:0;font-size:12px;color:#4b5563;line-height:1.6;">
           If an online payment was processed for this order (₹${formatCurrency(totalAmount)}), your refund will be automatically credited back to your original payment method (Credit/Debit Card, UPI, or Net Banking) within <strong>3-5 business days</strong>.
         </p>

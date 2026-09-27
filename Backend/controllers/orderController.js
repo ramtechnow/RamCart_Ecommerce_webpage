@@ -149,7 +149,7 @@ exports.placeOrder = async (req, res) => {
         });
         sendEmail(
           customerEmail,
-          `🛒 RamCart — Order Placed! #${String(newOrder._id).substring(0, 8).toUpperCase()}`,
+          `RamCart — Order Placed! #${String(newOrder._id).substring(0, 8).toUpperCase()}`,
           emailHtml
         ).then(result => {
           console.log(`📧 Order placement email to ${customerEmail}:`, result);
@@ -282,7 +282,7 @@ exports.cancelUserOrder = async (req, res) => {
         });
         sendEmail(
           customerEmail,
-          `✕ RamCart — Order Cancellation Confirmed #${String(order._id).substring(0, 8).toUpperCase()}`,
+          `RamCart — Order Cancellation Confirmed #${String(order._id).substring(0, 8).toUpperCase()}`,
           cancelHtml
         ).then(result => {
           console.log(`📧 Order cancellation email to ${customerEmail}:`, result);
@@ -345,7 +345,7 @@ exports.updateOrderStatus = async (req, res) => {
           });
           sendEmail(
             customerEmail,
-            `✕ RamCart — Order Cancellation Notice #${String(updatedOrder._id).substring(0, 8).toUpperCase()}`,
+            `RamCart — Order Cancellation Notice #${String(updatedOrder._id).substring(0, 8).toUpperCase()}`,
             cancelHtml
           ).then(res => console.log(`📧 Admin cancel email to ${customerEmail}:`, res))
            .catch(err => console.error(`⚠️ Admin cancel email error to ${customerEmail}:`, err.message));
@@ -375,7 +375,7 @@ exports.updateOrderStatus = async (req, res) => {
           });
           sendEmail(
             customerEmail,
-            `📦 RamCart — Your Order Has Been Delivered! #${String(updatedOrder._id).substring(0, 8).toUpperCase()}`,
+            `RamCart — Your Order Has Been Delivered! #${String(updatedOrder._id).substring(0, 8).toUpperCase()}`,
             deliveredHtml
           ).then(res => console.log(`📧 Admin delivered email to ${customerEmail}:`, res))
            .catch(err => console.error(`⚠️ Admin delivered email error to ${customerEmail}:`, err.message));
