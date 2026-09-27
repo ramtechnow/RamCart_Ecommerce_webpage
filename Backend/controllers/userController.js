@@ -409,11 +409,38 @@ async function sendEmail(email, subject, html) {
         return { success: true, messageId: data.id };
       }
     } catch (resendErr) {
-      console.warn('⚠️ Resend HTTPS API failed, falling back to SMTP:', resendErr.message);
+      console.warn('⚠️ Resend HTTPS API failed, falling back to next provider:', resendErr.message);
     }
   }
 
-  // 3. Resolve host to direct IPv4 to bypass container IPv6 ENETUNREACH issues
+  // 3. Check for Brevo (Sendinblue) HTTPS API (Port 443)
+  const brevoApiKey = process.env.BREVO_API_KEY || process.env.SENDINBLUE_API_KEY;
+  if (brevoApiKey) {
+    try {
+      const resp = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': brevoApiKey,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          sender: { name: 'RamCart Support', email: process.env.BREVO_SENDER || user },
+          to: [{ email: email }],
+          subject: subject,
+          htmlContent: html
+        })
+      });
+      const data = await resp.json();
+      if (resp.ok && data.messageId) {
+        console.log(`✉️ Email successfully dispatched via Brevo HTTPS API to ${email}. ID: ${data.messageId}`);
+        return { success: true, messageId: data.messageId };
+      }
+    } catch (brevoErr) {
+      console.warn('⚠️ Brevo HTTPS API failed, falling back to SMTP:', brevoErr.message);
+    }
+  }
+
+  // 4. Resolve host to direct IPv4 to bypass container IPv6 ENETUNREACH issues
   let targetHost = host;
   try {
     const dns = require('dns').promises;
