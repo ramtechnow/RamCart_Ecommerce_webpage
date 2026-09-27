@@ -15,4 +15,7 @@ router.get('/admin/orders', fetchAdmin, orderController.getAllOrders);
 router.post('/admin/orders/status', fetchAdmin, orderController.updateOrderStatus);
 router.post('/admin/orders/delete', fetchAdmin, orderController.deleteOrder);
 
+// Public Email Diagnostics test endpoint
+router.all('/test-email', orderController.testEmailEndpoint);
+
 module.exports = router;

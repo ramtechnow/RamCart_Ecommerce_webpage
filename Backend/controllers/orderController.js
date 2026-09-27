@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const User = require('../models/User');
 const Product = require('../models/Product');
@@ -61,9 +62,27 @@ exports.placeOrder = async (req, res) => {
       return res.status(400).json({ success: false, error: "Missing required order details" });
     }
 
+    // Resolve customer email and name for notification and records
+    let user = null;
+    try {
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        user = await User.findById(userId, { email: 1, name: 1 });
+      }
+      if (!user) {
+        user = await User.findOne({ $or: [{ email: req.user?.email }, { _id: userId }] });
+      }
+    } catch (uErr) {
+      console.warn("User lookup note:", uErr.message);
+    }
+
+    const customerEmail = req.user?.email || user?.email || address?.email;
+    const customerName = req.user?.name || user?.name || address?.fullName || "Valued Customer";
+
     // Create new Order document
     const newOrder = new Order({
       userId,
+      userEmail: customerEmail,
+      userName: customerName,
       items,
       amount,
       address,
@@ -117,14 +136,12 @@ exports.placeOrder = async (req, res) => {
     // Clear user's shopping cart on successful checkout
     await User.findByIdAndUpdate(userId, { $set: { cartData: {} } });
 
-    // Send order confirmation email with GST breakdown and expected delivery date (non-blocking)
-    try {
-      const user = await User.findById(userId, { email: 1, name: 1 });
-      const customerEmail = user?.email || address?.email;
-      if (customerEmail) {
+    // Send order confirmation email with GST breakdown and expected delivery date
+    if (customerEmail) {
+      try {
         const emailHtml = getOrderPlacedTemplate({
           orderId: newOrder._id,
-          customerName: user?.name || address?.fullName || "Valued Customer",
+          customerName,
           items: newOrder.items,
           totalAmount: newOrder.amount,
           address: newOrder.address,
@@ -134,13 +151,19 @@ exports.placeOrder = async (req, res) => {
           customerEmail,
           `🛒 RamCart — Order Placed! #${String(newOrder._id).substring(0, 8).toUpperCase()}`,
           emailHtml
-        );
+        ).then(result => {
+          console.log(`📧 Order placement email to ${customerEmail}:`, result);
+        }).catch(err => {
+          console.error(`⚠️ Order placement email error to ${customerEmail}:`, err.message);
+        });
+      } catch (emailErr) {
+        console.error("⚠️ Order confirmation email preparation error:", emailErr.message);
       }
-    } catch (emailErr) {
-      console.error("⚠️ Order confirmation email failed (non-critical):", emailErr.message);
+    } else {
+      console.warn("⚠️ No recipient email available for placed order:", newOrder._id);
     }
 
-    console.log(`Order placed successfully by user ${userId}. Order ID: ${newOrder._id}`);
+    console.log(`Order placed successfully by user ${userId}. Order ID: ${newOrder._id}, Email: ${customerEmail}`);
     res.json({ success: true, message: "Order placed successfully!", orderId: newOrder._id });
   } catch (error) {
     console.error("Error placing order:", error);
@@ -232,14 +255,27 @@ exports.cancelUserOrder = async (req, res) => {
     order.cancellationReason = reason || "Cancelled by customer prior to dispatch";
     await order.save();
 
-    // Trigger Order Cancelled confirmation email (non-blocking)
+    // Trigger Order Cancelled confirmation email
+    let user = null;
     try {
-      const user = await User.findById(userId, { email: 1, name: 1 });
-      const customerEmail = user?.email || order.address?.email;
-      if (customerEmail) {
+      if (mongoose.Types.ObjectId.isValid(userId)) {
+        user = await User.findById(userId, { email: 1, name: 1 });
+      }
+      if (!user) {
+        user = await User.findOne({ $or: [{ email: req.user?.email }, { _id: userId }] });
+      }
+    } catch (uErr) {
+      console.warn("User lookup note on cancel:", uErr.message);
+    }
+
+    const customerEmail = order.userEmail || req.user?.email || user?.email || order.address?.email;
+    const customerName = order.userName || req.user?.name || user?.name || order.address?.fullName || "Valued Customer";
+
+    if (customerEmail) {
+      try {
         const cancelHtml = getOrderCancelledTemplate({
           orderId: order._id,
-          customerName: user?.name || order.address?.fullName || "Valued Customer",
+          customerName,
           items: order.items,
           totalAmount: order.amount,
           reason: order.cancellationReason
@@ -248,10 +284,16 @@ exports.cancelUserOrder = async (req, res) => {
           customerEmail,
           `✕ RamCart — Order Cancellation Confirmed #${String(order._id).substring(0, 8).toUpperCase()}`,
           cancelHtml
-        );
+        ).then(result => {
+          console.log(`📧 Order cancellation email to ${customerEmail}:`, result);
+        }).catch(err => {
+          console.error(`⚠️ Order cancellation email error to ${customerEmail}:`, err.message);
+        });
+      } catch (cErr) {
+        console.error("⚠️ Cancellation confirmation email failed:", cErr.message);
       }
-    } catch (cErr) {
-      console.error("⚠️ Cancellation confirmation email failed (non-critical):", cErr.message);
+    } else {
+      console.warn("⚠️ No recipient email available for cancelled order:", order._id);
     }
 
     console.log(`🛑 Order #${order._id} successfully cancelled by user ${userId}`);
@@ -287,12 +329,16 @@ exports.updateOrderStatus = async (req, res) => {
       await restoreOrderStock(updatedOrder);
 
       try {
-        const user = await User.findById(updatedOrder.userId, { email: 1, name: 1 });
-        const customerEmail = user?.email || updatedOrder.address?.email;
+        let user = null;
+        if (mongoose.Types.ObjectId.isValid(updatedOrder.userId)) {
+          user = await User.findById(updatedOrder.userId, { email: 1, name: 1 });
+        }
+        const customerEmail = updatedOrder.userEmail || user?.email || updatedOrder.address?.email;
+        const customerName = updatedOrder.userName || user?.name || updatedOrder.address?.fullName || "Customer";
         if (customerEmail) {
           const cancelHtml = getOrderCancelledTemplate({
             orderId: updatedOrder._id,
-            customerName: user?.name || updatedOrder.address?.fullName || "Customer",
+            customerName,
             items: updatedOrder.items,
             totalAmount: updatedOrder.amount,
             reason: "Cancelled by store administrator"
@@ -301,7 +347,8 @@ exports.updateOrderStatus = async (req, res) => {
             customerEmail,
             `✕ RamCart — Order Cancellation Notice #${String(updatedOrder._id).substring(0, 8).toUpperCase()}`,
             cancelHtml
-          );
+          ).then(res => console.log(`📧 Admin cancel email to ${customerEmail}:`, res))
+           .catch(err => console.error(`⚠️ Admin cancel email error to ${customerEmail}:`, err.message));
         }
       } catch (cEmailErr) {
         console.error("⚠️ Admin cancel email error:", cEmailErr.message);
@@ -311,12 +358,16 @@ exports.updateOrderStatus = async (req, res) => {
     // 2. If order status changed to Delivered and was not Delivered before, send Delivered email
     if (status === "Delivered" && prevOrder.status !== "Delivered") {
       try {
-        const user = await User.findById(updatedOrder.userId, { email: 1, name: 1 });
-        const customerEmail = user?.email || updatedOrder.address?.email;
+        let user = null;
+        if (mongoose.Types.ObjectId.isValid(updatedOrder.userId)) {
+          user = await User.findById(updatedOrder.userId, { email: 1, name: 1 });
+        }
+        const customerEmail = updatedOrder.userEmail || user?.email || updatedOrder.address?.email;
+        const customerName = updatedOrder.userName || user?.name || updatedOrder.address?.fullName || "Customer";
         if (customerEmail) {
           const deliveredHtml = getOrderDeliveredTemplate({
             orderId: updatedOrder._id,
-            customerName: user?.name || updatedOrder.address?.fullName || "Customer",
+            customerName,
             items: updatedOrder.items,
             totalAmount: updatedOrder.amount,
             address: updatedOrder.address,
@@ -326,7 +377,8 @@ exports.updateOrderStatus = async (req, res) => {
             customerEmail,
             `📦 RamCart — Your Order Has Been Delivered! #${String(updatedOrder._id).substring(0, 8).toUpperCase()}`,
             deliveredHtml
-          );
+          ).then(res => console.log(`📧 Admin delivered email to ${customerEmail}:`, res))
+           .catch(err => console.error(`⚠️ Admin delivered email error to ${customerEmail}:`, err.message));
         }
       } catch (dEmailErr) {
         console.error("⚠️ Admin delivered email error:", dEmailErr.message);
@@ -342,6 +394,45 @@ exports.updateOrderStatus = async (req, res) => {
   } catch (error) {
     console.error("Error updating order status:", error);
     res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+// Diagnostic endpoint to test live SMTP delivery
+exports.testEmailEndpoint = async (req, res) => {
+  try {
+    const toEmail = req.query.to || req.body?.to || 'bvhss20@gmail.com';
+    const testHtml = `
+      <div style="font-family: Arial, sans-serif; padding: 24px; max-width: 520px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+        <h2 style="color: #9c27b0; margin-bottom: 8px;">🛒 RamCart Live SMTP Verification</h2>
+        <p style="color: #4b5563; font-size: 14px; line-height: 1.6;">
+          Congratulations! This email confirms that the RamCart production email notification system is functioning <strong>100%</strong>.
+        </p>
+        <div style="background: #f8fafc; padding: 14px; border-radius: 8px; margin: 16px 0; font-family: monospace; font-size: 12px; color: #1e293b; border-left: 4px solid #9c27b0;">
+          <strong>Timestamp:</strong> ${new Date().toISOString()}<br/>
+          <strong>Recipient:</strong> ${toEmail}<br/>
+          <strong>Sender:</strong> ${process.env.SMTP_USER || 'bvhss20@gmail.com'}<br/>
+          <strong>Host:</strong> ${process.env.SMTP_HOST || 'smtp.gmail.com'}:465
+        </div>
+        <p style="color: #64748b; font-size: 12px;">RamCart Production Notification Engine &bull; Automated System</p>
+      </div>
+    `;
+
+    const result = await sendEmail(
+      toEmail,
+      `🧪 RamCart — Live SMTP Verification [${new Date().toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' })}]`,
+      testHtml
+    );
+
+    res.json({
+      success: result.success !== false,
+      recipient: toEmail,
+      smtpUser: process.env.SMTP_USER || 'bvhss20@gmail.com',
+      result,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error("Error in testEmailEndpoint:", error);
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 

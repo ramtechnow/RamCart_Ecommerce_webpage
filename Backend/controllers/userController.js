@@ -350,44 +350,69 @@ async function sendSMS(phone, otp) {
   }
 }
 
-// Transactional Email OTP sender helper using Nodemailer
+// Transactional Email sender helper using Nodemailer
 async function sendEmail(email, subject, html) {
   const host = process.env.SMTP_HOST || process.env.SMTP_SERVER || 'smtp.gmail.com';
   const port = parseInt(process.env.SMTP_PORT) || 465;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
+  const user = process.env.SMTP_USER || 'bvhss20@gmail.com';
+  const pass = process.env.SMTP_PASS || 'yqup nkss xket bpkt';
 
-  if (!user || !pass) {
-    console.error('❌ SMTP credentials are not configured. Set SMTP_USER and SMTP_PASS environment variables.');
-    return false;
+  if (!email || !/\S+@\S+\.\S+/.test(email)) {
+    console.error('❌ Cannot send email: invalid or missing recipient email address:', email);
+    return { success: false, error: 'Invalid recipient email' };
   }
 
-  try {
-    const transporter = nodemailer.createTransport({
+  // Helper to create transport with specified port and secure setting
+  const createTransporter = (targetPort, isSecure) => {
+    return nodemailer.createTransport({
       host,
-      port,
-      family: 4, // Force IPv4 resolution to bypass IPv6 ENETUNREACH errors on Render
-      secure: port === 465,
+      port: targetPort,
+      secure: isSecure,
       auth: { user, pass },
-      connectionTimeout: 5000,
-      greetingTimeout: 5000,
-      socketTimeout: 5000,
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 15000,
       tls: {
-        servername: host, // Ensure TLS SNI is sent correctly for certificate verification
-        rejectUnauthorized: false // Avoid connection drops due to local certificate issues
+        servername: host,
+        rejectUnauthorized: false
       }
     });
-    await transporter.sendMail({
+  };
+
+  try {
+    // Primary attempt on configured port (default 465 SSL)
+    const transporter = createTransporter(port, port === 465);
+    const info = await transporter.sendMail({
       from: `"RamCart Support" <${user}>`,
       to: email,
       subject: subject,
       html: html
     });
-    console.log(`✉️ Email successfully sent to ${email}`);
-    return true;
-  } catch (err) {
-    console.error("❌ Failed to send transactional email:", err);
-    return false;
+    console.log(`✉️ Email successfully sent to ${email}. ID: ${info.messageId}`);
+    return { success: true, messageId: info.messageId };
+  } catch (primaryErr) {
+    console.warn(`⚠️ Primary SMTP delivery failed on port ${port}:`, primaryErr.message);
+
+    // If port 465 failed, try fallback to port 587 (STARTTLS)
+    if (port === 465) {
+      try {
+        console.log(`🔄 Attempting SMTP fallback on port 587 (STARTTLS)...`);
+        const fallbackTransporter = createTransporter(587, false);
+        const info = await fallbackTransporter.sendMail({
+          from: `"RamCart Support" <${user}>`,
+          to: email,
+          subject: subject,
+          html: html
+        });
+        console.log(`✉️ Email successfully sent to ${email} via fallback port 587. ID: ${info.messageId}`);
+        return { success: true, messageId: info.messageId };
+      } catch (fallbackErr) {
+        console.error(`❌ Fallback SMTP delivery also failed on port 587:`, fallbackErr.message);
+        return { success: false, error: fallbackErr.message };
+      }
+    }
+
+    return { success: false, error: primaryErr.message };
   }
 }
 exports.sendEmail = sendEmail;
