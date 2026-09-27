@@ -362,19 +362,30 @@ async function sendEmail(email, subject, html) {
     return { success: false, error: 'Invalid recipient email' };
   }
 
-  // Helper to create transport with specified port, secure setting, and IPv4 enforcement
+  // Resolve host to direct IPv4 to completely bypass Linux container IPv6 ENETUNREACH issues on cloud hosts
+  let targetHost = host;
+  try {
+    const dns = require('dns').promises;
+    const ips = await dns.resolve4(host);
+    if (ips && ips.length > 0) {
+      targetHost = ips[0];
+    }
+  } catch (dnsErr) {
+    console.warn('DNS resolve4 note, using hostname directly:', dnsErr.message);
+  }
+
+  // Helper to create transport with direct IPv4 target and SNI servername
   const createTransporter = (targetPort, isSecure) => {
     return nodemailer.createTransport({
-      host,
+      host: targetHost,
       port: targetPort,
       secure: isSecure,
-      family: 4, // Explicitly force IPv4 resolution to eliminate ENETUNREACH errors on Render cloud
       auth: { user, pass },
       connectionTimeout: 15000,
       greetingTimeout: 15000,
       socketTimeout: 15000,
       tls: {
-        servername: host,
+        servername: host, // Preserves hostname for TLS SNI validation
         rejectUnauthorized: false
       }
     });
