@@ -3,6 +3,53 @@ const User = require('../models/User');
 const Product = require('../models/Product');
 const { incrementCouponUsage } = require('./couponController');
 const { sendEmail } = require('./userController');
+const {
+  getOrderPlacedTemplate,
+  getOrderDeliveredTemplate,
+  getOrderCancelledTemplate
+} = require('../utils/emailTemplates');
+
+/**
+ * Safe stock restoration helper to prevent double restock
+ * Restores both overall product stock and matching variant stock
+ */
+async function restoreOrderStock(order) {
+  if (!order || !Array.isArray(order.items)) return;
+  for (const item of order.items) {
+    try {
+      const prodId = item.id || item.productId;
+      const qty = Number(item.quantity) || 1;
+      const color = item.color;
+      const size = item.size;
+
+      const query = isNaN(Number(prodId)) ? { _id: prodId } : { $or: [{ id: Number(prodId) }, { _id: prodId }] };
+      const product = await Product.findOne(query);
+
+      if (product) {
+        // Restore overall stock count
+        product.stockCount = (product.stockCount || 0) + qty;
+
+        // Restore variant stock if variants exist
+        if (Array.isArray(product.variants) && product.variants.length > 0) {
+          product.variants = product.variants.map(v => {
+            const vObj = v.toObject ? v.toObject() : v;
+            const matchColor = !color || (vObj.color && vObj.color.toLowerCase() === String(color).toLowerCase());
+            const matchSize = !size || (vObj.size && vObj.size.toLowerCase() === String(size).toLowerCase());
+            if (matchColor && matchSize) {
+              return { ...vObj, stock: (vObj.stock || 0) + qty };
+            }
+            return vObj;
+          });
+        }
+
+        await product.save();
+        console.log(`🔄 Restocked cancelled order item: Product ${product.id} +${qty}. New stock: ${product.stockCount}`);
+      }
+    } catch (rErr) {
+      console.warn("Could not restock cancelled item:", rErr.message);
+    }
+  }
+}
 
 // Place a new Order (Authenticated User)
 exports.placeOrder = async (req, res) => {
@@ -70,69 +117,24 @@ exports.placeOrder = async (req, res) => {
     // Clear user's shopping cart on successful checkout
     await User.findByIdAndUpdate(userId, { $set: { cartData: {} } });
 
-    // Send order confirmation email (fire-and-forget, non-blocking)
+    // Send order confirmation email with GST breakdown and expected delivery date (non-blocking)
     try {
       const user = await User.findById(userId, { email: 1, name: 1 });
-      if (user && user.email) {
-        const itemsHtml = (items || []).map(item => `
-          <tr>
-            <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;">${item.name || item.title || 'Product'}</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:center;">${item.size || '-'}</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:center;">${item.quantity || 1}</td>
-            <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:right;">₹${(item.price * (item.quantity || 1)).toFixed(2)}</td>
-          </tr>
-        `).join('');
-
-        const emailHtml = `
-          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e8e8e8;">
-            <div style="background:linear-gradient(135deg,#ff8906,#e53170);padding:28px 32px;text-align:center;">
-              <h1 style="color:#fff;margin:0;font-size:26px;font-weight:800;letter-spacing:1px;">🛒 RamCart</h1>
-              <p style="color:rgba(255,255,255,0.9);margin:6px 0 0;font-size:14px;">Order Confirmation</p>
-            </div>
-            <div style="padding:28px 32px;">
-              <p style="font-size:15px;color:#333;">Hi <strong>${user.name || 'Customer'}</strong>,</p>
-              <p style="color:#555;line-height:1.6;">Thank you for your order! We've received it and it's being processed. Here's a summary of what you ordered:</p>
-
-              <div style="background:#fff9f0;border-left:4px solid #ff8906;padding:14px 18px;border-radius:6px;margin:20px 0;">
-                <p style="margin:0;font-size:13px;color:#888;">Order ID</p>
-                <p style="margin:4px 0 0;font-size:15px;font-weight:700;color:#333;word-break:break-all;">${newOrder._id}</p>
-              </div>
-
-              <table style="width:100%;border-collapse:collapse;margin:20px 0;font-size:13px;">
-                <thead>
-                  <tr style="background:#f7f7f7;">
-                    <th style="padding:10px 12px;text-align:left;color:#555;font-weight:600;">Item</th>
-                    <th style="padding:10px 12px;text-align:center;color:#555;font-weight:600;">Size</th>
-                    <th style="padding:10px 12px;text-align:center;color:#555;font-weight:600;">Qty</th>
-                    <th style="padding:10px 12px;text-align:right;color:#555;font-weight:600;">Price</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${itemsHtml}
-                </tbody>
-                <tfoot>
-                  <tr>
-                    <td colspan="3" style="padding:12px;text-align:right;font-weight:700;color:#333;font-size:14px;">Total Paid:</td>
-                    <td style="padding:12px;text-align:right;font-weight:800;color:#ff8906;font-size:16px;">₹${Number(amount).toFixed(2)}</td>
-                  </tr>
-                </tfoot>
-              </table>
-
-              ${address ? `
-              <div style="background:#f9f9f9;padding:14px 18px;border-radius:8px;margin-bottom:20px;font-size:13px;color:#555;line-height:1.7;">
-                <p style="margin:0 0 6px;font-weight:700;color:#333;">📦 Delivery Address</p>
-                <p style="margin:0;">${address.fullName || ''}<br/>${address.addressLine || ''}<br/>${address.city || ''}, ${address.state || ''} - ${address.postalCode || ''}</p>
-              </div>
-              ` : ''}
-
-              <p style="color:#555;line-height:1.6;">We'll notify you when your order is shipped. You can track your order status anytime from your <strong>Order History</strong> page.</p>
-            </div>
-            <div style="background:#f7f7f7;padding:16px 32px;text-align:center;border-top:1px solid #e8e8e8;">
-              <p style="margin:0;font-size:11px;color:#aaa;">© ${new Date().getFullYear()} RamCart by RamTechnow Technologies · Demo Platform · No real currency involved</p>
-            </div>
-          </div>
-        `;
-        sendEmail(user.email, '🛒 RamCart — Order Confirmed! Your order is being processed', emailHtml);
+      const customerEmail = user?.email || address?.email;
+      if (customerEmail) {
+        const emailHtml = getOrderPlacedTemplate({
+          orderId: newOrder._id,
+          customerName: user?.name || address?.fullName || "Valued Customer",
+          items: newOrder.items,
+          totalAmount: newOrder.amount,
+          address: newOrder.address,
+          orderDate: newOrder.date || new Date()
+        });
+        sendEmail(
+          customerEmail,
+          `🛒 RamCart — Order Placed! #${String(newOrder._id).substring(0, 8).toUpperCase()}`,
+          emailHtml
+        );
       }
     } catch (emailErr) {
       console.error("⚠️ Order confirmation email failed (non-critical):", emailErr.message);
@@ -187,6 +189,79 @@ exports.getAllOrders = async (req, res) => {
   }
 };
 
+// Cancel an Order (Customer Endpoint)
+exports.cancelUserOrder = async (req, res) => {
+  try {
+    const { orderId, reason } = req.body;
+    const userId = req.user.id;
+
+    if (!orderId) {
+      return res.status(400).json({ success: false, error: "Missing required orderId field" });
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ success: false, error: "Order not found" });
+    }
+
+    // Authorization check: User can only cancel their own order
+    if (order.userId.toString() !== userId.toString()) {
+      return res.status(403).json({ success: false, error: "Unauthorized: You can only cancel your own orders" });
+    }
+
+    // Safety checks: Cannot cancel if already cancelled
+    if (order.status === "Cancelled") {
+      return res.status(400).json({ success: false, error: "This order is already cancelled" });
+    }
+
+    // Cannot cancel if already shipped or delivered
+    if (order.status === "Shipped" || order.status === "Delivered") {
+      return res.status(400).json({ 
+        success: false, 
+        error: `Order cannot be cancelled because it is already ${order.status.toLowerCase()}. You may request an exchange or return upon delivery.` 
+      });
+    }
+
+    // Safely restore stock quantities (both overall count & variants)
+    await restoreOrderStock(order);
+
+    // Update order status & record cancellation details
+    order.status = "Cancelled";
+    order.notificationSeen = false;
+    order.cancelledAt = new Date();
+    order.cancellationReason = reason || "Cancelled by customer prior to dispatch";
+    await order.save();
+
+    // Trigger Order Cancelled confirmation email (non-blocking)
+    try {
+      const user = await User.findById(userId, { email: 1, name: 1 });
+      const customerEmail = user?.email || order.address?.email;
+      if (customerEmail) {
+        const cancelHtml = getOrderCancelledTemplate({
+          orderId: order._id,
+          customerName: user?.name || order.address?.fullName || "Valued Customer",
+          items: order.items,
+          totalAmount: order.amount,
+          reason: order.cancellationReason
+        });
+        sendEmail(
+          customerEmail,
+          `✕ RamCart — Order Cancellation Confirmed #${String(order._id).substring(0, 8).toUpperCase()}`,
+          cancelHtml
+        );
+      }
+    } catch (cErr) {
+      console.error("⚠️ Cancellation confirmation email failed (non-critical):", cErr.message);
+    }
+
+    console.log(`🛑 Order #${order._id} successfully cancelled by user ${userId}`);
+    res.json({ success: true, message: "Order cancelled successfully.", order });
+  } catch (error) {
+    console.error("Error cancelling user order:", error);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
 // Update Order status (Admin Only)
 exports.updateOrderStatus = async (req, res) => {
   try {
@@ -207,22 +282,54 @@ exports.updateOrderStatus = async (req, res) => {
       { new: true }
     );
 
-    // If order was cancelled and was not cancelled before, restore stock
+    // 1. If order was changed to Cancelled and was not cancelled before, restore stock safely and notify
     if (status === "Cancelled" && prevOrder.status !== "Cancelled") {
-      for (const item of (updatedOrder.items || [])) {
-        try {
-          const prodId = item.id;
-          const qty = Number(item.quantity) || 1;
-          const query = isNaN(Number(prodId)) ? { _id: prodId } : { $or: [{ id: Number(prodId) }, { _id: prodId }] };
-          const product = await Product.findOne(query);
-          if (product) {
-            product.stockCount = (product.stockCount || 0) + qty;
-            await product.save();
-            console.log(`🔄 Restocked cancelled order item: Product ${product.id} +${qty}`);
-          }
-        } catch (rErr) {
-          console.warn("Could not restock cancelled item:", rErr.message);
+      await restoreOrderStock(updatedOrder);
+
+      try {
+        const user = await User.findById(updatedOrder.userId, { email: 1, name: 1 });
+        const customerEmail = user?.email || updatedOrder.address?.email;
+        if (customerEmail) {
+          const cancelHtml = getOrderCancelledTemplate({
+            orderId: updatedOrder._id,
+            customerName: user?.name || updatedOrder.address?.fullName || "Customer",
+            items: updatedOrder.items,
+            totalAmount: updatedOrder.amount,
+            reason: "Cancelled by store administrator"
+          });
+          sendEmail(
+            customerEmail,
+            `✕ RamCart — Order Cancellation Notice #${String(updatedOrder._id).substring(0, 8).toUpperCase()}`,
+            cancelHtml
+          );
         }
+      } catch (cEmailErr) {
+        console.error("⚠️ Admin cancel email error:", cEmailErr.message);
+      }
+    }
+
+    // 2. If order status changed to Delivered and was not Delivered before, send Delivered email
+    if (status === "Delivered" && prevOrder.status !== "Delivered") {
+      try {
+        const user = await User.findById(updatedOrder.userId, { email: 1, name: 1 });
+        const customerEmail = user?.email || updatedOrder.address?.email;
+        if (customerEmail) {
+          const deliveredHtml = getOrderDeliveredTemplate({
+            orderId: updatedOrder._id,
+            customerName: user?.name || updatedOrder.address?.fullName || "Customer",
+            items: updatedOrder.items,
+            totalAmount: updatedOrder.amount,
+            address: updatedOrder.address,
+            deliveredDate: new Date()
+          });
+          sendEmail(
+            customerEmail,
+            `📦 RamCart — Your Order Has Been Delivered! #${String(updatedOrder._id).substring(0, 8).toUpperCase()}`,
+            deliveredHtml
+          );
+        }
+      } catch (dEmailErr) {
+        console.error("⚠️ Admin delivered email error:", dEmailErr.message);
       }
     }
 

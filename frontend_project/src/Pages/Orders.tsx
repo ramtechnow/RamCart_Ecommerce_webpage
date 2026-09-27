@@ -12,11 +12,13 @@ import {
   CheckCircle2, 
   Truck, 
   Clock3, 
-  Circle
+  Circle,
+  AlertTriangle,
+  XCircle
 } from "lucide-react";
 
 import { useAuth } from "../features/auth/hooks/useAuth";
-import { fetchUserOrders } from "../features/checkout/services/orderService";
+import { fetchUserOrders, cancelUserOrder } from "../features/checkout/services/orderService";
 import { Order } from "../features/checkout/types/orderTypes";
 import { addToast } from "../store/slices/toastSlice";
 import { useAppDispatch } from "../store/hooks";
@@ -29,7 +31,8 @@ const STATUS_ICONS: Record<string, React.ReactNode> = {
   Pending: <Circle size={16} />,
   Processing: <Clock3 size={16} />,
   Shipped: <Truck size={16} />,
-  Delivered: <CheckCircle2 size={16} />
+  Delivered: <CheckCircle2 size={16} />,
+  Cancelled: <XCircle size={16} />
 };
 
 export const Orders: React.FC = () => {
@@ -39,6 +42,19 @@ export const Orders: React.FC = () => {
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [activeSection, setActiveSection] = useState<"active" | "completed">("active");
+
+  // Cancellation Modal State
+  const [cancelModal, setCancelModal] = useState<{
+    isOpen: boolean;
+    order: Order | null;
+    reason: string;
+    loading: boolean;
+  }>({
+    isOpen: false,
+    order: null,
+    reason: "Changed mind / Placed by mistake",
+    loading: false
+  });
   
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -83,12 +99,52 @@ export const Orders: React.FC = () => {
     setExpandedOrderId(expandedOrderId === id ? null : id);
   };
 
+  const isCancellable = (status?: string) => {
+    const s = (status || "").toLowerCase();
+    return s === "pending" || s === "processing" || s === "ordered";
+  };
+
+  const handleInitiateCancel = (order: Order, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCancelModal({
+      isOpen: true,
+      order,
+      reason: "Changed mind / Placed by mistake",
+      loading: false
+    });
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!cancelModal.order?.id) return;
+    const orderId = cancelModal.order.id;
+    setCancelModal(prev => ({ ...prev, loading: true }));
+
+    try {
+      const res = await cancelUserOrder(orderId, cancelModal.reason);
+      if (res.success) {
+        dispatch(addToast({ 
+          message: `Order #${orderId.substring(0, 8).toUpperCase()} cancelled successfully!`, 
+          type: "success" 
+        }));
+        // Update local order list immediately
+        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: "Cancelled" } : o));
+        setCancelModal({ isOpen: false, order: null, reason: "", loading: false });
+      } else {
+        dispatch(addToast({ message: res.error || "Failed to cancel order", type: "error" }));
+        setCancelModal(prev => ({ ...prev, loading: false }));
+      }
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || "Failed to cancel order", type: "error" }));
+      setCancelModal(prev => ({ ...prev, loading: false }));
+    }
+  };
+
   const getStepIndex = (status: string) => STATUS_STEPS.indexOf(status);
 
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {
-      const isDelivered = order.status === "Delivered";
-      return activeSection === "active" ? !isDelivered : isDelivered;
+      const isCompleted = order.status === "Delivered" || order.status === "Cancelled";
+      return activeSection === "active" ? !isCompleted : isCompleted;
     });
   }, [orders, activeSection]);
 
@@ -222,7 +278,17 @@ export const Orders: React.FC = () => {
                     </span>
                   </div>
 
-                  <div className="order-status-amount flex items-center gap-3">
+                  <div className="order-status-amount flex items-center gap-2.5 flex-wrap">
+                    {isCancellable(order.status) && (
+                      <button
+                        type="button"
+                        onClick={(e) => handleInitiateCancel(order, e)}
+                        className="px-2.5 py-1 text-[11px] font-bold text-red-600 dark:text-red-400 hover:text-white hover:bg-red-600 border border-red-300 dark:border-red-900/60 rounded-lg transition-colors cursor-pointer bg-red-50/50 dark:bg-red-950/20"
+                        title="Cancel this order before shipment"
+                      >
+                        Cancel Order
+                      </button>
+                    )}
                     <span className="order-amount text-sm md:text-base font-extrabold text-text-primary font-mono">
                       ₹{(order.amount || 0).toFixed(2)}
                     </span>
@@ -246,26 +312,43 @@ export const Orders: React.FC = () => {
                       exit={{ height: 0 }}
                       transition={{ duration: 0.22, ease: "easeInOut" }}
                     >
-                      {/* Timeline status tracker */}
-                      <div className="status-tracker flex items-center p-4 bg-bg-primary overflow-x-auto gap-1">
-                        {STATUS_STEPS.map((step, idx) => {
-                          const isDone = idx <= currentStep;
-                          const isCurrent = idx === currentStep;
-                          return (
-                            <React.Fragment key={step}>
-                              <div className={`tracker-step flex flex-col items-center gap-1.5 ${isDone ? "done" : ""} ${isCurrent ? "current animate-pulse" : ""}`}>
-                                <div className="tracker-dot w-8 h-8 rounded-full border border-border bg-bg-secondary flex items-center justify-center text-text-muted transition-all">
-                                  {STATUS_ICONS[step]}
+                      {/* Timeline status tracker or Cancelled Banner */}
+                      {order.status === "Cancelled" ? (
+                        <div className="status-tracker p-4 bg-red-500/10 border-b border-red-500/20 flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center flex-shrink-0">
+                            <XCircle size={18} />
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">
+                              Order Cancelled
+                            </p>
+                            <p className="text-[11px] text-text-muted mt-0.5">
+                              {order.cancellationReason ? `Reason: ${order.cancellationReason} • ` : ""}
+                              {order.cancelledAt ? new Date(order.cancelledAt).toLocaleString() : "This order has been cancelled."}
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="status-tracker flex items-center p-4 bg-bg-primary overflow-x-auto gap-1">
+                          {STATUS_STEPS.map((step, idx) => {
+                            const isDone = idx <= currentStep;
+                            const isCurrent = idx === currentStep;
+                            return (
+                              <React.Fragment key={step}>
+                                <div className={`tracker-step flex flex-col items-center gap-1.5 ${isDone ? "done" : ""} ${isCurrent ? "current animate-pulse" : ""}`}>
+                                  <div className="tracker-dot w-8 h-8 rounded-full border border-border bg-bg-secondary flex items-center justify-center text-text-muted transition-all">
+                                    {STATUS_ICONS[step]}
+                                  </div>
+                                  <span className="tracker-label text-[9px] font-bold text-text-muted uppercase tracking-wider">{step}</span>
                                 </div>
-                                <span className="tracker-label text-[9px] font-bold text-text-muted uppercase tracking-wider">{step}</span>
-                              </div>
-                              {idx < STATUS_STEPS.length - 1 && (
-                                <div className={`tracker-line flex-1 h-0.5 bg-border min-w-[20px] max-w-[80px] self-center -mt-4 ${idx < currentStep ? "done" : ""}`} />
-                              )}
-                            </React.Fragment>
-                          );
-                        })}
-                      </div>
+                                {idx < STATUS_STEPS.length - 1 && (
+                                  <div className={`tracker-line flex-1 h-0.5 bg-border min-w-[20px] max-w-[80px] self-center -mt-4 ${idx < currentStep ? "done" : ""}`} />
+                                )}
+                              </React.Fragment>
+                            );
+                          })}
+                        </div>
+                      )}
 
                       {/* Detail information panel */}
                       <div className="order-detail-grid grid grid-cols-1 md:grid-cols-3 gap-6 p-4 border-t border-border bg-bg-secondary/40">
@@ -340,6 +423,12 @@ export const Orders: React.FC = () => {
                               <span>Promo Applied:</span>
                               <span className="font-semibold text-text-muted">{order.couponCode || "None"}</span>
                             </div>
+                            {order.status === "Cancelled" && (
+                              <div className="payment-row flex justify-between text-xs py-1.5 border-t border-border mt-1 text-red-500 font-medium">
+                                <span>Refund Info:</span>
+                                <span>3–5 business days</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -353,6 +442,78 @@ export const Orders: React.FC = () => {
       )}
       </>
     )}
+
+    {/* Order Cancellation Confirmation Modal */}
+    <AnimatePresence>
+      {cancelModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            className="bg-bg-primary border border-border rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle size={22} />
+              </div>
+              <div>
+                <h3 className="text-base font-extrabold text-text-primary">Cancel Order</h3>
+                <p className="text-xs text-text-muted font-mono">
+                  ID: #{cancelModal.order?.id?.substring(0, 10).toUpperCase()}
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-text-muted leading-relaxed">
+              Are you sure you want to cancel this order? Once cancelled, reserved items will be safely restocked and cannot be undone.
+            </p>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-text-primary block">Reason for Cancellation</label>
+              <select
+                value={cancelModal.reason}
+                onChange={(e) => setCancelModal(prev => ({ ...prev, reason: e.target.value }))}
+                className="w-full text-xs bg-bg-secondary border border-border rounded-lg p-2.5 text-text-primary focus:outline-none focus:border-accent-pink"
+              >
+                <option value="Changed mind / Placed by mistake">Changed mind / Placed by mistake</option>
+                <option value="Found a better price elsewhere">Found a better price elsewhere</option>
+                <option value="Delivery time is too long">Delivery time is too long</option>
+                <option value="Incorrect shipping address or size">Incorrect shipping address or size</option>
+                <option value="Decided to purchase different items">Decided to purchase different items</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
+              <button
+                type="button"
+                disabled={cancelModal.loading}
+                onClick={() => setCancelModal({ isOpen: false, order: null, reason: "", loading: false })}
+                className="px-4 py-2 text-xs font-bold text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50"
+              >
+                Keep Order
+              </button>
+              <button
+                type="button"
+                disabled={cancelModal.loading}
+                onClick={handleConfirmCancel}
+                className="px-4 py-2 text-xs font-bold bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all shadow-md hover:shadow-red-500/25 flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {cancelModal.loading ? (
+                  <>
+                    <RefreshCw size={14} className="animate-spin" />
+                    Cancelling...
+                  </>
+                ) : (
+                  "Yes, Cancel Order"
+                )}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   </main>
   );
 };

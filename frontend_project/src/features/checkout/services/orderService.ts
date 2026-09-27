@@ -168,3 +168,33 @@ export const markOrderAsSeen = async (orderId: string): Promise<boolean> => {
   }
 };
 
+// Cancel an active order by customer
+export const cancelUserOrder = async (
+  orderId: string,
+  reason?: string
+): Promise<{ success: boolean; message?: string; error?: string }> => {
+  try {
+    const token = localStorage.getItem("auth-token");
+    if (!token) return { success: false, error: "Please sign in to cancel this order." };
+
+    const res = await fetch(`${BACKEND_URL}/userorders/cancel`, {
+      method: "POST",
+      headers: {
+        "auth-token": token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ orderId, reason: reason || "Cancelled by customer" })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      return { success: false, error: data.error || "Failed to cancel order." };
+    }
+
+    return { success: true, message: data.message || "Order cancelled successfully." };
+  } catch (err: any) {
+    console.error("Order cancellation failed:", err);
+    return { success: false, error: err.message || "Failed to cancel order." };
+  }
+};
+

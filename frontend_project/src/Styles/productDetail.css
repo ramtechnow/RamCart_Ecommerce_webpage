@@ -938,6 +938,11 @@
 }
 
 @media (max-width: 768px) {
+  /* Hide the duplicate action buttons under the main image on mobile */
+  .rc-pdp-action-buttons {
+    display: none !important;
+  }
+
   .rc-pdp-mobile-sticky-bar {
     display: flex;
     position: fixed;

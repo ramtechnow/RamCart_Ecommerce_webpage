@@ -71,5 +71,7 @@ export interface Order {
   couponCode: string | null;
   status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
   payment: boolean;
+  cancelledAt?: any;
+  cancellationReason?: string;
   createdAt: any; // Server timestamp or Date object
 }

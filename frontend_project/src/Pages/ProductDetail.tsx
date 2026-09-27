@@ -123,6 +123,22 @@ export const ProductDetail: React.FC = () => {
     ];
   }, [product]);
 
+  // Determine whether to display size chart (hide for Free Size / single size items)
+  const isFreeSize = useMemo(() => {
+    if (!product) return false;
+    if (product.variants && product.variants.length === 1) {
+      const s = product.variants[0].size.toLowerCase().trim();
+      if (s.includes("free") || s.includes("one") || s === "fs" || s === "na") return true;
+    }
+    if (product.sizes && product.sizes.length === 1) {
+      const s = product.sizes[0].toLowerCase().trim();
+      if (s.includes("free") || s.includes("one") || s === "fs" || s === "na") return true;
+    }
+    return false;
+  }, [product]);
+
+  const hasSizeChart = !isFreeSize && sizeTiers.length > 1;
+
   // Initialize selected size & price once tiers are ready
   useEffect(() => {
     if (sizeTiers.length > 0) {
@@ -281,17 +297,19 @@ export const ProductDetail: React.FC = () => {
                 );
               })}
 
-              {/* 4th Thumbnail: Size Measurement Chart Trigger */}
-              <button
-                type="button"
-                onClick={() => setShowSizeChartModal(true)}
-                className="rc-pdp-thumb-btn rc-pdp-thumb-chart"
-                title="View Size Chart & Measurements"
-                aria-label="View Size Chart"
-              >
-                <Ruler size={18} />
-                <span style={{ fontSize: "9px", fontWeight: "800", textTransform: "uppercase" }}>Size Chart</span>
-              </button>
+              {/* 4th Thumbnail: Size Measurement Chart Trigger (Only if multi-size product) */}
+              {hasSizeChart && (
+                <button
+                  type="button"
+                  onClick={() => setShowSizeChartModal(true)}
+                  className="rc-pdp-thumb-btn rc-pdp-thumb-chart"
+                  title="View Size Chart & Measurements"
+                  aria-label="View Size Chart"
+                >
+                  <Ruler size={18} />
+                  <span style={{ fontSize: "9px", fontWeight: "800", textTransform: "uppercase" }}>Size Chart</span>
+                </button>
+              )}
             </div>
 
             {/* Center Main Large Image Box */}
@@ -398,13 +416,15 @@ export const ProductDetail: React.FC = () => {
           <div className="rc-pdp-card">
             <div className="rc-pdp-size-header">
               <h3 className="rc-pdp-size-title">Select Size</h3>
-              <button 
-                type="button" 
-                onClick={() => setShowSizeChartModal(true)}
-                className="rc-pdp-size-chart-link"
-              >
-                Size Chart
-              </button>
+              {hasSizeChart && (
+                <button 
+                  type="button" 
+                  onClick={() => setShowSizeChartModal(true)}
+                  className="rc-pdp-size-chart-link"
+                >
+                  Size Chart
+                </button>
+              )}
             </div>
 
             {/* Size Pills Grid with Size + Individual Price */}
