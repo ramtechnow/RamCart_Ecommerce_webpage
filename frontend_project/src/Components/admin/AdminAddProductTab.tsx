@@ -22,8 +22,6 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("women");
-  const [newPrice, setNewPrice] = useState("");
-  const [oldPrice, setOldPrice] = useState("");
   
   // Chip selections
   const [selectedSizes, setSelectedSizes] = useState<string[]>(['S', 'M', 'L', 'XL', 'XXL']);
@@ -183,7 +181,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
 
   const handleToggleSizeStock = (size: string) => {
     setSizeDetails(prev => {
-      const current = prev[size] || { price: Number(newPrice) || 0, stock: 15, inStock: true };
+      const current = prev[size] || { price: 0, stock: 15, inStock: true };
       const nextInStock = !current.inStock;
       return {
         ...prev,
@@ -200,7 +198,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
     setSizeDetails(prev => ({
       ...prev,
       [size]: {
-        ...(prev[size] || { price: Number(newPrice) || 0, inStock: true }),
+        ...(prev[size] || { price: 0, inStock: true }),
         stock: units,
         inStock: units > 0
       }
@@ -216,14 +214,14 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
       .replace(/[^A-Z0-9]/g, '-')
       .substring(0, 15) || "ITEM";
 
-    const defaultPrice = Number(newPrice) || 0;
-    const defaultOldPrice = Number(oldPrice) || (defaultPrice ? Math.round(defaultPrice * 1.5) : 0);
     const primaryColor = selectedColors[0] || "Standard";
 
     selectedSizes.forEach(size => {
       const detail = sizeDetails[size];
-      const sizePrice = detail?.price !== undefined ? detail.price : defaultPrice;
-      const sizeOldPrice = detail?.oldPrice !== undefined ? detail.oldPrice : (detail?.old_price !== undefined ? detail.old_price : defaultOldPrice);
+      const sizePrice = detail?.price !== undefined ? detail.price : 0;
+      const sizeOldPrice = detail?.oldPrice !== undefined 
+        ? detail.oldPrice 
+        : (detail?.old_price !== undefined ? detail.old_price : (sizePrice ? Math.round(sizePrice * 1.5) : 0));
       const sizeStock = detail?.inStock !== false ? (detail?.stock ?? 15) : 0;
 
       list.push({
@@ -237,7 +235,7 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
       });
     });
     return list;
-  }, [selectedSizes, selectedColors, name, category, newPrice, oldPrice, sizeDetails]);
+  }, [selectedSizes, selectedColors, name, category, sizeDetails]);
 
   const totalCalculatedStock = useMemo(() => {
     return generatedVariants.reduce((sum, v) => sum + v.stock, 0);
@@ -248,12 +246,18 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
     const errors: Record<string, string | null> = {};
     if (!name.trim()) errors.name = "Product title is required";
     if (!description.trim()) errors.description = "Product description is required";
-    if (!newPrice || Number(newPrice) <= 0) errors.newPrice = "Promo price must be positive";
-    if (!oldPrice || Number(oldPrice) <= 0) errors.oldPrice = "MSRP price must be positive";
-    if (Number(newPrice) > Number(oldPrice)) errors.newPrice = "Promo price should not exceed MSRP";
     if (selectedSizes.length === 0) errors.sizes = "Select at least one size";
     if (selectedColors.length === 0) errors.colors = "Select at least one color";
     if (images.length === 0) errors.images = "Upload at least one product image";
+
+    // Validate size prices in size table
+    const invalidPriceSize = selectedSizes.find(sz => {
+      const p = sizeDetails[sz]?.price;
+      return p === undefined || p <= 0;
+    });
+    if (invalidPriceSize) {
+      errors.sizes = `Please enter a valid New Price (₹ > 0) for size "${invalidPriceSize}" in the size table below`;
+    }
 
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
@@ -273,8 +277,8 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
     const primaryImage = images[0];
     const validVariantPrices = generatedVariants.map(v => Number(v.price)).filter(p => !isNaN(p) && p > 0);
     const validVariantOldPrices = generatedVariants.map(v => Number(v.oldPrice || v.old_price)).filter(p => !isNaN(p) && p > 0);
-    const finalNewPrice = validVariantPrices.length > 0 ? Math.min(...validVariantPrices) : Number(newPrice);
-    const finalOldPrice = validVariantOldPrices.length > 0 ? Math.max(...validVariantOldPrices) : (Number(oldPrice) || Math.round(finalNewPrice * 1.5));
+    const finalNewPrice = validVariantPrices.length > 0 ? Math.min(...validVariantPrices) : 0;
+    const finalOldPrice = validVariantOldPrices.length > 0 ? Math.max(...validVariantOldPrices) : (finalNewPrice ? Math.round(finalNewPrice * 1.5) : 0);
 
     const payload = {
       name,
@@ -370,78 +374,15 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
               </div>
             </div>
 
-            {/* Pricing & Inventory Configuration */}
+            {/* Sizing & Color Specs */}
             <div className="bg-[#ffffff] dark:bg-[#171622] rounded-2xl shadow-sm border border-[#e2e4ed]/40 dark:border-white/10 p-6 flex flex-col gap-4">
-              <h3 className="text-sm font-black text-[#e53170] dark:text-[#ff8906] uppercase tracking-wider flex items-center gap-2 border-b border-[#e2e4ed]/20 dark:border-white/5 pb-3">
-                <DollarSign size={18} /> Pricing &amp; Sizing Specs
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Default New price */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-[#2e2f3e] dark:text-[#a7a9be]">New Price (₹) <span className="text-red-500">*</span></label>
-                  <input 
-                    type="number" 
-                    placeholder="e.g. 799" 
-                    value={newPrice}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setNewPrice(val);
-                      setFieldErrors(prev => ({ ...prev, newPrice: null }));
-                      const num = Number(val);
-                      if (!isNaN(num) && num > 0) {
-                        setSizeDetails(prev => {
-                          const updated = { ...prev };
-                          Object.keys(updated).forEach(sz => {
-                            updated[sz] = { ...updated[sz], price: num };
-                          });
-                          return updated;
-                        });
-                      }
-                    }}
-                    className={`w-full h-11 px-4 rounded-xl border bg-[#ffffff] dark:bg-[#212030] outline-none text-sm focus:border-[#ff8906] focus:ring-1 focus:ring-[#ff8906] ${
-                      fieldErrors.newPrice ? 'border-red-500' : 'border-[#e2e4ed]/40 dark:border-white/10'
-                    }`}
-                  />
-                  {fieldErrors.newPrice && (
-                    <span className="text-[10px] text-red-500 font-bold flex items-center gap-1 mt-1">
-                      <ShieldAlert size={12}/>{fieldErrors.newPrice}
-                    </span>
-                  )}
-                </div>
-
-                {/* Default Old price */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-[#2e2f3e] dark:text-[#a7a9be]">Old Price (₹) <span className="text-red-500">*</span></label>
-                  <input 
-                    type="number" 
-                    placeholder="e.g. 1499" 
-                    value={oldPrice}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setOldPrice(val);
-                      setFieldErrors(prev => ({ ...prev, oldPrice: null }));
-                      const num = Number(val);
-                      if (!isNaN(num) && num > 0) {
-                        setSizeDetails(prev => {
-                          const updated = { ...prev };
-                          Object.keys(updated).forEach(sz => {
-                            updated[sz] = { ...updated[sz], oldPrice: num, old_price: num };
-                          });
-                          return updated;
-                        });
-                      }
-                    }}
-                    className={`w-full h-11 px-4 rounded-xl border bg-[#ffffff] dark:bg-[#212030] outline-none text-sm focus:border-[#ff8906] focus:ring-1 focus:ring-[#ff8906] ${
-                      fieldErrors.oldPrice ? 'border-red-500' : 'border-[#e2e4ed]/40 dark:border-white/10'
-                    }`}
-                  />
-                  {fieldErrors.oldPrice && (
-                    <span className="text-[10px] text-red-500 font-bold flex items-center gap-1 mt-1">
-                      <ShieldAlert size={12}/>{fieldErrors.oldPrice}
-                    </span>
-                  )}
-                </div>
+              <div className="border-b border-[#e2e4ed]/20 dark:border-white/5 pb-3">
+                <h3 className="text-sm font-black text-[#e53170] dark:text-[#ff8906] uppercase tracking-wider flex items-center gap-2">
+                  <DollarSign size={18} /> Sizing &amp; Color Specs
+                </h3>
+                <p className="text-[11px] text-[#717388] mt-1">
+                  Select available sizes &amp; colors below. Set custom New Price (₹), Old Price (₹), and units per size in the table at the bottom.
+                </p>
               </div>
 
               {/* Sizes available */}
@@ -705,11 +646,11 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                 </thead>
                 <tbody className="divide-y divide-[#e2e4ed]/20 dark:divide-white/5">
                   {selectedSizes.map((sz) => {
-                    const detail = sizeDetails[sz] || { price: Number(newPrice) || 0, stock: 15, inStock: true };
-                    const currentPrice = detail.price !== undefined ? detail.price : (Number(newPrice) || 0);
+                    const detail = sizeDetails[sz] || { price: 0, stock: 15, inStock: true };
+                    const currentPrice = detail.price !== undefined ? detail.price : 0;
                     const currentOldPrice = detail.oldPrice !== undefined 
                       ? detail.oldPrice 
-                      : (Number(oldPrice) || (currentPrice ? Math.round(currentPrice * 1.5) : 0));
+                      : (detail.old_price !== undefined ? detail.old_price : (currentPrice ? Math.round(currentPrice * 1.5) : 0));
                     const isInStock = detail.inStock !== false;
 
                     return (
@@ -725,8 +666,9 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                             <input 
                               type="number"
                               min="0"
-                              value={currentPrice}
-                              onChange={(e) => handleSizePriceChange(sz, Math.max(0, Number(e.target.value)))}
+                              placeholder="0"
+                              value={currentPrice || ""}
+                              onChange={(e) => handleSizePriceChange(sz, e.target.value === "" ? 0 : Math.max(0, Number(e.target.value)))}
                               className="w-28 h-9 pl-6 pr-2 text-xs font-bold rounded-lg border border-[#e2e4ed]/40 dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] outline-none text-[#ff8906] focus:border-[#ff8906]"
                             />
                           </div>
@@ -737,8 +679,9 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                             <input 
                               type="number"
                               min="0"
-                              value={currentOldPrice}
-                              onChange={(e) => handleSizeOldPriceChange(sz, Math.max(0, Number(e.target.value)))}
+                              placeholder="0"
+                              value={currentOldPrice || ""}
+                              onChange={(e) => handleSizeOldPriceChange(sz, e.target.value === "" ? 0 : Math.max(0, Number(e.target.value)))}
                               className="w-28 h-9 pl-6 pr-2 text-xs font-semibold rounded-lg border border-[#e2e4ed]/40 dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] outline-none text-zinc-500 focus:border-[#ff8906]"
                             />
                           </div>
