@@ -36,9 +36,11 @@ const ProductSchema = new mongoose.Schema({
   },
   variants: {
     type: [{
-      color: { type: String, required: true },
-      stock: { type: Number, required: true, default: 0 },
-      price: { type: Number }
+      size: { type: String },
+      color: { type: String, default: "Standard" },
+      stock: { type: Number, default: 0 },
+      price: { type: Number },
+      old_price: { type: Number }
     }],
     default: []
   },

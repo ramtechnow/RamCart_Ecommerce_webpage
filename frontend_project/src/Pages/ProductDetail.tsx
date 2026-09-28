@@ -10,13 +10,14 @@ import { addToast } from "../store/slices/toastSlice";
 import { 
   Star, Heart, ShoppingCart, ShieldCheck, 
   Truck, RotateCcw, ChevronDown, ChevronUp, X, Ruler, 
-  Store, Info, Zap, Tag
+  Store, Info, Zap, Tag, Check
 } from "lucide-react";
 import "../Styles/productDetail.css";
 
 interface SizeTier {
   size: string;
   price: number;
+  oldPrice?: number;
   inStock: boolean;
   chest: string;
   length: string;
@@ -40,6 +41,7 @@ export const ProductDetail: React.FC = () => {
   // Selections
   const [selectedSize, setSelectedSize] = useState<string>("M");
   const [selectedPrice, setSelectedPrice] = useState<number>(0);
+  const [selectedOldPrice, setSelectedOldPrice] = useState<number>(0);
   const [selectedColor, setSelectedColor] = useState<string>("Green");
   const [quantity, setQuantity] = useState<number>(1);
   const [addedNotice, setAddedNotice] = useState(false);
@@ -97,10 +99,11 @@ export const ProductDetail: React.FC = () => {
     }
   }, [product]);
 
-  // Compute Size Tiers with prices and stock status
+  // Compute Size Tiers with prices, MSRP old prices and stock status
   const sizeTiers: SizeTier[] = useMemo(() => {
     if (!product) return [];
     const P = product.newPrice || 243;
+    const oldP = product.oldPrice || Math.round(P * 1.4);
 
     // 1. Check if explicit variants with sizes exist in database
     const variantsWithSize = (product.variants || []).filter(
@@ -109,9 +112,12 @@ export const ProductDetail: React.FC = () => {
     if (variantsWithSize.length > 0) {
       return variantsWithSize.map((v) => {
         const s = v.size.trim();
+        const vPrice = v.price && v.price > 0 ? v.price : P;
+        const vOldPrice = (v.old_price && v.old_price > 0) ? v.old_price : ((v.oldPrice && v.oldPrice > 0) ? v.oldPrice : oldP);
         return {
           size: s,
-          price: v.price && v.price > 0 ? v.price : P,
+          price: vPrice,
+          oldPrice: vOldPrice > vPrice ? vOldPrice : undefined,
           inStock: v.stock === undefined || v.stock > 0,
           chest: s === "S" ? '38"' : s === "M" ? '40"' : s === "L" ? '42"' : '44"',
           length: '29"',
@@ -127,6 +133,7 @@ export const ProductDetail: React.FC = () => {
         return {
           size: sizeStr,
           price: P,
+          oldPrice: oldP > P ? oldP : undefined,
           inStock: product.stockCount === undefined || product.stockCount > 0,
           chest: sizeStr === "S" ? '38"' : sizeStr === "M" ? '40"' : sizeStr === "L" ? '42"' : '44"',
           length: '29"',
@@ -137,22 +144,22 @@ export const ProductDetail: React.FC = () => {
 
     // 3. Standard Indian apparel size-tier pricing matching catalog
     return [
-      { size: "S", price: Math.max(1, Math.round(P * 0.98)), inStock: true, chest: '38"', length: '28"', shoulder: '17.0"' },
-      { size: "M", price: P, inStock: true, chest: '40"', length: '29"', shoulder: '18.0"' },
-      { size: "L", price: Math.round(P * 1.04), inStock: true, chest: '42"', length: '30"', shoulder: '19.0"' },
-      { size: "XL", price: Math.round(P * 1.06), inStock: true, chest: '44"', length: '31"', shoulder: '20.0"' },
-      { size: "XXL", price: Math.round(P * 1.08), inStock: true, chest: '46"', length: '32"', shoulder: '21.0"' }
+      { size: "S", price: Math.max(1, Math.round(P * 0.98)), oldPrice: Math.round(oldP * 0.98), inStock: true, chest: '38"', length: '28"', shoulder: '17.0"' },
+      { size: "M", price: P, oldPrice: oldP, inStock: true, chest: '40"', length: '29"', shoulder: '18.0"' },
+      { size: "L", price: Math.round(P * 1.04), oldPrice: Math.round(oldP * 1.04), inStock: true, chest: '42"', length: '30"', shoulder: '19.0"' },
+      { size: "XL", price: Math.round(P * 1.06), oldPrice: Math.round(oldP * 1.06), inStock: true, chest: '44"', length: '31"', shoulder: '20.0"' },
+      { size: "XXL", price: Math.round(P * 1.08), oldPrice: Math.round(oldP * 1.08), inStock: true, chest: '46"', length: '32"', shoulder: '21.0"' }
     ];
   }, [product]);
 
   // Available colors list from product or its variants
-  const availableColors = useMemo(() => {
+  const availableColors: string[] = useMemo(() => {
     if (!product) return [];
     if (product.colors && Array.isArray(product.colors) && product.colors.length > 0) {
-      return product.colors.filter(Boolean);
+      return product.colors.filter((c): c is string => Boolean(c));
     }
     if (product.variants && Array.isArray(product.variants) && product.variants.length > 0) {
-      const cols = product.variants.map((v) => v.color).filter(Boolean);
+      const cols = product.variants.map((v) => v.color).filter((c): c is string => Boolean(c));
       if (cols.length > 0) return Array.from(new Set(cols));
     }
     return [];
@@ -180,8 +187,9 @@ export const ProductDetail: React.FC = () => {
       const defaultTier = sizeTiers.find(t => t.inStock) || sizeTiers[0];
       setSelectedSize(defaultTier.size);
       setSelectedPrice(defaultTier.price);
+      setSelectedOldPrice(defaultTier.oldPrice || product?.oldPrice || 0);
     }
-  }, [sizeTiers]);
+  }, [sizeTiers, product]);
 
   const handleSelectSize = (tier: SizeTier) => {
     if (!tier.inStock) {
@@ -190,6 +198,7 @@ export const ProductDetail: React.FC = () => {
     }
     setSelectedSize(tier.size);
     setSelectedPrice(tier.price);
+    setSelectedOldPrice(tier.oldPrice || product?.oldPrice || 0);
   };
 
   const handleAddToCart = () => {
@@ -386,7 +395,7 @@ export const ProductDetail: React.FC = () => {
           <div className="rc-pdp-media-wrapper">
             {/* Vertical Thumbnails List on Left */}
             <div className="rc-pdp-thumbnails">
-              {galleryImages.slice(0, 3).map((img, idx) => {
+              {galleryImages.map((img, idx) => {
                 const isActive = (activeImage || galleryImages[0]) === img;
                 const label = viewLabels[idx] || `View ${idx + 1}`;
                 return (
@@ -403,7 +412,7 @@ export const ProductDetail: React.FC = () => {
                 );
               })}
 
-              {/* 4th Thumbnail: Size Measurement Chart Trigger (Only if multi-size product) */}
+              {/* Size Measurement Chart Trigger (Only if multi-size product) */}
               {hasSizeChart && (
                 <button
                   type="button"
@@ -494,10 +503,20 @@ export const ProductDetail: React.FC = () => {
           <div className="rc-pdp-card">
             <h1 className="rc-pdp-product-title">{product.name}</h1>
 
-            <div className="rc-pdp-price-row">
+            <div className="rc-pdp-price-row" style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
               <span className="rc-pdp-main-price">
                 ₹{selectedPrice || product.newPrice}
               </span>
+              {selectedOldPrice > (selectedPrice || product.newPrice) && (
+                <>
+                  <span className="rc-pdp-old-price" style={{ textDecoration: "line-through", color: "var(--text-muted)", fontSize: "1.1rem" }}>
+                    ₹{selectedOldPrice}
+                  </span>
+                  <span className="rc-pdp-discount-badge" style={{ backgroundColor: "#22c55e", color: "white", padding: "2px 8px", borderRadius: "4px", fontSize: "0.8rem", fontWeight: "800" }}>
+                    {Math.round(((selectedOldPrice - (selectedPrice || product.newPrice)) / selectedOldPrice) * 100)}% OFF
+                  </span>
+                </>
+              )}
               <span className="rc-pdp-price-onwards">onwards</span>
               <span title="Prices vary by size selection" style={{ display: "inline-flex", alignItems: "center", color: "var(--text-muted)", cursor: "help" }}>
                 <Info size={14} />
@@ -566,8 +585,18 @@ export const ProductDetail: React.FC = () => {
                     className={`rc-pdp-size-pill ${isSelected ? "active" : ""} ${!tier.inStock ? "out-of-stock" : ""}`}
                     title={!tier.inStock ? `${tier.size} is currently out of stock` : `Select ${tier.size} for ₹${tier.price}`}
                   >
-                    <span className="size-name">{tier.size}</span>
-                    <span className="size-price">₹{tier.price}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                      {isSelected && <Check size={13} strokeWidth={3} style={{ color: "#9c27b0" }} />}
+                      <span className="size-name">{tier.size}</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                      <span className="size-price">₹{tier.price}</span>
+                      {tier.oldPrice && tier.oldPrice > tier.price && (
+                        <span style={{ textDecoration: "line-through", fontSize: "10px", color: "var(--text-muted)" }}>
+                          ₹{tier.oldPrice}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 );
               })}

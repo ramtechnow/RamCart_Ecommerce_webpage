@@ -775,3 +775,57 @@
   align-items: center;
   gap: 4px;
 }
+
+/* ── Mobile Checkout Responsiveness (<640px) ──────────────── */
+@media (max-width: 640px) {
+  .checkout-page-container {
+    padding: 16px 12px 60px !important;
+  }
+
+  .checkout-section-card {
+    padding: 16px 14px !important;
+  }
+
+  .form-grid-2 {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .form-grid-2-inner {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .span-2 {
+    grid-column: span 1 !important;
+  }
+
+  .card-scene {
+    max-width: 100% !important;
+    height: 160px !important;
+    margin: 0 auto 18px !important;
+  }
+
+  .card-front, .card-back {
+    padding: 14px !important;
+  }
+
+  .card-chip {
+    width: 32px !important;
+    height: 24px !important;
+  }
+
+  .card-number-display {
+    font-size: 14px !important;
+    letter-spacing: 2px !important;
+  }
+
+  .summary-line {
+    font-size: 12px !important;
+  }
+
+  .checkout-btn-primary {
+    font-size: 13px !important;
+    height: 44px !important;
+  }
+}

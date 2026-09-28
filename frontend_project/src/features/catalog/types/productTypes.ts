@@ -1,9 +1,11 @@
 export interface ProductVariant {
-  sku: string;
+  sku?: string;
   size: string;
   color: string;
   stock: number;
   price?: number;
+  oldPrice?: number;
+  old_price?: number;
 }
 
 export interface Product {

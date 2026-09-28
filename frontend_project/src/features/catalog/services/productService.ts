@@ -1,10 +1,45 @@
 import { Product } from "../types/productTypes";
 import { BACKEND_URL } from "../../../config";
 
+// Sanitize image URLs to ensure valid HTTPS protocol and absolute paths
+const sanitizeImg = (imgUrl: any): string => {
+  if (!imgUrl || typeof imgUrl !== "string") return "";
+  let trimmed = imgUrl.trim();
+  if (trimmed.startsWith("http://frontend-project-jucn.onrender.com")) {
+    trimmed = trimmed.replace("http://", "https://");
+  } else if (trimmed.startsWith("http://localhost:4000")) {
+    trimmed = trimmed.replace("http://localhost:4000", BACKEND_URL);
+  } else if (trimmed.startsWith("/images/")) {
+    trimmed = `${BACKEND_URL}${trimmed}`;
+  }
+  return trimmed;
+};
+
 // Reusable mapper to ensure consistent product schema
 const mapRawProduct = (p: any): Product => {
   const rawCat = (p.category || "").toLowerCase().trim();
   const normCat = (rawCat === "kid" || rawCat === "kids") ? "kids" : rawCat;
+  
+  const rawVariants = Array.isArray(p.variants) ? p.variants : [];
+  const mappedVariants = rawVariants.map((v: any) => ({
+    sku: v.sku || "",
+    size: String(v.size || "").trim(),
+    color: v.color || "",
+    stock: v.stock !== undefined ? Number(v.stock) : 10,
+    price: v.price !== undefined && v.price !== null ? Number(v.price) : Number(p.new_price || 0),
+    oldPrice: v.old_price !== undefined && v.old_price !== null 
+      ? Number(v.old_price) 
+      : (v.oldPrice !== undefined && v.oldPrice !== null ? Number(v.oldPrice) : Number(p.old_price || 0)),
+    old_price: v.old_price !== undefined && v.old_price !== null 
+      ? Number(v.old_price) 
+      : (v.oldPrice !== undefined && v.oldPrice !== null ? Number(v.oldPrice) : Number(p.old_price || 0))
+  }));
+
+  const primaryImage = sanitizeImg(p.image);
+  const additionalImages = (Array.isArray(p.images) ? p.images : [])
+    .map(sanitizeImg)
+    .filter(Boolean);
+
   return {
     id: String(p.id !== undefined && p.id !== null ? p.id : (p._id || "")),
     name: p.name || "",
@@ -14,10 +49,10 @@ const mapRawProduct = (p: any): Product => {
     oldPrice: Number(p.old_price || 0),
     sizes: p.sizes && Array.isArray(p.sizes) && p.sizes.length > 0 ? p.sizes : ['S', 'M', 'L', 'XL'],
     colors: p.colors && Array.isArray(p.colors) && p.colors.length > 0 ? p.colors : ['Black', 'White'],
-    variants: p.variants || [],
+    variants: mappedVariants,
     stockCount: Number(p.stockCount || 0),
-    image: p.image || "",
-    images: p.images || [],
+    image: primaryImage,
+    images: additionalImages.length > 0 ? additionalImages : (primaryImage ? [primaryImage] : []),
     available: p.available !== false,
     createdAt: p.date
   };

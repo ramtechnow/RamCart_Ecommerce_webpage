@@ -794,28 +794,37 @@ exports.updateProfile = async (req, res) => {
       return res.status(400).json({ success: false, errors: "Name and email are required fields" });
     }
 
-    const emailCheck = await User.findOne({ email: { $regex: new RegExp("^" + email + "$", "i") }, _id: { $ne: userId } });
+    const emailCheck = await User.findOne({ email: { $regex: new RegExp("^" + email.trim() + "$", "i") }, _id: { $ne: userId } });
     if (emailCheck) {
       return res.status(400).json({ success: false, errors: "Email address is already in use by another account" });
     }
 
-    if (phone) {
-      const phoneCheck = await User.findOne({ phone, _id: { $ne: userId } });
+    const updateQuery = {
+      $set: { name: name.trim(), email: email.trim().toLowerCase() }
+    };
+
+    const cleanPhone = phone && typeof phone === 'string' ? phone.trim() : "";
+    if (cleanPhone) {
+      const phoneCheck = await User.findOne({ phone: cleanPhone, _id: { $ne: userId } });
       if (phoneCheck) {
         return res.status(400).json({ success: false, errors: "Phone number is already in use by another account" });
       }
+      updateQuery.$set.phone = cleanPhone;
+    } else {
+      // Unset phone completely so MongoDB sparse unique index doesn't conflict with ""
+      updateQuery.$unset = { phone: 1 };
     }
 
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { $set: { name, email, phone } },
+      updateQuery,
       { new: true, select: "-password" }
     );
 
     res.json({ success: true, user: updatedUser });
   } catch (error) {
     console.error("Error in updateProfile:", error);
-    res.status(500).json({ success: false, errors: "Internal Server Error" });
+    res.status(500).json({ success: false, errors: error.message || "Internal Server Error" });
   }
 };
 

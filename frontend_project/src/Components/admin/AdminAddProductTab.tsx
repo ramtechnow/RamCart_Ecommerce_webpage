@@ -42,15 +42,15 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string | null>>({});
 
   // Size-specific Pricing & Stock state
-  const [sizeDetails, setSizeDetails] = useState<Record<string, { price?: number; stock: number; inStock: boolean }>>({
-    'XXS': { price: 178, stock: 0, inStock: false },
-    'S': { price: 238, stock: 25, inStock: true },
-    'M': { price: 243, stock: 40, inStock: true },
-    'L': { price: 253, stock: 30, inStock: true },
-    'XL': { price: 258, stock: 20, inStock: true },
-    'XXL': { price: 262, stock: 15, inStock: true },
-    'XXXL': { price: 342, stock: 10, inStock: true },
-    '4XL': { price: 342, stock: 8, inStock: true },
+  const [sizeDetails, setSizeDetails] = useState<Record<string, { price?: number; oldPrice?: number; old_price?: number; stock: number; inStock: boolean }>>({
+    'XXS': { price: 178, oldPrice: 299, stock: 0, inStock: false },
+    'S': { price: 238, oldPrice: 399, stock: 25, inStock: true },
+    'M': { price: 243, oldPrice: 429, stock: 40, inStock: true },
+    'L': { price: 253, oldPrice: 449, stock: 30, inStock: true },
+    'XL': { price: 258, oldPrice: 469, stock: 20, inStock: true },
+    'XXL': { price: 262, oldPrice: 499, stock: 15, inStock: true },
+    'XXXL': { price: 342, oldPrice: 599, stock: 10, inStock: true },
+    '4XL': { price: 342, oldPrice: 599, stock: 8, inStock: true },
   });
 
   // Size/Color chip toggle handlers
@@ -170,6 +170,17 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
     }));
   };
 
+  const handleSizeOldPriceChange = (size: string, val: number) => {
+    setSizeDetails(prev => ({
+      ...prev,
+      [size]: {
+        ...(prev[size] || { stock: 15, inStock: true }),
+        oldPrice: val,
+        old_price: val
+      }
+    }));
+  };
+
   const handleToggleSizeStock = (size: string) => {
     setSizeDetails(prev => {
       const current = prev[size] || { price: Number(newPrice) || 0, stock: 15, inStock: true };
@@ -206,11 +217,13 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
       .substring(0, 15) || "ITEM";
 
     const defaultPrice = Number(newPrice) || 0;
+    const defaultOldPrice = Number(oldPrice) || (defaultPrice ? Math.round(defaultPrice * 1.5) : 0);
     const primaryColor = selectedColors[0] || "Standard";
 
     selectedSizes.forEach(size => {
       const detail = sizeDetails[size];
       const sizePrice = detail?.price !== undefined ? detail.price : defaultPrice;
+      const sizeOldPrice = detail?.oldPrice !== undefined ? detail.oldPrice : (detail?.old_price !== undefined ? detail.old_price : defaultOldPrice);
       const sizeStock = detail?.inStock !== false ? (detail?.stock ?? 15) : 0;
 
       list.push({
@@ -218,11 +231,13 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
         color: primaryColor,
         size,
         stock: sizeStock,
-        price: sizePrice
+        price: sizePrice,
+        oldPrice: sizeOldPrice,
+        old_price: sizeOldPrice
       });
     });
     return list;
-  }, [selectedSizes, selectedColors, name, category, newPrice, sizeDetails]);
+  }, [selectedSizes, selectedColors, name, category, newPrice, oldPrice, sizeDetails]);
 
   const totalCalculatedStock = useMemo(() => {
     return generatedVariants.reduce((sum, v) => sum + v.stock, 0);
@@ -655,15 +670,19 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                 <thead>
                   <tr className="border-b border-[#e2e4ed]/30 dark:border-white/10 text-xs font-bold text-[#717388]">
                     <th className="p-3">Size Tier</th>
-                    <th className="p-3 w-44">Price for this Size (₹)</th>
-                    <th className="p-3 w-40">Stock Status</th>
-                    <th className="p-3 w-36">Units in Stock</th>
+                    <th className="p-3 w-36">Promo Price (₹)</th>
+                    <th className="p-3 w-36">MSRP Old Price (₹)</th>
+                    <th className="p-3 w-36">Stock Status</th>
+                    <th className="p-3 w-32">Units in Stock</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#e2e4ed]/20 dark:divide-white/5">
                   {selectedSizes.map((sz) => {
                     const detail = sizeDetails[sz] || { price: Number(newPrice) || 0, stock: 15, inStock: true };
                     const currentPrice = detail.price !== undefined ? detail.price : (Number(newPrice) || 0);
+                    const currentOldPrice = detail.oldPrice !== undefined 
+                      ? detail.oldPrice 
+                      : (Number(oldPrice) || (currentPrice ? Math.round(currentPrice * 1.5) : 0));
                     const isInStock = detail.inStock !== false;
 
                     return (
@@ -681,7 +700,19 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                               min="0"
                               value={currentPrice}
                               onChange={(e) => handleSizePriceChange(sz, Math.max(0, Number(e.target.value)))}
-                              className="w-36 h-9 pl-6 pr-2.5 text-xs font-bold rounded-lg border border-[#e2e4ed]/40 dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] outline-none text-[#ff8906] focus:border-[#ff8906]"
+                              className="w-28 h-9 pl-6 pr-2 text-xs font-bold rounded-lg border border-[#e2e4ed]/40 dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] outline-none text-[#ff8906] focus:border-[#ff8906]"
+                            />
+                          </div>
+                        </td>
+                        <td className="p-3">
+                          <div className="relative flex items-center">
+                            <span className="absolute left-2.5 text-xs text-zinc-400 font-bold">₹</span>
+                            <input 
+                              type="number"
+                              min="0"
+                              value={currentOldPrice}
+                              onChange={(e) => handleSizeOldPriceChange(sz, Math.max(0, Number(e.target.value)))}
+                              className="w-28 h-9 pl-6 pr-2 text-xs font-semibold rounded-lg border border-[#e2e4ed]/40 dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] outline-none text-zinc-500 focus:border-[#ff8906]"
                             />
                           </div>
                         </td>

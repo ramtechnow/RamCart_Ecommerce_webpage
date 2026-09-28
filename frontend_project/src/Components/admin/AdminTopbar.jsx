@@ -106,25 +106,25 @@ export const AdminTopbar = ({
           {/* Notifications Dropdown */}
           {showNotifications && (
             <div 
-              className="fixed sm:absolute right-3 sm:right-0 top-16 sm:top-auto sm:mt-3 w-[calc(100vw-24px)] sm:w-80 max-w-[360px] max-h-[80vh] sm:max-h-96 rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden animate-fade-in bg-white dark:bg-[#121214] border border-zinc-200 dark:border-zinc-800"
+              className="fixed sm:absolute right-2 sm:right-0 top-16 sm:top-auto sm:mt-3 w-[calc(100vw-16px)] sm:w-[420px] max-w-[450px] max-h-[85vh] sm:max-h-[520px] rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden animate-fade-in bg-white dark:bg-[#121214] border border-zinc-200 dark:border-zinc-800"
             >
               {/* Header */}
               <div className="flex items-center justify-between p-3.5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-black text-zinc-900 dark:text-zinc-100">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-xs font-black text-zinc-900 dark:text-zinc-100 truncate">
                     Notifications
                   </span>
                   {unreadCount > 0 && (
-                    <span className="text-[10px] font-black bg-black text-white dark:bg-white dark:text-black px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-black bg-black text-white dark:bg-white dark:text-black px-2 py-0.5 rounded-full shrink-0">
                       {unreadCount} new
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
                   {notifications.length > 0 && (
                     <button
                       onClick={onClearAll || onMarkAllRead}
-                      className="text-zinc-500 hover:text-red-600 dark:hover:text-red-400 text-[10px] font-bold flex items-center gap-1 cursor-pointer bg-transparent border-none p-0 transition-colors"
+                      className="text-zinc-500 hover:text-red-600 dark:hover:text-red-400 text-[10px] font-bold flex items-center gap-1 cursor-pointer bg-transparent border-none p-1 transition-colors rounded hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
                       title="Clear all notifications"
                     >
                       <Trash2 size={11} /> Clear
@@ -133,7 +133,7 @@ export const AdminTopbar = ({
                   {unreadCount > 0 && (
                     <button
                       onClick={onMarkAllRead}
-                      className="text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer bg-transparent border-none p-0 transition-colors"
+                      className="text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer bg-transparent border-none p-1 transition-colors rounded hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
                       title="Mark all as read"
                     >
                       <CheckCheck size={12} /> Mark Read
@@ -141,7 +141,7 @@ export const AdminTopbar = ({
                   )}
                   <button
                     onClick={() => setShowNotifications(false)}
-                    className="cursor-pointer bg-transparent border-none p-0 transition-colors text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200"
+                    className="cursor-pointer bg-transparent border-none p-1 transition-colors text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 rounded hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50"
                   >
                     <X size={15} />
                   </button>
@@ -171,13 +171,13 @@ export const AdminTopbar = ({
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-center">
+                          <div className="flex justify-between items-center gap-2">
                             <span className="text-[12px] font-bold truncate text-zinc-900 dark:text-zinc-100">
                               {n.title}
                             </span>
-                            <span className="text-[9px] text-zinc-400 dark:text-zinc-500">{n.time}</span>
+                            <span className="text-[9px] text-zinc-400 dark:text-zinc-500 shrink-0">{n.time}</span>
                           </div>
-                          <p className="text-[11px] mt-1 leading-snug text-zinc-600 dark:text-zinc-400">
+                          <p className="text-[11px] mt-1 leading-snug text-zinc-600 dark:text-zinc-400 break-words">
                             {n.message}
                           </p>
                         </div>

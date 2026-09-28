@@ -16,8 +16,26 @@ interface ProductCardProps {
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const isWishlisted = isInWishlist(product.id);
+  // Compute primary image source with HTTPS safety
+  const rawImg = product.image || (product.images && product.images[0]) || "";
+  const initialImg = rawImg.replace(/^http:\/\/frontend-project-jucn\.onrender\.com/, "https://frontend-project-jucn.onrender.com");
+  
+  const [currentImg, setCurrentImg] = useState<string>(initialImg);
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
+
+  const handleImageError = () => {
+    // If primary failed, try first item of images array if different
+    if (product.images && product.images.length > 0) {
+      const altUrl = product.images[0].replace(/^http:\/\/frontend-project-jucn\.onrender\.com/, "https://frontend-project-jucn.onrender.com");
+      if (altUrl && altUrl !== currentImg) {
+        setCurrentImg(altUrl);
+        return;
+      }
+    }
+    setImgError(true);
+    setImgLoaded(true);
+  };
 
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -46,7 +64,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const isOutOfStock = product.stockCount !== undefined && product.stockCount <= 0;
 
   // Show styled name-alt instead of broken image
-  const showAltName = imgError || !product.image;
+  const showAltName = imgError || !currentImg;
 
   return (
     <div className={`product-card ${isOutOfStock ? "is-sold-out" : ""}`} style={{ position: "relative" }}>
@@ -96,16 +114,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </div>
           ) : (
             <img
-              src={product.image}
+              src={currentImg}
               alt={product.name}
               className="product-card-image"
               loading="lazy"
               decoding="async"
               onLoad={() => setImgLoaded(true)}
-              onError={() => {
-                setImgError(true);
-                setImgLoaded(true);
-              }}
+              onError={handleImageError}
               style={{
                 opacity: imgLoaded ? 1 : 0,
                 transition: "opacity 0.3s ease-in-out"

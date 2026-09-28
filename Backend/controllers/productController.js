@@ -7,6 +7,14 @@ exports.addProduct = async (req, res) => {
     const lastProduct = await Product.findOne({}, { id: 1 }).sort({ id: -1 });
     const id = lastProduct ? lastProduct.id + 1 : 1;
     
+    const variantsInput = Array.isArray(req.body.variants) ? req.body.variants.map(v => ({
+      size: v.size || "",
+      color: v.color || "Standard",
+      stock: Number(v.stock !== undefined ? v.stock : 0),
+      price: Number(v.price !== undefined ? v.price : (req.body.new_price || 0)),
+      old_price: Number(v.old_price !== undefined ? v.old_price : (v.oldPrice !== undefined ? v.oldPrice : (req.body.old_price || 0)))
+    })) : [];
+
     const product = new Product({
       id: id,
       name: req.body.name,
@@ -16,8 +24,8 @@ exports.addProduct = async (req, res) => {
       old_price: req.body.old_price,
       sizes: req.body.sizes,
       colors: req.body.colors,
-      variants: req.body.variants || [],
-      stockCount: req.body.variants ? req.body.variants.reduce((sum, v) => sum + Number(v.stock), 0) : Number(req.body.stockCount || 100),
+      variants: variantsInput,
+      stockCount: variantsInput.length > 0 ? variantsInput.reduce((sum, v) => sum + Number(v.stock), 0) : Number(req.body.stockCount || 100),
       images: req.body.images || [],
       description: req.body.description || "",
     });
@@ -81,16 +89,26 @@ exports.getAllProducts = async (req, res) => {
         });
       }
       
-      // Synthesize variants for legacy documents
+      // Ensure all variants have size, price, and old_price
       if (!prodObj.variants || prodObj.variants.length === 0) {
+        const sizes = prodObj.sizes && prodObj.sizes.length > 0 ? prodObj.sizes : ['S', 'M', 'L', 'XL'];
         const colors = prodObj.colors && prodObj.colors.length > 0 ? prodObj.colors : ['Black', 'White'];
         const totalStock = prodObj.stockCount !== undefined ? prodObj.stockCount : 100;
-        const stockPerColor = Math.floor(totalStock / colors.length);
+        const stockPerSize = Math.floor(totalStock / sizes.length);
         
-        prodObj.variants = colors.map((c, idx) => ({
-          color: c,
-          stock: idx === colors.length - 1 ? totalStock - (stockPerColor * (colors.length - 1)) : stockPerColor,
-          price: prodObj.new_price
+        prodObj.variants = sizes.map((s, idx) => ({
+          size: s,
+          color: colors[0] || 'Standard',
+          stock: idx === sizes.length - 1 ? totalStock - (stockPerSize * (sizes.length - 1)) : stockPerSize,
+          price: prodObj.new_price,
+          old_price: prodObj.old_price || Math.round(prodObj.new_price * 1.3)
+        }));
+      } else {
+        prodObj.variants = prodObj.variants.map((v, idx) => ({
+          ...v,
+          size: v.size || (prodObj.sizes && prodObj.sizes[idx % prodObj.sizes.length]) || 'M',
+          price: Number(v.price !== undefined ? v.price : prodObj.new_price),
+          old_price: Number(v.old_price !== undefined ? v.old_price : (v.oldPrice !== undefined ? v.oldPrice : (prodObj.old_price || Math.round((v.price || prodObj.new_price) * 1.3))))
         }));
       }
       
@@ -144,16 +162,26 @@ exports.getProductById = async (req, res) => {
       });
     }
 
-    // Synthesize variants for legacy documents if empty
+    // Ensure all variants have size, price, and old_price
     if (!prodObj.variants || prodObj.variants.length === 0) {
+      const sizes = prodObj.sizes && prodObj.sizes.length > 0 ? prodObj.sizes : ['S', 'M', 'L', 'XL'];
       const colors = prodObj.colors && prodObj.colors.length > 0 ? prodObj.colors : ['Black', 'White'];
       const totalStock = prodObj.stockCount !== undefined ? prodObj.stockCount : 100;
-      const stockPerColor = Math.floor(totalStock / colors.length);
+      const stockPerSize = Math.floor(totalStock / sizes.length);
       
-      prodObj.variants = colors.map((c, idx) => ({
-        color: c,
-        stock: idx === colors.length - 1 ? totalStock - (stockPerColor * (colors.length - 1)) : stockPerColor,
-        price: prodObj.new_price
+      prodObj.variants = sizes.map((s, idx) => ({
+        size: s,
+        color: colors[0] || 'Standard',
+        stock: idx === sizes.length - 1 ? totalStock - (stockPerSize * (sizes.length - 1)) : stockPerSize,
+        price: prodObj.new_price,
+        old_price: prodObj.old_price || Math.round(prodObj.new_price * 1.3)
+      }));
+    } else {
+      prodObj.variants = prodObj.variants.map((v, idx) => ({
+        ...v,
+        size: v.size || (prodObj.sizes && prodObj.sizes[idx % prodObj.sizes.length]) || 'M',
+        price: Number(v.price !== undefined ? v.price : prodObj.new_price),
+        old_price: Number(v.old_price !== undefined ? v.old_price : (v.oldPrice !== undefined ? v.oldPrice : (prodObj.old_price || Math.round((v.price || prodObj.new_price) * 1.3))))
       }));
     }
 
@@ -196,16 +224,24 @@ exports.updateProduct = async (req, res) => {
     if (description !== undefined) updateData.description = description;
     if (available !== undefined) updateData.available = available;
     
-    if (variants) {
-      updateData.variants = variants;
-      updateData.stockCount = variants.reduce((sum, v) => sum + Number(v.stock), 0);
+    if (variants && Array.isArray(variants)) {
+      updateData.variants = variants.map(v => ({
+        size: v.size || "",
+        color: v.color || "Standard",
+        stock: Number(v.stock !== undefined ? v.stock : 0),
+        price: Number(v.price !== undefined ? v.price : (new_price || 0)),
+        old_price: Number(v.old_price !== undefined ? v.old_price : (v.oldPrice !== undefined ? v.oldPrice : (old_price || 0)))
+      }));
+      updateData.stockCount = updateData.variants.reduce((sum, v) => sum + Number(v.stock), 0);
       
       // Auto-extract colors and sizes from variants to keep them in sync if not explicitly passed
-      if (!colors) {
-        updateData.colors = [...new Set(variants.map(v => v.color))];
+      if (!colors || colors.length === 0) {
+        const extractedColors = [...new Set(updateData.variants.map(v => v.color).filter(Boolean))];
+        if (extractedColors.length > 0) updateData.colors = extractedColors;
       }
-      if (!sizes) {
-        updateData.sizes = [...new Set(variants.map(v => v.size))];
+      if (!sizes || sizes.length === 0) {
+        const extractedSizes = [...new Set(updateData.variants.map(v => v.size).filter(Boolean))];
+        if (extractedSizes.length > 0) updateData.sizes = extractedSizes;
       }
     } else if (stockCount !== undefined) {
       updateData.stockCount = Number(stockCount);

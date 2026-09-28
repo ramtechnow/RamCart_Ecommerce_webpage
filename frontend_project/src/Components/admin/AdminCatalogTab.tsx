@@ -122,7 +122,14 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
     setEditingProductId(prod.id);
     
     let initialVariants: ProductVariant[] = prod.variants ? JSON.parse(JSON.stringify(prod.variants)) : [];
-    if (initialVariants.length === 0) {
+    if (initialVariants.length > 0) {
+      initialVariants = initialVariants.map(v => ({
+        ...v,
+        price: v.price !== undefined ? v.price : prod.newPrice,
+        oldPrice: v.old_price !== undefined ? v.old_price : (v.oldPrice !== undefined ? v.oldPrice : (prod.oldPrice || Math.round(prod.newPrice * 1.5))),
+        old_price: v.old_price !== undefined ? v.old_price : (v.oldPrice !== undefined ? v.oldPrice : (prod.oldPrice || Math.round(prod.newPrice * 1.5)))
+      }));
+    } else {
       const colors = prod.colors && prod.colors.length > 0 ? prod.colors : ['Black', 'White'];
       const sizes = prod.sizes && prod.sizes.length > 0 ? prod.sizes : ['S', 'M', 'L'];
       const totalStock = prod.stockCount !== undefined ? prod.stockCount : 100;
@@ -135,7 +142,9 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
             size: s,
             color: c,
             stock: stockPerVariant,
-            price: prod.newPrice || 0
+            price: prod.newPrice || 0,
+            oldPrice: prod.oldPrice || Math.round(prod.newPrice * 1.5),
+            old_price: prod.oldPrice || Math.round(prod.newPrice * 1.5)
           });
         });
       });
@@ -621,29 +630,43 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                     <td className="p-4 align-middle">
                       {isEditing && editForm ? (
                         <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto pr-1">
-                          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">Size / Stock / Price (₹)</span>
+                          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-0.5">Size / Stock / New ₹ / Old ₹</span>
                           {editForm.variants.map((v, idx) => (
                             <div key={idx} className="flex items-center gap-1.5 border-b border-[#e2e4ed]/30 dark:border-white/5 pb-1.5">
-                              <span className="text-[11px] font-black text-zinc-900 dark:text-zinc-100 min-w-[50px]">{v.size}</span>
+                              <span className="text-[11px] font-black text-zinc-900 dark:text-zinc-100 min-w-[36px]">{v.size}</span>
                               <input 
                                 type="number" 
                                 value={v.stock}
-                                title="Available Stock"
+                                title="Available Stock (Units)"
                                 placeholder="Units"
                                 onChange={(e) => handleVariantFieldChange(idx, "stock", Math.max(0, Number(e.target.value)))}
                                 min="0"
-                                className="w-16 px-1.5 py-1 text-[11px] font-bold rounded border-2 border-zinc-200 dark:border-zinc-700 bg-[#ffffff] dark:bg-[#212030] text-[#0f0e17] dark:text-white"
+                                className="w-14 px-1 py-1 text-[11px] font-bold rounded border-2 border-zinc-200 dark:border-zinc-700 bg-[#ffffff] dark:bg-[#212030] text-[#0f0e17] dark:text-white"
                               />
-                              <div className="flex items-center relative">
-                                <span className="absolute left-1.5 text-[10px] text-zinc-400 font-bold">₹</span>
+                              <div className="flex items-center relative" title="Size New Price (₹)">
+                                <span className="absolute left-1 text-[9px] text-zinc-400 font-bold">New</span>
                                 <input 
                                   type="number" 
                                   value={v.price ?? editForm.newPrice}
-                                  title="Size Price (₹)"
-                                  placeholder="₹"
+                                  placeholder="New"
                                   onChange={(e) => handleVariantFieldChange(idx, "price", Math.max(0, Number(e.target.value)))}
                                   min="0"
-                                  className="w-20 pl-4 pr-1 py-1 text-[11px] font-bold rounded border-2 border-zinc-200 dark:border-zinc-700 bg-[#ffffff] dark:bg-[#212030] text-[#ff8906]"
+                                  className="w-16 pl-6 pr-1 py-1 text-[11px] font-bold rounded border-2 border-zinc-200 dark:border-zinc-700 bg-[#ffffff] dark:bg-[#212030] text-[#ff8906]"
+                                />
+                              </div>
+                              <div className="flex items-center relative" title="Size Old Price / MSRP (₹)">
+                                <span className="absolute left-1 text-[9px] text-zinc-400 font-bold">Old</span>
+                                <input 
+                                  type="number" 
+                                  value={v.old_price ?? v.oldPrice ?? editForm.oldPrice}
+                                  placeholder="Old"
+                                  onChange={(e) => {
+                                    const val = Math.max(0, Number(e.target.value));
+                                    handleVariantFieldChange(idx, "oldPrice" as any, val);
+                                    handleVariantFieldChange(idx, "old_price" as any, val);
+                                  }}
+                                  min="0"
+                                  className="w-16 pl-6 pr-1 py-1 text-[11px] font-bold rounded border-2 border-zinc-200 dark:border-zinc-700 bg-[#ffffff] dark:bg-[#212030] text-zinc-400"
                                 />
                               </div>
                             </div>
