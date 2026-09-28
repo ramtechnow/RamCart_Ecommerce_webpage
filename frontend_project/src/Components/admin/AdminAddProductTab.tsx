@@ -271,12 +271,17 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
 
     setSaving(true);
     const primaryImage = images[0];
+    const validVariantPrices = generatedVariants.map(v => Number(v.price)).filter(p => !isNaN(p) && p > 0);
+    const validVariantOldPrices = generatedVariants.map(v => Number(v.oldPrice || v.old_price)).filter(p => !isNaN(p) && p > 0);
+    const finalNewPrice = validVariantPrices.length > 0 ? Math.min(...validVariantPrices) : Number(newPrice);
+    const finalOldPrice = validVariantOldPrices.length > 0 ? Math.max(...validVariantOldPrices) : (Number(oldPrice) || Math.round(finalNewPrice * 1.5));
+
     const payload = {
       name,
       description,
       category,
-      newPrice: Number(newPrice),
-      oldPrice: Number(oldPrice),
+      newPrice: finalNewPrice,
+      oldPrice: finalOldPrice,
       sizes: selectedSizes,
       colors: selectedColors,
       variants: generatedVariants,
@@ -372,16 +377,27 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Base price */}
+                {/* Default New price */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-[#2e2f3e] dark:text-[#a7a9be]">Discounted Price (₹) <span className="text-red-500">*</span></label>
+                  <label className="text-xs font-bold text-[#2e2f3e] dark:text-[#a7a9be]">New Price (₹) <span className="text-red-500">*</span></label>
                   <input 
                     type="number" 
                     placeholder="e.g. 799" 
                     value={newPrice}
                     onChange={(e) => {
-                      setNewPrice(e.target.value);
+                      const val = e.target.value;
+                      setNewPrice(val);
                       setFieldErrors(prev => ({ ...prev, newPrice: null }));
+                      const num = Number(val);
+                      if (!isNaN(num) && num > 0) {
+                        setSizeDetails(prev => {
+                          const updated = { ...prev };
+                          Object.keys(updated).forEach(sz => {
+                            updated[sz] = { ...updated[sz], price: num };
+                          });
+                          return updated;
+                        });
+                      }
                     }}
                     className={`w-full h-11 px-4 rounded-xl border bg-[#ffffff] dark:bg-[#212030] outline-none text-sm focus:border-[#ff8906] focus:ring-1 focus:ring-[#ff8906] ${
                       fieldErrors.newPrice ? 'border-red-500' : 'border-[#e2e4ed]/40 dark:border-white/10'
@@ -394,16 +410,27 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                   )}
                 </div>
 
-                {/* MSRP */}
+                {/* Default Old price */}
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold text-[#2e2f3e] dark:text-[#a7a9be]">Maximum Retail Price / MSRP (₹) <span className="text-red-500">*</span></label>
+                  <label className="text-xs font-bold text-[#2e2f3e] dark:text-[#a7a9be]">Old Price (₹) <span className="text-red-500">*</span></label>
                   <input 
                     type="number" 
                     placeholder="e.g. 1499" 
                     value={oldPrice}
                     onChange={(e) => {
-                      setOldPrice(e.target.value);
+                      const val = e.target.value;
+                      setOldPrice(val);
                       setFieldErrors(prev => ({ ...prev, oldPrice: null }));
+                      const num = Number(val);
+                      if (!isNaN(num) && num > 0) {
+                        setSizeDetails(prev => {
+                          const updated = { ...prev };
+                          Object.keys(updated).forEach(sz => {
+                            updated[sz] = { ...updated[sz], oldPrice: num, old_price: num };
+                          });
+                          return updated;
+                        });
+                      }
                     }}
                     className={`w-full h-11 px-4 rounded-xl border bg-[#ffffff] dark:bg-[#212030] outline-none text-sm focus:border-[#ff8906] focus:ring-1 focus:ring-[#ff8906] ${
                       fieldErrors.oldPrice ? 'border-red-500' : 'border-[#e2e4ed]/40 dark:border-white/10'
@@ -670,8 +697,8 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                 <thead>
                   <tr className="border-b border-[#e2e4ed]/30 dark:border-white/10 text-xs font-bold text-[#717388]">
                     <th className="p-3">Size Tier</th>
-                    <th className="p-3 w-36">Promo Price (₹)</th>
-                    <th className="p-3 w-36">MSRP Old Price (₹)</th>
+                    <th className="p-3 w-36">New Price (₹)</th>
+                    <th className="p-3 w-36">Old Price (₹)</th>
                     <th className="p-3 w-36">Stock Status</th>
                     <th className="p-3 w-32">Units in Stock</th>
                   </tr>

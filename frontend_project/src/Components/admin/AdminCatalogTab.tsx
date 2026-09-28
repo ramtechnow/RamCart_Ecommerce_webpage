@@ -52,7 +52,6 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
 
   // Loaders
   const [savingProductId, setSavingProductId] = useState<string | null>(null);
-  const [busyStockKeys, setBusyStockKeys] = useState<Record<string, boolean>>({});
 
   // Filtered list
   const filteredProducts = useMemo(() => {
@@ -240,20 +239,25 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
       addToast("Product title cannot be empty", "error");
       return;
     }
-    if (Number(editForm.newPrice) <= 0) {
-      addToast("Price must be greater than 0", "error");
+    const calculatedStock = editForm.variants.reduce((sum, v) => sum + (Number(v.stock) || 0), 0);
+    const validVariantPrices = editForm.variants.map(v => Number(v.price)).filter(p => !isNaN(p) && p > 0);
+    const validVariantOldPrices = editForm.variants.map(v => Number(v.old_price ?? v.oldPrice)).filter(p => !isNaN(p) && p > 0);
+    const derivedNewPrice = validVariantPrices.length > 0 ? Math.min(...validVariantPrices) : Number(editForm.newPrice || 0);
+    const derivedOldPrice = validVariantOldPrices.length > 0 ? Math.max(...validVariantOldPrices) : (Number(editForm.oldPrice) || Math.round(derivedNewPrice * 1.5));
+
+    if (derivedNewPrice <= 0) {
+      addToast("Price must be greater than 0 for product sizes", "error");
       return;
     }
 
     setSavingProductId(id);
-    const calculatedStock = editForm.variants.reduce((sum, v) => sum + v.stock, 0);
 
     const payload = {
       id: editForm.id,
       name: editForm.name,
       category: editForm.category,
-      newPrice: Number(editForm.newPrice),
-      oldPrice: Number(editForm.oldPrice),
+      newPrice: derivedNewPrice,
+      oldPrice: derivedOldPrice,
       variants: editForm.variants,
       stockCount: calculatedStock,
       image: editForm.images[0] || "",
@@ -295,23 +299,6 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
         }
       }
     });
-  };
-
-  const handleVariantStockAdjust = async (id: string, colorName: string, change: number) => {
-    const key = `${id}-${colorName}`;
-    if (busyStockKeys[key]) return;
-
-    setBusyStockKeys(prev => ({ ...prev, [key]: true }));
-    try {
-      await adminApi.updateVariantStock(id, colorName, change);
-      addToast(`Adjusted ${colorName} stock count`, "success");
-      onRefreshProducts();
-    } catch (err: any) {
-      console.error(err);
-      addToast(err.message || "Failed to adjust stock", "error");
-    } finally {
-      setBusyStockKeys(prev => ({ ...prev, [key]: false }));
-    }
   };
 
   return (
@@ -411,11 +398,9 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
               <tr className="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 text-xs font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider">
                 <th className="p-4 w-28 text-center">Product View</th>
                 <th className="p-4">Title & Specifications</th>
-                <th className="p-4 w-32">Category</th>
-                <th className="p-4 w-72">Stock Control (Inline)</th>
-                <th className="p-4 w-28">New Price</th>
-                <th className="p-4 w-28">Old Price</th>
-                <th className="p-4 w-44 text-right sticky right-0 z-20 bg-zinc-50 dark:bg-zinc-900 shadow-[-4px_0_8px_rgba(0,0,0,0.06)]">Actions</th>
+                <th className="p-4 w-28">Category</th>
+                <th className="p-4 w-96">Sizes, Stock &amp; Prices (New ₹ / Old ₹)</th>
+                <th className="p-4 w-36 text-right sticky right-0 z-20 bg-zinc-50 dark:bg-zinc-900 shadow-[-4px_0_8px_rgba(0,0,0,0.06)]">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
@@ -673,87 +658,46 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                           ))}
                         </div>
                       ) : (
-                        <div className="flex flex-col gap-1.5">
+                        <div className="flex flex-col gap-2">
                           {/* Inventory Warning Badge */}
                           {isLowStock ? (
-                            <div className="flex items-center gap-1.5 mb-1 text-red-600 font-extrabold text-xs">
+                            <div className="flex items-center gap-1.5 text-red-600 font-extrabold text-xs">
                               <span className="w-2 h-2 rounded-full bg-red-600 animate-ping"></span>
                               <span>{totalStock} in stock (Low Stock Alert)</span>
                             </div>
                           ) : (
-                            <div className="flex items-center gap-1.5 mb-1 text-[#388E3C] font-extrabold text-xs">
+                            <div className="flex items-center gap-1.5 text-[#388E3C] font-extrabold text-xs">
                               <span className="w-2 h-2 rounded-full bg-[#1f7a3d]"></span>
-                              <span className="text-[#166534] dark:text-[#9be7b2]">{totalStock} in stock (Healthy)</span>
+                              <span className="text-[#166534] dark:text-[#9be7b2]">{totalStock} in stock</span>
                             </div>
                           )}
 
-                          {/* Quick Adjust buttons per Variant */}
-                          <div className="flex flex-col gap-1">
-                            {(prod.variants || []).slice(0, 3).map((v, vidx) => {
-                              const stockKey = `${prod.id}-${v.color}`;
-                              const isBusy = busyStockKeys[stockKey];
-
+                          {/* Sizes with stock, New Price and Old Price directly */}
+                          <div className="flex flex-col gap-1 max-h-48 overflow-y-auto pr-1">
+                            {(prod.variants && prod.variants.length > 0 ? prod.variants : [
+                              { size: prod.sizes?.[0] || 'Std', color: prod.colors?.[0] || 'Std', stock: totalStock, price: prod.newPrice, old_price: prod.oldPrice }
+                            ]).map((v, vidx) => {
+                              const vPrice = v.price || prod.newPrice;
+                              const vOldPrice = v.old_price || v.oldPrice || prod.oldPrice;
                               return (
-                                <div key={vidx} className="flex items-center justify-between text-[11px] text-[#2e2f3e] dark:text-[#a7a9be] max-w-[200px]">
+                                <div key={vidx} className="flex items-center justify-between text-[11px] gap-2 py-1 border-b border-zinc-100 dark:border-zinc-800/60 last:border-none">
                                   <div className="flex items-center gap-1.5">
-                                    <span className="w-2 h-2 rounded-full border border-gray-400" style={{ backgroundColor: v.color.toLowerCase() }}></span>
-                                    <span>{v.color}/{v.size}:</span>
+                                    <span className="font-black text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded text-[10px]">
+                                      {v.size}
+                                    </span>
+                                    <span className="text-zinc-500 font-medium text-[10px]">({v.stock} units)</span>
                                   </div>
-                                  <div className="flex items-center gap-1">
-                                    <button 
-                                      type="button" 
-                                      disabled={isBusy}
-                                      onClick={() => handleVariantStockAdjust(prod.id, v.color, -5)}
-                                      className="w-5 h-5 flex items-center justify-center bg-[#eff0f6] dark:bg-[#212030] border border-[#e2e4ed]/40 dark:border-white/10 hover:bg-[#e6e8eb] rounded text-xs font-bold disabled:opacity-50 cursor-pointer text-[#0f0e17] dark:text-white"
-                                    >
-                                      -
-                                    </button>
-                                    <span className="w-7 text-center font-bold">{v.stock}</span>
-                                    <button 
-                                      type="button" 
-                                      disabled={isBusy}
-                                      onClick={() => handleVariantStockAdjust(prod.id, v.color, 5)}
-                                      className="w-5 h-5 flex items-center justify-center bg-[#eff0f6] dark:bg-[#212030] border border-[#e2e4ed]/40 dark:border-white/10 hover:bg-[#e6e8eb] rounded text-xs font-bold disabled:opacity-50 cursor-pointer text-[#0f0e17] dark:text-white"
-                                    >
-                                      +
-                                    </button>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-extrabold text-[#ff8906]">₹{vPrice}</span>
+                                    {vOldPrice && vOldPrice > vPrice && (
+                                      <span className="text-zinc-400 line-through text-[10px]">₹{vOldPrice}</span>
+                                    )}
                                   </div>
                                 </div>
                               );
                             })}
-                            {prod.variants && prod.variants.length > 3 && (
-                              <span className="text-[10px] text-[#717388] mt-0.5">+ {prod.variants.length - 3} more variants</span>
-                            )}
                           </div>
                         </div>
-                      )}
-                    </td>
-
-                    {/* New Price */}
-                    <td className="p-4 align-middle font-bold text-[#0f0e17] dark:text-[#fffffe]">
-                      {isEditing && editForm ? (
-                        <input 
-                          type="number" 
-                          value={editForm.newPrice} 
-                          onChange={(e) => setEditForm({ ...editForm, newPrice: Number(e.target.value) })}
-                          className="w-20 px-2 py-1 text-xs rounded border-2 border-zinc-200 dark:border-zinc-700 bg-[#ffffff] dark:bg-[#212030] text-[#0f0e17] dark:text-white font-extrabold outline-none shadow-sm"
-                        />
-                      ) : (
-                        <span>₹{prod.newPrice}</span>
-                      )}
-                    </td>
-
-                    {/* Old Price */}
-                    <td className="p-4 align-middle text-[#717388] line-through">
-                      {isEditing && editForm ? (
-                        <input 
-                          type="number" 
-                          value={editForm.oldPrice} 
-                          onChange={(e) => setEditForm({ ...editForm, oldPrice: Number(e.target.value) })}
-                          className="w-20 px-2 py-1 text-xs rounded border-2 border-zinc-200 dark:border-zinc-700 bg-[#ffffff] dark:bg-[#212030] text-[#0f0e17] dark:text-white font-bold outline-none shadow-sm"
-                        />
-                      ) : (
-                        <span>₹{prod.oldPrice || 0}</span>
                       )}
                     </td>
 

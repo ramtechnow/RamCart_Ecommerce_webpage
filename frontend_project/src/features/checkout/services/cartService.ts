@@ -26,16 +26,19 @@ export const fetchUserCart = async (userId: string): Promise<CartItem[]> => {
     const data = cartData[key];
     const product = productsRes.find((p) => p.id === String(data.id));
     if (product) {
+      const itemSize = data.size || "M";
+      const matchingVariant = (product.variants || []).find((v) => v.size === itemSize);
+      const variantPrice = matchingVariant?.price && matchingVariant.price > 0 ? matchingVariant.price : product.newPrice;
       items.push({
         id: key, // Use key as cart item ID
         userId,
         productId: String(data.id),
         name: product.name,
         image: product.image,
-        size: data.size || "M",
+        size: itemSize,
         color: data.color || "White",
         quantity: Number(data.quantity || 1),
-        price: product.newPrice
+        price: variantPrice
       });
     }
   }

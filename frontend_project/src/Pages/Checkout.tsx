@@ -155,6 +155,8 @@ export const Checkout: React.FC = () => {
         try {
           const product = await fetchProductById(buyNowProductId);
           if (product) {
+            const matchingVariant = (product.variants || []).find((v) => v.size === buyNowSize);
+            const variantPrice = matchingVariant?.price && matchingVariant.price > 0 ? matchingVariant.price : product.newPrice;
             setBuyNowItem({
               id: `buynow-${product.id}`,
               userId: user?.uid || "",
@@ -164,7 +166,7 @@ export const Checkout: React.FC = () => {
               size: buyNowSize,
               color: buyNowColor,
               quantity: buyNowQty,
-              price: buyNowPrice > 0 ? buyNowPrice : product.newPrice
+              price: buyNowPrice > 0 ? buyNowPrice : variantPrice
             });
           }
         } catch (err) {

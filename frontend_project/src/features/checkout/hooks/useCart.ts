@@ -88,7 +88,9 @@ export const useCart = () => {
       return;
     }
 
-    const itemPrice = customPrice !== undefined && customPrice > 0 ? customPrice : product.newPrice;
+    const matchingVariant = (product.variants || []).find((v) => v.size === size);
+    const variantPrice = matchingVariant?.price && matchingVariant.price > 0 ? matchingVariant.price : product.newPrice;
+    const itemPrice = customPrice !== undefined && customPrice > 0 ? customPrice : variantPrice;
     const docId = `${user?.uid || "guest"}_${productId}_${size}_${color}`;
     const cartItem: CartItem = {
       id: docId,
