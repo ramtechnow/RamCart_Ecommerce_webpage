@@ -300,7 +300,7 @@ When designing promotional hero banners for the multi-card carousel:
 > If you are a recruiter, engineering evaluator, prospective client, or collaborator interested in test-driving the administrative console and operations features (Analytics, Catalog Management, Variant Pricing, Order Pipelines, and Coupon Engines), please reach out directly:
 >
 > - **Lead Developer**: **Shriram M G**
-> - **Email**: [bvhss20@gmail.com](mailto:bvhss20@gmail.com)
+> - **Email**: [ramtechnow@gmail.com](mailto:ramtechnow@gmail.com)
 > - **GitHub**: [@ramtechnow20](https://github.com/ramtechnow20)
 >
 > Verified demo access credentials or a guided walkthrough session will be provided upon request.
@@ -312,7 +312,7 @@ When designing promotional hero banners for the multi-card carousel:
 - 🌐 **Live Web Application**: [https://ecommerce-website-dfd55.web.app](https://ecommerce-website-dfd55.web.app)
 - 🐙 **GitHub Repository**: [https://github.com/ramtechnow/RamCart_Ecommerce_webpage](https://github.com/ramtechnow/RamCart_Ecommerce_webpage)
 - 📦 **Target Git Branch**: `Ecommerce_backend`
-- 👨‍💻 **Developer & Maintainer**: **Shriram M G** ([bvhss20@gmail.com](mailto:bvhss20@gmail.com))
+- 👨‍💻 **Developer & Maintainer**: **Shriram M G** ([ramtechnow@gmail.com](mailto:ramtechnow@gmail.com))
 
 ---
 
