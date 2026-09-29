@@ -1,4 +1,4 @@
-# 🛍️ RamCart — Omnichannel Enterprise E-Commerce Platform
+# 🛍️ RamCart — Modern Fashion & Apparel E-Commerce Platform
 
 [![Live Web Application](https://img.shields.io/badge/Live%20Web%20App-Firebase%20Hosting-blueviolet?style=for-the-badge&logo=firebase)](https://ecommerce-website-dfd55.web.app)
 [![Frontend Stack](https://img.shields.io/badge/Frontend-React%2019%20%7C%20Vite%206%20%7C%20TypeScript%20%7C%20Tailwind-blue?style=for-the-badge&logo=react)](https://ecommerce-website-dfd55.web.app)
@@ -6,7 +6,7 @@
 [![Mobile App](https://img.shields.io/badge/Mobile-React%20Native%20%7C%20Expo%2057-black?style=for-the-badge&logo=expo)](https://github.com/ramtechnow/RamCart_Ecommerce_webpage)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=for-the-badge)](LICENSE)
 
-> **RamCart** is a modern, enterprise-grade omnichannel e-commerce platform built with **React 19, TypeScript, Vite 6, Tailwind CSS, Node.js, Express, MongoDB Atlas, Firebase, and React Native (Expo)**. Engineered to deliver Flipkart/Myntra-grade shopping experiences, real-time warehouse inventory synchronization, size-tier variant pricing, progressive image loading, and high-contrast administrative intelligence.
+> **RamCart** is a modern, full-stack fashion and apparel e-commerce platform built with **React 19, TypeScript, Vite 6, Tailwind CSS, Node.js, Express, MongoDB Atlas, Firebase, and React Native (Expo)**. Engineered to deliver high-performance online shopping for clothing and fashion wear, real-time warehouse inventory synchronization, size-tier variant pricing, progressive image loading, and high-contrast administrative intelligence.
 
 ---
 
@@ -14,7 +14,7 @@
 
 ### 🌟 1. Customer Storefront Experience
 
-| Storefront Home Page | Flipkart-Style Multi-Card Carousel |
+| Storefront Home Page | Multi-Card Peeking Hero Carousel |
 | :---: | :---: |
 | ![Storefront Home](Screenshots/01_storefront_home.png) | ![Storefront Carousel](Screenshots/02_storefront_carousel.png) |
 
@@ -81,10 +81,10 @@
 
 ## 🚀 Key Capabilities & Architectural Highlights
 
-### 1. 🎠 Flipkart-Style Multi-Card Peeking Carousel
-- **Desktop / Laptop View**: Displays **2.2 banner cards simultaneously** with smooth spacing, interactive preview of upcoming offers, and floating navigation chevrons.
+### 1. 🎠 Multi-Card Peeking Hero Carousel
+- **Desktop / Laptop View**: Displays **2.2 promotional banner cards simultaneously** with smooth spacing, interactive preview of upcoming offers, and floating navigation chevrons.
 - **Mobile Touch-Swipe**: Native touch gesture handling with right-edge slide peeking (`88vw` viewport width) inviting users to swipe naturally.
-- **Signature Flipkart Pill Indicators**: Elongated black active pill (`32px`) with compact rounded inactive dots (`8px`) tracking slide position in real-time.
+- **Adaptive Pill Indicators**: Elongated dark active pill (`32px`) with compact rounded inactive dots (`8px`) tracking slide position in real-time.
 - **Direct Offer Deep Linking**: Clicking anywhere on a banner card instantly routes customers to specific product pages (`/product/:id`), categories (`/womens`, `/mens`, `/kids`), or custom seasonal sale filters.
 
 ### 2. 🏷️ Size-Tier Variant Pricing & Instant Checkout Sync
@@ -93,7 +93,7 @@
 - **Automated Base Price Aggregation**: Catalog sorting and card previews automatically aggregate `Math.min(...)` promo prices across available variants.
 
 ### 3. 📦 Sharp Box Product Card Architecture
-- Modernized from rounded bubbly edges to crisp, premium **sharp box borders (`border-radius: 4px`)** inspired by Zara, Meesho, and modern luxury commerce.
+- Modernized from rounded bubbly edges to crisp, premium **sharp box borders (`border-radius: 4px`)** tailored for contemporary fashion and lifestyle e-commerce.
 - Full-card hover elevation, interactive heart wishlist toggle, rating chips, discount percentages, and clean typography.
 
 ### 4. ⚡ High-Speed Image Performance & Shimmer Skeletons
@@ -280,7 +280,7 @@ npx expo start
 
 ## 🎨 Recommended Banner Artwork Specifications
 
-When designing hero banners for the Flipkart carousel:
+When designing promotional hero banners for the multi-card carousel:
 - **Desktop / Laptop**: `1920 × 600 px` (Aspect ratio: `16:5`) or `1440 × 500 px`
 - **Mobile View**: `800 × 500 px` (Aspect ratio: `16:10`) or `750 × 450 px`
 - **Recommended File Format**: WebP or high-quality JPEG under 300 KB
