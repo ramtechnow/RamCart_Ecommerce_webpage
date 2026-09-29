@@ -246,7 +246,10 @@ Start the server:
 npm start
 ```
 - Backend API running at: `http://localhost:4000`
-- Pre-seeded Admin: `Admin@gmail.com` / `Admin@1234`
+
+> [!NOTE]
+> **Admin Panel Credentials Protected**:
+> For security and database integrity, default administrative credentials (User ID & Password) are not publicly disclosed in this repository. To experience the live Admin Intelligence Suite (Catalog Manager, Orders Pipeline, Banner Engine, and Coupons), please contact the developer directly (details below).
 
 ### 4. Mobile App Setup (Optional)
 ```bash
@@ -288,11 +291,28 @@ When designing promotional hero banners for the multi-card carousel:
 
 ---
 
+## 🛡️ Administrative Console Access & Inquiries
+
+> [!IMPORTANT]
+> **Admin Credentials Protected**:
+> To ensure production data privacy, prevent unauthorized catalog tampering, and safeguard inventory workflows, **administrative login credentials (User ID & Password) are not publicly shared on GitHub**.
+>
+> If you are a recruiter, engineering evaluator, prospective client, or collaborator interested in test-driving the administrative console and operations features (Analytics, Catalog Management, Variant Pricing, Order Pipelines, and Coupon Engines), please reach out directly:
+>
+> - **Lead Developer**: **Shriram M G**
+> - **Email**: [bvhss20@gmail.com](mailto:bvhss20@gmail.com)
+> - **GitHub**: [@ramtechnow20](https://github.com/ramtechnow20)
+>
+> Verified demo access credentials or a guided walkthrough session will be provided upon request.
+
+---
+
 ## 🔗 Live Deployment & Resources
 
 - 🌐 **Live Web Application**: [https://ecommerce-website-dfd55.web.app](https://ecommerce-website-dfd55.web.app)
 - 🐙 **GitHub Repository**: [https://github.com/ramtechnow/RamCart_Ecommerce_webpage](https://github.com/ramtechnow/RamCart_Ecommerce_webpage)
 - 📦 **Target Git Branch**: `Ecommerce_backend`
+- 👨‍💻 **Developer & Maintainer**: **Shriram M G** ([bvhss20@gmail.com](mailto:bvhss20@gmail.com))
 
 ---
 
