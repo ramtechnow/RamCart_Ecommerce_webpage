@@ -4,82 +4,52 @@ import { Truck, ShieldCheck, RefreshCw } from "lucide-react";
 const ProcessSteps = () => {
   const steps = [
     {
-      icon: <Truck size={32} style={{ color: "var(--accent-pink)" }} />,
-      title: "Fast Doorstep Delivery",
-      description: "Quick, dependable shipping across India with real-time tracking updates."
+      step: "01",
+      icon: <Truck size={22} className="text-[#ff8906]" />,
+      title: "Fast Express Delivery",
+      description: "Quick, dependable shipping across India with live parcel tracking updates."
     },
     {
-      icon: <ShieldCheck size={32} style={{ color: "var(--accent-pink)" }} />,
-      title: "100% Secure Payments",
-      description: "256-bit encrypted checkout supporting UPI, NetBanking, and all major cards."
+      step: "02",
+      icon: <ShieldCheck size={22} className="text-[#ff8906]" />,
+      title: "100% Encrypted Checkout",
+      description: "Bank-grade secure checkout supporting UPI, NetBanking, and all major cards."
     },
     {
-      icon: <RefreshCw size={32} style={{ color: "var(--accent-pink)" }} />,
-      title: "Easy 30-Day Returns",
-      description: "Not the perfect fit? Enjoy hassle-free exchanges or refunds within 30 days."
+      step: "03",
+      icon: <RefreshCw size={22} className="text-[#ff8906]" />,
+      title: "30-Day Easy Returns",
+      description: "Not the perfect fit? Enjoy hassle-free doorstep exchange or full refunds."
     }
   ];
 
   return (
-    <div 
-      style={{ 
-        display: "grid", 
-        gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", 
-        gap: "var(--space-6)", 
-        margin: "var(--space-10) 0",
-        padding: "var(--space-6) var(--space-4)",
-        backgroundColor: "var(--bg-secondary)",
-        border: "1px solid var(--border-color)",
-        borderRadius: "var(--border-radius-md)",
-        boxShadow: "var(--shadow-sm)"
-      }}
-    >
-      {steps.map((step, index) => (
-        <div 
-          key={index}
-          className="process-step-card"
-          style={{ 
-            display: "flex", 
-            flexDirection: "column", 
-            alignItems: "center", 
-            textAlign: "center", 
-            padding: "var(--space-4) var(--space-3)",
-            gap: "var(--space-2)",
-            borderRadius: "12px",
-            transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
-            cursor: "pointer"
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-4px)";
-            e.currentTarget.style.backgroundColor = "var(--bg-tertiary)";
-            e.currentTarget.style.boxShadow = "0 8px 24px rgba(255, 63, 108, 0.12)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.backgroundColor = "transparent";
-            e.currentTarget.style.boxShadow = "none";
-          }}
-        >
-          <div style={{
-            marginBottom: "var(--space-2)",
-            padding: "12px",
-            borderRadius: "50%",
-            background: "rgba(184, 0, 53, 0.06)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            transition: "transform 0.3s ease"
-          }}>
-            {step.icon}
-          </div>
-          <h3 style={{ fontSize: "var(--text-md)", fontWeight: "700", color: "var(--text-primary)" }}>
-            {step.title}
-          </h3>
-          <p style={{ fontSize: "var(--text-sm)", color: "var(--text-secondary)", maxWidth: "260px", lineHeight: "1.5" }}>
-            {step.description}
-          </p>
+    <div className="my-10 sm:my-14 p-1 sm:p-1.5 rounded-2xl sm:rounded-3xl bg-black/[0.02] dark:bg-white/[0.03] ring-1 ring-black/5 dark:ring-white/10 shadow-sm">
+      <div className="rounded-xl sm:rounded-2xl bg-white dark:bg-[#171622] p-6 sm:p-8 border border-black/5 dark:border-white/5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 divide-y md:divide-y-0 md:divide-x divide-black/5 dark:divide-white/5">
+          {steps.map((step, index) => (
+            <div 
+              key={index}
+              className={`group flex flex-col items-center sm:items-start text-center sm:text-left transition-all duration-300 ${index > 0 ? "pt-6 md:pt-0 md:pl-8" : ""}`}
+            >
+              <div className="w-full flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-2xl bg-[#ff8906]/10 dark:bg-[#ff8906]/20 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 shadow-sm">
+                  {step.icon}
+                </div>
+                <span className="text-[11px] font-mono font-black text-[#ff8906] bg-[#ff8906]/10 px-2.5 py-0.5 rounded-full tracking-widest">
+                  STEP {step.step}
+                </span>
+              </div>
+              <h3 className="text-base font-extrabold text-[#0f0e17] dark:text-[#fffffe] tracking-tight mb-1.5">
+                {step.title}
+              </h3>
+              <p className="text-xs sm:text-sm text-[#717388] dark:text-[#a7a9be] leading-relaxed max-w-sm">
+                {step.description}
+              </p>
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
     </div>
   );
 };
