@@ -5,7 +5,6 @@ import ProductCard from "../Components/ProductCard";
 import ProcessSteps from "../Components/ProcessSteps";
 import Newsletter from "../Components/Newsletter";
 import { TestimonialsSection } from "../Components/ui/testimonials-6";
-import categories from "../data/categories";
 import { fetchProducts } from "../features/catalog/services/productService";
 import { Product } from "../features/catalog/types/productTypes";
 import { Truck, RotateCcw, Shield, Tag } from "lucide-react";
@@ -123,31 +122,6 @@ export const Home: React.FC = () => {
 
   return (
     <>
-      {/* ── Mobile Instagram-Story Style Quick Categories Bar ── */}
-      <div className="mobile-categories-scroll">
-        {categories.map((cat) => (
-          <Link 
-            to={cat.link || `/${cat.id === "kid" ? "kids" : cat.id + "s"}`} 
-            key={cat.id} 
-            className="group flex flex-col items-center text-decoration-none gap-1.5 shrink-0"
-          >
-            {/* Gradient Halo Ring (Doppelrand nested styling) */}
-            <div className="p-0.5 rounded-full bg-gradient-to-tr from-[#ff8906] via-[#e53170] to-[#ff8906]/30 shadow-sm transition-transform duration-300 group-active:scale-95 group-hover:scale-105">
-              <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 border-white dark:border-[#171622] bg-zinc-100 dark:bg-zinc-800">
-                <img 
-                  src={cat.image} 
-                  alt={cat.name} 
-                  className="w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-110" 
-                />
-              </div>
-            </div>
-            <span className="text-[11px] font-extrabold text-[#0f0e17] dark:text-[#fffffe] tracking-tight group-hover:text-[#ff8906] transition-colors">
-              {cat.name}
-            </span>
-          </Link>
-        ))}
-      </div>
-
       {/* 1. Hero Promo Banner (Flipkart-style multi-card peeking carousel) */}
       <PromoBanner />
 
