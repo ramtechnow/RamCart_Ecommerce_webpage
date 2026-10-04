@@ -49,6 +49,13 @@
 | Fix Checkout Buy Now price from matching variant | `47d6e5b` | Sep 2026 |
 | Validate that each selected size has price > 0 before submission | `10c87e0` | Sep 2026 |
 
+### UI/UX & Design (Taste-Skill Redesign)
+| Task | Commit | Date |
+| :--- | :--- | :--- |
+| Install 13 Leonxlnx/taste-skill tools in .agents/skills/ | `31f995e` | Oct 2026 |
+| Elevate Home page with Asymmetrical Bento Grid, Double-Bezel Trust Capsule, and Island CTAs | `31f995e` | Oct 2026 |
+| Fix mobile screen: remove oversized top category bubbles, show Hero Banner cleanly first (tested via Playwright) | `21dfa31` | Oct 2026 |
+
 ### Product Display & Images
 | Task | Commit | Date |
 | :--- | :--- | :--- |
