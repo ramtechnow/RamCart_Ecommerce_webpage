@@ -109,14 +109,14 @@ export function TestimonialsSection() {
           </p>
         </div>
 
-        {/* Animated columns */}
+        {/* Animated columns — streamlined vertical footprint */}
         <div
           className={cn(
-            "flex justify-center gap-6 overflow-hidden",
+            "flex justify-center gap-5 overflow-hidden",
           )}
-          style={{ maxHeight: 520, maskImage: "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)" }}
+          style={{ maxHeight: 380, maskImage: "linear-gradient(to bottom, transparent, black 12%, black 88%, transparent)" }}
         >
-          <InfiniteSlider direction="vertical" speed={28} speedOnHover={12}>
+          <InfiniteSlider direction="vertical" speed={24} speedOnHover={10}>
             {firstColumn.map((testimonial) => (
               <TestimonialCard key={testimonial.name} testimonial={testimonial} />
             ))}
@@ -124,8 +124,8 @@ export function TestimonialsSection() {
           <InfiniteSlider
             className="hidden md:block"
             direction="vertical"
-            speed={45}
-            speedOnHover={20}
+            speed={38}
+            speedOnHover={15}
           >
             {secondColumn.map((testimonial) => (
               <TestimonialCard key={testimonial.name} testimonial={testimonial} />
@@ -134,8 +134,8 @@ export function TestimonialsSection() {
           <InfiniteSlider
             className="hidden lg:block"
             direction="vertical"
-            speed={32}
-            speedOnHover={14}
+            speed={28}
+            speedOnHover={12}
           >
             {thirdColumn.map((testimonial) => (
               <TestimonialCard key={testimonial.name} testimonial={testimonial} />

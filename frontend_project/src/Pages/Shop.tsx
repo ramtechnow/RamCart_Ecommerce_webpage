@@ -338,6 +338,18 @@ export const Shop: React.FC<ShopProps> = ({ category = "all" }) => {
 
   return (
     <main className="container" style={{ padding: "32px var(--space-4) 80px", color: 'var(--text-primary)' }}>
+      {/* ── Page Primary H1 Heading ── */}
+      <div style={{ marginBottom: "20px" }}>
+        <h1 style={{ fontSize: "24px", fontWeight: "800", color: "var(--text-primary)", letterSpacing: "-0.4px", margin: "0 0 6px 0" }}>
+          {selectedCategory === "all"
+            ? "Fashion Catalog & All Collections"
+            : `${selectedCategory === "kid" ? "Kids" : selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)}'s Fashion Collection`}
+        </h1>
+        <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0 }}>
+          Explore trending apparel, seasonal arrivals, and everyday styles.
+        </p>
+      </div>
+
       {/* Category Promotion Header Banner */}
       {selectedCategory !== "all" && (
         <PromoBanner page={selectedCategory === "kid" ? "kids" : selectedCategory} />

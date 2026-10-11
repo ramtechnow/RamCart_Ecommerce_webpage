@@ -340,11 +340,11 @@ export const Navbar: React.FC = () => {
                 )}
               </div>
             ) : (
-              <Link to="/login" style={{ display: "flex", alignItems: "center" }}>
-                <button className="nav-login-btn">Login</button>
-                <button className="nav-mobile-login-icon-btn" aria-label="Login" style={{ padding: 0 }}>
+              <Link to="/login" className="nav-login-link-btn" aria-label="Sign in to your account">
+                <span className="nav-login-text">Login</span>
+                <span className="nav-mobile-login-icon">
                   <User size={18} />
-                </button>
+                </span>
               </Link>
             )}
 

@@ -122,6 +122,9 @@ export const Home: React.FC = () => {
 
   return (
     <>
+      {/* ── Accessible Primary Heading (SEO & Screen Readers) ── */}
+      <h1 className="sr-only">RamCart — Modern Fashion, Lifestyle &amp; Apparel Store</h1>
+
       {/* 1. Hero Promo Banner (Flipkart-style multi-card peeking carousel) */}
       <PromoBanner />
 
@@ -138,7 +141,7 @@ export const Home: React.FC = () => {
                 <span className="block text-xs sm:text-sm font-extrabold text-[#0f0e17] dark:text-[#fffffe] leading-tight">
                   Free Express Delivery
                 </span>
-                <span className="block text-[10px] sm:text-[11px] text-[#717388] dark:text-[#a7a9be] mt-0.5 font-medium">
+                <span className="block text-xs text-[#52525b] dark:text-[#a1a1aa] mt-0.5 font-medium">
                   On all orders above ₹499
                 </span>
               </div>
@@ -154,7 +157,7 @@ export const Home: React.FC = () => {
                 <span className="block text-xs sm:text-sm font-extrabold text-[#0f0e17] dark:text-[#fffffe] leading-tight">
                   Hassle-Free Returns
                 </span>
-                <span className="block text-[10px] sm:text-[11px] text-[#717388] dark:text-[#a7a9be] mt-0.5 font-medium">
+                <span className="block text-xs text-[#52525b] dark:text-[#a1a1aa] mt-0.5 font-medium">
                   30-day doorstep exchange
                 </span>
               </div>
@@ -170,7 +173,7 @@ export const Home: React.FC = () => {
                 <span className="block text-xs sm:text-sm font-extrabold text-[#0f0e17] dark:text-[#fffffe] leading-tight">
                   Encrypted Checkout
                 </span>
-                <span className="block text-[10px] sm:text-[11px] text-[#717388] dark:text-[#a7a9be] mt-0.5 font-medium">
+                <span className="block text-xs text-[#52525b] dark:text-[#a1a1aa] mt-0.5 font-medium">
                   100% bank-grade security
                 </span>
               </div>
@@ -186,7 +189,7 @@ export const Home: React.FC = () => {
                 <span className="block text-xs sm:text-sm font-extrabold text-[#0f0e17] dark:text-[#fffffe] leading-tight">
                   Unbeatable Value
                 </span>
-                <span className="block text-[10px] sm:text-[11px] text-[#717388] dark:text-[#a7a9be] mt-0.5 font-medium">
+                <span className="block text-xs text-[#52525b] dark:text-[#a1a1aa] mt-0.5 font-medium">
                   50,000+ satisfied patrons
                 </span>
               </div>
@@ -231,10 +234,10 @@ export const Home: React.FC = () => {
 
               {/* Top Pill Badge */}
               <div className="relative z-10 flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold bg-white/20 backdrop-blur-md text-white border border-white/20 shadow-sm">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/20 backdrop-blur-md text-white border border-white/20 shadow-sm">
                   🔥 380+ Trending Styles • Most Loved
                 </span>
-                <span className="text-[11px] font-bold text-white/80 uppercase tracking-widest hidden sm:inline-block">
+                <span className="text-xs font-bold text-white/80 uppercase tracking-widest hidden sm:inline-block">
                   RamCart Exclusive
                 </span>
               </div>
@@ -242,13 +245,13 @@ export const Home: React.FC = () => {
               {/* Bottom Content Area with Button-in-Button CTA */}
               <div className="relative z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4 mt-auto">
                 <div className="max-w-md">
-                  <span className="text-[10px] font-mono font-bold text-[#ff8906] uppercase tracking-[0.2em] block mb-1">
+                  <span className="text-xs font-mono font-bold text-[#ff8906] uppercase tracking-[0.2em] block mb-1">
                     SIGNATURE EDIT
                   </span>
                   <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
                     Women's Haute &amp; Festive Edit
                   </h3>
-                  <p className="text-xs sm:text-sm text-white/80 line-clamp-2 mt-1.5 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-white/90 line-clamp-2 mt-1.5 leading-relaxed">
                     Ethereal ethnic sets, chic contemporary dresses, flowy tops &amp; premium layering.
                   </p>
                 </div>
@@ -281,7 +284,7 @@ export const Home: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10 transition-colors" />
 
                 <div className="relative z-10 flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-white/20 backdrop-blur-md text-white border border-white/20">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-white/20 backdrop-blur-md text-white border border-white/20">
                     👔 245+ Sharp Fits
                   </span>
                 </div>
@@ -291,7 +294,7 @@ export const Home: React.FC = () => {
                     <h3 className="text-lg sm:text-xl font-extrabold text-white tracking-tight">
                       Men's Modern Essentials
                     </h3>
-                    <p className="text-[11px] text-white/80 line-clamp-1 mt-0.5">
+                    <p className="text-xs text-white/90 line-clamp-1 mt-1">
                       Sharp blazers, organic polos &amp; tailored street chinos.
                     </p>
                   </div>
@@ -315,7 +318,7 @@ export const Home: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10 transition-colors" />
 
                 <div className="relative z-10 flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-white/20 backdrop-blur-md text-white border border-white/20">
+                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-white/20 backdrop-blur-md text-white border border-white/20">
                     🧸 180+ Playful Picks
                   </span>
                 </div>
@@ -325,7 +328,7 @@ export const Home: React.FC = () => {
                     <h3 className="text-lg sm:text-xl font-extrabold text-white tracking-tight">
                       Kids &amp; Junior Wardrobe
                     </h3>
-                    <p className="text-[11px] text-white/80 line-clamp-1 mt-0.5">
+                    <p className="text-xs text-white/90 line-clamp-1 mt-1">
                       Cozy dungarees, festive dresses &amp; active wear.
                     </p>
                   </div>

@@ -6,15 +6,15 @@
   /* Fonts — Inter first, Poppins fallback */
   --font-primary: 'Inter', 'Poppins', system-ui, -apple-system, sans-serif;
 
-  /* ── Typography ──────────────────────────────────────────── */
-  --text-xs: 0.75rem;      /* 12px */
-  --text-sm: 0.8125rem;    /* 13px */
-  --text-md: 0.875rem;     /* 14px */
-  --text-lg: 1rem;         /* 16px */
-  --text-xl: 1.125rem;     /* 18px */
-  --text-2xl: 1.375rem;    /* 22px */
-  --text-3xl: 1.75rem;     /* 28px */
-  --text-4xl: 2.25rem;     /* 36px */
+  /* ── Typography (Strict, consistent scale) ──────────────── */
+  --text-xs: 0.75rem;      /* 12px - badges, meta, captions */
+  --text-sm: 0.875rem;     /* 14px - secondary body, input */
+  --text-base: 1rem;       /* 16px - body default */
+  --text-lg: 1.125rem;     /* 18px - subheadings */
+  --text-xl: 1.25rem;      /* 20px - section headers */
+  --text-2xl: 1.5rem;      /* 24px - card titles, major headers */
+  --text-3xl: 1.875rem;    /* 30px - large titles */
+  --text-4xl: 2.25rem;     /* 36px - hero titles */
 
   /* ── Spacing (8px scale) ─────────────────────────────────── */
   --space-1: 0.25rem;   /* 4px */
@@ -28,34 +28,36 @@
   --space-12: 3rem;     /* 48px */
   --space-16: 4rem;     /* 64px */
 
-  /* ── Border Radius ───────────────────────────────────────── */
-  --border-radius-sm: 4px;
-  --border-radius-md: 8px;
-  --border-radius-lg: 16px;
-  --border-radius-full: 9999px;
+  /* ── Border Radius (Standardized to 4 key tiers) ─────────── */
+  --border-radius-sm: 6px;     /* Small chips, badges, inputs */
+  --border-radius-md: 12px;    /* Cards, containers */
+  --border-radius-lg: 20px;    /* Large cards, modals */
+  --border-radius-full: 9999px;/* Buttons, pills, avatars */
 
   /* ── Transitions ─────────────────────────────────────────── */
   --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* ── Light Theme — RamCart Palette ────────────────────────── */
+  /* ── Light Theme — RamCart Cohesive Palette ──────────────── */
   --bg-primary: #FAFAFA;
   --bg-secondary: #FFFFFF;
-  --bg-tertiary: #F5F5F6;
+  --bg-tertiary: #F4F4F5;
 
-  --text-primary: #282C3F;
-  --text-secondary: #535766;
-  --text-muted: #94969F;
+  --text-primary: #18181B;     /* High-contrast WCAG AAA */
+  --text-secondary: #52525B;   /* WCAG AA > 4.5:1 */
+  --text-muted: #71717A;       /* Subtle captions */
   --text-light: #FFFFFF;
 
-  /* Accent: ONLY for CTAs, discounts, sale tags, active states */
+  /* Accent & Brand Actions */
+  --brand-primary: #FF8906;
+  --brand-hover: #E53170;
   --accent-pink: #FF3F6C;
   --accent-color: #FF3F6C;
   --accent-hover: #E63060;
   --accent-light: #FFF0F4;
 
-  --border-color: #EAEAEC;
-  --border-focus: #FF3F6C;
+  --border-color: #E4E4E7;
+  --border-focus: #FF8906;
 
   /* Rating chip colour (RamCart Emerald) */
   --rating-green: #14958F;

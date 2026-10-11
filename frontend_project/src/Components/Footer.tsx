@@ -31,7 +31,7 @@ export const Footer: React.FC = () => {
 
           {/* Quick Links */}
           <div className="footer-links-column">
-            <h4 className="footer-column-title">Collections</h4>
+            <h3 className="footer-column-title">Collections</h3>
             <ul className="footer-links-list">
               <li><Link to="/catalog">Shop All Catalog</Link></li>
               <li><Link to="/mens">Men's Apparel</Link></li>
@@ -42,7 +42,7 @@ export const Footer: React.FC = () => {
 
           {/* Customer Area */}
           <div className="footer-links-column">
-            <h4 className="footer-column-title">Customer Care</h4>
+            <h3 className="footer-column-title">Customer Care</h3>
             <ul className="footer-links-list">
               <li><Link to="/profile">My Account</Link></li>
               <li><Link to="/orders">Track Orders</Link></li>
@@ -53,7 +53,7 @@ export const Footer: React.FC = () => {
 
           {/* Trust & Support Area */}
           <div className="footer-contact-column">
-            <h4 className="footer-column-title">Support & Trust</h4>
+            <h3 className="footer-column-title">Support & Trust</h3>
             <div className="footer-contact-item" style={{ marginBottom: "10px" }}>
               <Mail size={16} style={{ color: "var(--accent-pink)", flexShrink: 0 }} />
               <span>

@@ -113,7 +113,8 @@ const Newsletter = () => {
               border: "1px solid var(--border-color)", 
               borderRadius: "var(--border-radius-full)",
               minWidth: "240px",
-              outline: "none"
+              outline: "none",
+              fontSize: "14px"
             }}
           />
           <button 
@@ -121,15 +122,24 @@ const Newsletter = () => {
             disabled={loading}
             className="interactive-target"
             style={{ 
-              backgroundColor: "var(--accent-pink)", 
+              backgroundColor: "var(--brand-primary, #ff8906)", 
               color: "white", 
               fontWeight: "700", 
+              fontSize: "14px",
               borderRadius: "var(--border-radius-full)",
               padding: "0 var(--space-6)",
               height: "44px",
               minWidth: "120px",
+              border: "none",
               cursor: loading ? "not-allowed" : "pointer",
-              opacity: loading ? 0.7 : 1
+              opacity: loading ? 0.7 : 1,
+              transition: "background-color 0.2s ease, transform 0.2s ease"
+            }}
+            onMouseOver={(e) => {
+              if (!loading) e.currentTarget.style.backgroundColor = "var(--brand-hover, #e53170)";
+            }}
+            onMouseOut={(e) => {
+              if (!loading) e.currentTarget.style.backgroundColor = "var(--brand-primary, #ff8906)";
             }}
           >
             {loading ? "..." : "Subscribe"}

@@ -249,8 +249,8 @@ export const PromoBanner = ({ page = "home" }) => {
                   {/* Top Tags */}
                   <div className="flex items-center gap-2 mb-2">
                     <span className="ramcart-promo-badge-earlybird">
-                      <Zap size={11} className="fill-current" />
-                      {ban.tag || "EARLY BIRD DEALS"}
+                      <Zap size={12} className="fill-current" />
+                      {ban.tag ? ban.tag.charAt(0) + ban.tag.slice(1).toLowerCase() : "Early Bird Deals"}
                     </span>
                     {discountLabel && (
                       <span className="ramcart-promo-badge-discount">
@@ -273,13 +273,13 @@ export const PromoBanner = ({ page = "home" }) => {
                 </div>
 
                 {/* Offer tag */}
-                <div className="ramcart-promo-ad-tag">OFFER</div>
+                <div className="ramcart-promo-ad-tag">Offer</div>
               </div>
             );
           })}
         </div>
 
-        {/* ─── Floating Desktop Navigation Arrows ─── */}
+        {/* ─── Floating Navigation Arrows (High-Contrast Glass) ─── */}
         {totalSlides > 1 && (
           <>
             <button
