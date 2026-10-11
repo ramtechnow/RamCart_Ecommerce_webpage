@@ -156,10 +156,19 @@
 
 ---
 
+### Decision: Standardized Design System Tokens & Usability Heuristics Fixes
+**Date**: Oct 2026  
+**Context**: A 17-point heuristic usability audit flagged fragmented font sizes (15 distinct), text colors (16 distinct), border radii (11 distinct), button styles (12 distinct), micro-text below 12px, skipped heading levels, and low-contrast carousel arrows.  
+**Decision**: Standardized design tokens in `variables.css` down to 4 typography sizes, 4 semantic text colors, 4 border radii, and brand-primary button hierarchy. Enforced minimum font size of 12px (`text-xs`) across mobile bento grids and promo banners. Replaced nested interactive button-in-link in Navbar with responsive Link. Elevated carousel navigation with dark translucent glass backdrop (`rgba(15, 14, 23, 0.82)`) for high WCAG contrast against all slide backgrounds.  
+**Impact**: Modified `variables.css`, `promobanner.css`, `navbar.css`, `Home.tsx`, `Shop.tsx`, `Navbar.tsx`, `Footer.tsx`, `Newsletter.jsx`, and `testimonials-6.tsx`. Tested with Playwright.
+
+---
+
 ## 8. Commit History Reference (Recent)
 
 | Commit Hash | Description | Date |
 | :--- | :--- | :--- |
+| `6ed6459` | fix: resolve 17 heuristic usability issues across typography, headings, contrast, and responsive layout | Oct 2026 |
 | `6d133c4` | docs: update lead developer email to ramtechnow@gmail.com | Sep 2026 |
 | `627f06e` | docs: secure admin credentials and add developer contact | Sep 2026 |
 | `728c292` | docs: remove external brand names from README | Sep 2026 |

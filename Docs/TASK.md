@@ -55,6 +55,7 @@
 | Install 13 Leonxlnx/taste-skill tools in .agents/skills/ | `31f995e` | Oct 2026 |
 | Elevate Home page with Asymmetrical Bento Grid, Double-Bezel Trust Capsule, and Island CTAs | `31f995e` | Oct 2026 |
 | Fix mobile screen: remove oversized top category bubbles, show Hero Banner cleanly first (tested via Playwright) | `21dfa31` | Oct 2026 |
+| Resolve 17 heuristic usability audit issues (type scale, colors, border radii, button styles, contrast, accessibility) | `6ed6459` | Oct 2026 |
 
 ### Product Display & Images
 | Task | Commit | Date |
