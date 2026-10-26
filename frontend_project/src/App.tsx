@@ -43,11 +43,7 @@ const StorefrontChrome: React.FC = () => {
 
   if (isAdminPage) return null;
 
-  return (
-    <div style={{ position: "relative", zIndex: 10 }}>
-      <Navbar />
-    </div>
-  );
+  return <Navbar />;
 };
 
 const StorefrontFooter: React.FC = () => {
@@ -113,7 +109,7 @@ export const App: React.FC = () => {
           backgroundColor: "var(--bg-primary)",
           color: "var(--text-primary)",
           position: "relative",
-          overflow: "hidden"
+          overflowX: "clip"
         }}
       >
         {/* Global Animated Background Patterns (Grid / Stars) */}

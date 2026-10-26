@@ -12,6 +12,7 @@ import {
   LogOut,
   Image as ImageIcon,
   Sparkles,
+  Layers,
   Zap,
   ShieldCheck,
   X
@@ -101,6 +102,7 @@ export const AdminSidebar = ({
     { id: 'orders', label: 'Orders', icon: ShoppingCart, count: ordersCount },
     { id: 'coupons', label: 'Coupons', icon: Tag, count: couponsCount },
     { id: 'banners', label: 'Hero Banners', icon: ImageIcon, count: bannersCount },
+    { id: 'categories', label: 'Category Showcase', icon: Layers },
     { id: 'seasonal', label: 'Seasonal Offers', icon: Sparkles }
   ];
 

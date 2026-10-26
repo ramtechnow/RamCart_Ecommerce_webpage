@@ -156,6 +156,17 @@
 
 ---
 
+### Decision: Dynamic Category Showcase & Portrait Framing (Zero Head-Cropping)
+**Date**: Oct 2026  
+**Context**: On the Home page, Women, Men, and Kids category cards previously suffered from severe head/outfit cropping. Men and Kids cards were constrained to wide flat 210px boxes with `object-center`, which severed models' heads and necks. Additionally, category imagery was static/hardcoded with no way to customize from Admin.  
+**Decision**: 
+1. Re-architected category section into an editorial 3-column lookbook grid (`aspect-[3/4]` on mobile/tablet and `min-h-[480px]` on desktop) with `object-position: top`, ensuring models' faces, smiles, and full outfits remain 100% visible and uncropped across both laptop and phone screens.
+2. Built a full-stack dynamic Category Showcase system: created MongoDB `CategoryCard` model, public showcase API (`GET /api/categories/showcase`), and admin update/reset endpoints (`POST /admin/categories/update`, `POST /admin/categories/reset`).
+3. Created an intuitive `AdminCategoriesTab` in Admin Panel with live preview, client-side Canvas WebP compression for photo uploads, and focal point selectors (Top/Center/Bottom).
+**Impact**: Modified `Home.tsx`, created `CategoryCard.js`, `categoryController.js`, `categoryRoutes.js`, and `AdminCategoriesTab.tsx`. Verified with Playwright screenshots.
+
+---
+
 ### Decision: Standardized Design System Tokens & Usability Heuristics Fixes
 **Date**: Oct 2026  
 **Context**: A 17-point heuristic usability audit flagged fragmented font sizes (15 distinct), text colors (16 distinct), border radii (11 distinct), button styles (12 distinct), micro-text below 12px, skipped heading levels, and low-contrast carousel arrows.  

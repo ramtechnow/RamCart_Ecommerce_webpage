@@ -110,6 +110,18 @@ export const adminApi = {
   async deleteBanner(bannerId) {
     await adminService.deleteBanner(bannerId);
     return { success: true };
+  },
+
+  // Category Showcase Cards
+  async fetchCategoryCards() {
+    return adminService.fetchCategoryCards();
+  },
+
+  async updateCategoryCard(cardData) {
+    return adminService.updateCategoryCard(cardData);
+  },
+
+  async resetCategoryCards() {
+    return adminService.resetCategoryCards();
   }
 };
-

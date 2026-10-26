@@ -10,6 +10,7 @@ import { Product } from "../features/catalog/types/productTypes";
 import { Truck, RotateCcw, Shield, Tag } from "lucide-react";
 import { fetchActivePromo } from "../features/catalog/services/promoService";
 import { SeasonalPromo } from "../features/catalog/types/promoTypes";
+import { BACKEND_URL } from "../config";
 import BankOffers from "../Components/BankOffers";
 import "../Styles/productGrid.css";
 
@@ -73,11 +74,61 @@ export const BackendLoadingBanner: React.FC<{ onRetry?: () => void }> = ({ onRet
   </div>
 );
 
+
+interface CategoryCardItem {
+  categoryKey: string;
+  name: string;
+  title: string;
+  subtitle: string;
+  badgeText: string;
+  tagline: string;
+  image: string;
+  link: string;
+  objectPosition?: string;
+}
+
+const DEFAULT_CATEGORY_CARDS: CategoryCardItem[] = [
+  {
+    categoryKey: 'women',
+    name: "Women's Collection",
+    title: "Women's Haute & Festive Edit",
+    subtitle: "Ethereal ethnic sets, chic contemporary dresses, flowy tops & premium layering.",
+    badgeText: "🔥 380+ Trending Styles",
+    tagline: "SIGNATURE EDIT",
+    image: "/women_category.png",
+    link: "/womens",
+    objectPosition: "top"
+  },
+  {
+    categoryKey: 'men',
+    name: "Men's Collection",
+    title: "Men's Modern Essentials",
+    subtitle: "Sharp blazers, organic polos & tailored street chinos.",
+    badgeText: "👔 245+ Sharp Fits",
+    tagline: "SMART CASUALS",
+    image: "/men_category.png",
+    link: "/mens",
+    objectPosition: "top"
+  },
+  {
+    categoryKey: 'kids',
+    name: "Kids Collection",
+    title: "Kids & Junior Wardrobe",
+    subtitle: "Cozy dungarees, festive dresses & active wear.",
+    badgeText: "🧸 180+ Playful Picks",
+    tagline: "PLAY & COMFORT",
+    image: "/kids_category.png",
+    link: "/kids",
+    objectPosition: "top"
+  }
+];
+
 export const Home: React.FC = () => {
   const [productsList, setProductsList] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
-  const [activePromo, setActivePromo] = useState<SeasonalPromo | null>(null);
+    const [activePromo, setActivePromo] = useState<SeasonalPromo | null>(null);
+  const [categoryCards, setCategoryCards] = useState<CategoryCardItem[]>(DEFAULT_CATEGORY_CARDS);
 
   const loadProducts = async (isRetry = false) => {
     if (!isRetry) setLoading(true);
@@ -86,6 +137,16 @@ export const Home: React.FC = () => {
         fetchProducts(),
         fetchActivePromo()
       ]);
+
+      // Fetch dynamic category showcase cards
+      fetch(`${BACKEND_URL}/api/categories/showcase`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.cards && Array.isArray(data.cards) && data.cards.length > 0) {
+            setCategoryCards(data.cards);
+          }
+        })
+        .catch(() => {});
       
       if (productsData && productsData.length > 0) {
         setProductsList(productsData);
@@ -204,7 +265,7 @@ export const Home: React.FC = () => {
           <BankOffers offers={activePromo.bankOffers} />
         )}
 
-        {/* ── 2. The Asymmetrical Fashion Bento Grid (Curated Collections) ── */}
+        {/* ── 2. Curated Wardrobe Lookbook (Dynamic & Responsive Categories) ── */}
         <section aria-labelledby="cat-heading" className="my-10 sm:my-14">
           <div className="text-center mb-8">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] uppercase tracking-[0.2em] font-extrabold bg-[#ff8906]/10 text-[#ff8906] border border-[#ff8906]/20 dark:bg-[#ff8906]/15 dark:border-[#ff8906]/30 mb-2.5">
@@ -218,127 +279,72 @@ export const Home: React.FC = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
-            {/* Bento Card 1 (Grand Hero: Women's Collection) */}
-            <Link
-              to="/womens"
-              className="group relative lg:col-span-2 min-h-[380px] sm:min-h-[440px] rounded-3xl overflow-hidden shadow-sm border border-black/5 dark:border-white/10 flex flex-col justify-between p-6 sm:p-8 transition-all duration-500 hover:shadow-xl cursor-pointer"
-            >
-              <img
-                src="/women_category.png"
-                alt="Women's Collection"
-                className="absolute inset-0 w-full h-full object-cover object-top transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10 group-hover:via-black/50 transition-colors" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 lg:gap-7">
+            {categoryCards.map((card) => (
+              <Link
+                key={card.categoryKey}
+                to={card.link || (card.categoryKey === 'women' ? '/womens' : card.categoryKey === 'men' ? '/mens' : '/kids')}
+                className="group relative w-full aspect-[3/4] min-h-[420px] sm:min-h-[450px] lg:min-h-[480px] rounded-3xl overflow-hidden shadow-sm border border-black/5 dark:border-white/10 flex flex-col justify-between p-5 sm:p-7 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 cursor-pointer"
+              >
+                {/* Responsive Image with Object Containment & Top Alignment */}
+                <img
+                  src={card.image}
+                  alt={card.title || card.name}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105"
+                  style={{ objectPosition: card.objectPosition || 'top' }}
+                  loading="lazy"
+                  onError={(e) => {
+                    const fallback = card.categoryKey === 'women' 
+                      ? '/women_category.png' 
+                      : card.categoryKey === 'men' 
+                      ? '/men_category.png' 
+                      : '/kids_category.png';
+                    if ((e.target as HTMLImageElement).src !== fallback) {
+                      (e.target as HTMLImageElement).src = fallback;
+                    }
+                  }}
+                />
 
-              {/* Top Pill Badge */}
-              <div className="relative z-10 flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/20 backdrop-blur-md text-white border border-white/20 shadow-sm">
-                  🔥 380+ Trending Styles • Most Loved
-                </span>
-                <span className="text-xs font-bold text-white/80 uppercase tracking-widest hidden sm:inline-block">
-                  RamCart Exclusive
-                </span>
-              </div>
+                {/* Subtle scrim gradient ensuring face/head is clear while text is legible */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 to-black/5 group-hover:via-black/45 transition-colors duration-500" />
 
-              {/* Bottom Content Area with Button-in-Button CTA */}
-              <div className="relative z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4 mt-auto">
-                <div className="max-w-md">
-                  <span className="text-xs font-mono font-bold text-[#ff8906] uppercase tracking-[0.2em] block mb-1">
-                    SIGNATURE EDIT
+                {/* Top Floating Badge */}
+                <div className="relative z-10 flex items-center justify-between">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/20 backdrop-blur-md text-white border border-white/20 shadow-sm">
+                    {card.badgeText}
                   </span>
-                  <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
-                    Women's Haute &amp; Festive Edit
-                  </h3>
-                  <p className="text-xs sm:text-sm text-white/90 line-clamp-2 mt-1.5 leading-relaxed">
-                    Ethereal ethnic sets, chic contemporary dresses, flowy tops &amp; premium layering.
-                  </p>
+                  <span className="text-[10px] font-bold text-white/80 uppercase tracking-widest hidden sm:inline-block">
+                    RamCart
+                  </span>
                 </div>
 
-                <div className="group-hover:translate-x-1 transition-transform duration-300">
-                  <div className="inline-flex items-center gap-2 pl-4 pr-1.5 py-1.5 rounded-full text-xs font-bold text-[#0f0e17] bg-white hover:bg-[#ff8906] hover:text-white transition-all duration-300 shadow-md">
-                    <span>Explore Women</span>
-                    <span className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center text-[10px]">
-                      ↗
+                {/* Bottom Content Area */}
+                <div className="relative z-10 flex flex-col gap-2 mt-auto">
+                  {card.tagline && (
+                    <span className="text-[10px] font-mono font-bold text-[#ff8906] uppercase tracking-[0.2em] block">
+                      {card.tagline}
                     </span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-
-            {/* Bento Stack (Men's & Kids) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-5 sm:gap-6">
-              
-              {/* Bento Card 2: Men's Collection */}
-              <Link
-                to="/mens"
-                className="group relative min-h-[210px] sm:min-h-[210px] rounded-3xl overflow-hidden shadow-sm border border-black/5 dark:border-white/10 flex flex-col justify-between p-5 sm:p-6 transition-all duration-500 hover:shadow-lg cursor-pointer"
-              >
-                <img
-                  src="/men_category.png"
-                  alt="Men's Collection"
-                  className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10 transition-colors" />
-
-                <div className="relative z-10 flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-white/20 backdrop-blur-md text-white border border-white/20">
-                    👔 245+ Sharp Fits
-                  </span>
-                </div>
-
-                <div className="relative z-10 flex items-end justify-between gap-2 mt-auto">
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-extrabold text-white tracking-tight">
-                      Men's Modern Essentials
-                    </h3>
-                    <p className="text-xs text-white/90 line-clamp-1 mt-1">
-                      Sharp blazers, organic polos &amp; tailored street chinos.
+                  )}
+                  <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight leading-tight">
+                    {card.title}
+                  </h3>
+                  {card.subtitle && (
+                    <p className="text-xs text-white/90 line-clamp-1 sm:line-clamp-2 mt-0.5 leading-relaxed">
+                      {card.subtitle}
                     </p>
-                  </div>
-                  <div className="w-7 h-7 rounded-full bg-white text-[#0f0e17] group-hover:bg-[#ff8906] group-hover:text-white flex items-center justify-center text-xs font-bold shrink-0 transition-colors shadow-sm">
-                    ↗
+                  )}
+
+                  <div className="pt-2">
+                    <div className="inline-flex items-center gap-2 pl-4 pr-2 py-1.5 rounded-full text-xs font-bold text-[#0f0e17] bg-white group-hover:bg-[#ff8906] group-hover:text-white transition-all duration-300 shadow-md">
+                      <span>Explore {card.name.replace(" Collection", "")}</span>
+                      <span className="w-5 h-5 rounded-full bg-black/10 flex items-center justify-center text-[10px] group-hover:bg-white/20">
+                        ↗
+                      </span>
+                    </div>
                   </div>
                 </div>
               </Link>
-
-              {/* Bento Card 3: Kids Collection */}
-              <Link
-                to="/kids"
-                className="group relative min-h-[210px] sm:min-h-[210px] rounded-3xl overflow-hidden shadow-sm border border-black/5 dark:border-white/10 flex flex-col justify-between p-5 sm:p-6 transition-all duration-500 hover:shadow-lg cursor-pointer"
-              >
-                <img
-                  src="/kids_category.png"
-                  alt="Kids Collection"
-                  className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10 transition-colors" />
-
-                <div className="relative z-10 flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-white/20 backdrop-blur-md text-white border border-white/20">
-                    🧸 180+ Playful Picks
-                  </span>
-                </div>
-
-                <div className="relative z-10 flex items-end justify-between gap-2 mt-auto">
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-extrabold text-white tracking-tight">
-                      Kids &amp; Junior Wardrobe
-                    </h3>
-                    <p className="text-xs text-white/90 line-clamp-1 mt-1">
-                      Cozy dungarees, festive dresses &amp; active wear.
-                    </p>
-                  </div>
-                  <div className="w-7 h-7 rounded-full bg-white text-[#0f0e17] group-hover:bg-[#ff8906] group-hover:text-white flex items-center justify-center text-xs font-bold shrink-0 transition-colors shadow-sm">
-                    ↗
-                  </div>
-                </div>
-              </Link>
-
-            </div>
+            ))}
           </div>
         </section>
 

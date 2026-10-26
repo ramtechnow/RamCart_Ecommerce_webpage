@@ -414,5 +414,48 @@ export const adminService = {
     if (!res.ok || data.success === false) {
       throw new Error(data.error || "Failed to delete coupon");
     }
+  },
+
+  // ── Category Showcase Cards Management ────────────────────────────────────
+  async fetchCategoryCards(): Promise<any[]> {
+    const res = await fetch(`${BACKEND_URL}/api/categories/showcase`);
+    const data = await res.json().catch(() => ({}));
+    if (data.cards && Array.isArray(data.cards)) {
+      return data.cards;
+    }
+    return [];
+  },
+
+  async updateCategoryCard(cardData: any): Promise<any> {
+    const token = localStorage.getItem("auth-token");
+    const res = await fetch(`${BACKEND_URL}/admin/categories/update`, {
+      method: "POST",
+      headers: {
+        "auth-token": token || "",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(cardData)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) {
+      throw new Error(data.error || "Failed to update category card");
+    }
+    return data.card;
+  },
+
+  async resetCategoryCards(): Promise<any[]> {
+    const token = localStorage.getItem("auth-token");
+    const res = await fetch(`${BACKEND_URL}/admin/categories/reset`, {
+      method: "POST",
+      headers: {
+        "auth-token": token || "",
+        "Content-Type": "application/json"
+      }
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.success === false) {
+      throw new Error(data.error || "Failed to reset category cards");
+    }
+    return data.cards || [];
   }
 };
