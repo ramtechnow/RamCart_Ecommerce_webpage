@@ -1,5 +1,5 @@
 import React, { useState, useMemo, ChangeEvent } from 'react';
-import { Pencil, Trash2, X, Search, Filter, Loader2, Plus, AlertTriangle, Check } from 'lucide-react';
+import { Pencil, Trash2, X, Search, Filter, Loader2, Plus, AlertTriangle, Check, ExternalLink } from 'lucide-react';
 import { adminApi } from '../../Utils/adminApi';
 import { compressImageToBase64, normalizeCategory } from '../../Utils/adminHelpers';
 import { Product, ProductVariant } from '../../features/catalog/types/productTypes';
@@ -47,6 +47,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
 
   // Editing Product Inline State
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
   const [editForm, setEditForm] = useState<EditFormState | null>(null);
   const [replaceIndex, setReplaceIndex] = useState<number | null>(null);
 
@@ -569,8 +570,13 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                         </div>
                       ) : (
                         <div className="flex flex-col">
-                          <span className="text-sm font-bold text-[#0f0e17] dark:text-[#fffffe] hover:underline cursor-pointer">
+                          <span 
+                            onClick={() => window.open(`/product/${prod.id}`, '_blank')}
+                            className="text-sm font-bold text-[#0f0e17] dark:text-[#fffffe] hover:underline cursor-pointer inline-flex items-center gap-1.5 group"
+                            title="Click to open live product page in new tab"
+                          >
                             {prod.name}
+                            <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity text-blue-500 shrink-0" />
                           </span>
                           
                           {/* Warnings overlay tags */}
@@ -761,6 +767,54 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
           </table>
         </div>
       </div>
+    
+      {/* ── Large Image Zoom Modal (Admin Instant Inspector) ── */}
+      {previewProduct && (
+        <div 
+          className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setPreviewProduct(null)}
+        >
+          <div 
+            className="relative bg-white dark:bg-[#18181b] rounded-lg max-w-lg w-full overflow-hidden shadow-2xl border border-zinc-200 dark:border-zinc-800"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-800">
+              <div>
+                <h3 className="font-bold text-sm text-[#0f0e17] dark:text-white">{previewProduct.name}</h3>
+                <p className="text-xs text-zinc-500 mt-0.5">ID: {previewProduct.id} • Category: {previewProduct.category} • Price: ₹{previewProduct.newPrice}</p>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setPreviewProduct(null)}
+                className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 flex items-center justify-center text-zinc-700 dark:text-zinc-200 cursor-pointer border-none"
+                title="Close Preview (ESC)"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-4 flex items-center justify-center bg-zinc-50 dark:bg-zinc-900/50">
+              <img 
+                src={previewProduct.image} 
+                alt={previewProduct.name} 
+                className="max-h-[60vh] max-w-full object-contain rounded"
+              />
+            </div>
+            <div className="p-3.5 bg-zinc-100 dark:bg-zinc-800/60 flex items-center justify-between text-xs">
+              <span className="font-bold text-zinc-600 dark:text-zinc-300">Stock Count: {previewProduct.stockCount ?? 0} units</span>
+              <button 
+                type="button"
+                onClick={() => {
+                  window.open(`/product/${previewProduct.id}`, '_blank');
+                  setPreviewProduct(null);
+                }}
+                className="px-3.5 py-1.5 bg-black dark:bg-white text-white dark:text-black font-bold rounded flex items-center gap-1.5 cursor-pointer border-none text-xs hover:opacity-90"
+              >
+                Open Live Page &rarr;
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

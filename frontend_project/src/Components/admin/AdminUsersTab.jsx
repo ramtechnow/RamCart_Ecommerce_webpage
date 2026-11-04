@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { User, ShoppingCart, Shield, Trash2, ChevronDown, ChevronUp, UserCheck, AlertTriangle } from 'lucide-react';
+import { User, ShoppingCart, Shield, Trash2, ChevronDown, ChevronUp, UserCheck, AlertTriangle, Store } from 'lucide-react';
 import { adminApi } from '../../Utils/adminApi';
 
 export const AdminUsersTab = ({ 
@@ -98,6 +98,29 @@ export const AdminUsersTab = ({
         } catch (err) {
           console.error(err);
           addToast(err.message || "Failed to update user role", "error");
+        }
+      }
+    });
+  };
+
+  const handleToggleVendor = (user) => {
+    const isCurrentlyVendor = user.role === 'vendor';
+    const nextRole = isCurrentlyVendor ? 'customer' : 'vendor';
+    triggerConfirm({
+      title: isCurrentlyVendor ? "Revoke Vendor Privileges?" : "Designate as Store Vendor?",
+      message: isCurrentlyVendor
+        ? `Revoke vendor access for "${user.name}" (${user.email})? They will become a standard customer.`
+        : `Designate "${user.name}" (${user.email}) as an Authorized Vendor? They will receive vendor rights to add their products, but cannot edit or delete store catalog items.`,
+      confirmText: isCurrentlyVendor ? "Revoke Vendor" : "Authorize Vendor",
+      onConfirm: async () => {
+        try {
+          await adminApi.updateUserRole(user.email, nextRole);
+          addToast(`Updated vendor access for ${user.email}`, "success");
+          if (logAction) logAction(`${isCurrentlyVendor ? 'Revoked vendor' : 'Authorized vendor'} role: ${user.email}`);
+          onRefreshUsers();
+        } catch (err) {
+          console.error(err);
+          addToast(err.message || "Failed to update vendor status", "error");
         }
       }
     });

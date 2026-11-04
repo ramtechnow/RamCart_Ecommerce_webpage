@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { AlertTriangle, Activity, ShoppingBag, Users, ArrowUpRight, Plus, PlusCircle, ShoppingCart, IndianRupee, Warehouse, BarChart3, MoreVertical } from 'lucide-react';
+import { AlertTriangle, Activity, ShoppingBag, Users, ArrowUpRight, Plus, PlusCircle, ShoppingCart, IndianRupee, Warehouse, BarChart3, MoreVertical, Download } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -184,6 +184,52 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
   const menStrokeDash = menPct * donutCircumference;
   const kidsStrokeDash = kidsPct * donutCircumference;
 
+  // ── Executive Business Report CSV Export ─────────────────────────────────────
+  const handleExportBusinessReport = () => {
+    try {
+      const summaryRows = [
+        ["=== RAMCART BUSINESS INTELLIGENCE REPORT ===", ""],
+        ["Generated At", new Date().toLocaleString("en-IN")],
+        ["Total Realized Sales Revenue", `INR ${realizedRevenue.toFixed(2)}`],
+        ["Total Orders Recorded", orders.length],
+        ["Delivered Orders", deliveredOrdersCount],
+        ["Pending / In-Transit Orders", pendingOrdersCount],
+        ["Total Active Products in Catalog", products.length],
+        ["Low Stock Alert Products", lowStockCount],
+        ["Out of Stock Items", outOfStockCount],
+        ["", ""],
+        ["=== INVENTORY & STOCK SNAPSHOT ===", ""],
+        ["Product ID", "Product Name", "Category", "Selling Price (INR)", "Stock Count", "Inventory Status"]
+      ];
+
+      const productRows = products.map((p) => [
+        `"${p.id}"`,
+        `"${(p.name || "").replace(/"/g, '""')}"`,
+        `"${p.category || ""}"`,
+        p.newPrice || 0,
+        p.stockCount ?? 0,
+        Number(p.stockCount) === 0 ? "OUT OF STOCK" : Number(p.stockCount) < 10 ? "LOW STOCK" : "OPTIMAL"
+      ]);
+
+      const csvContent = "\uFEFF" + [
+        ...summaryRows.map(r => r.join(",")),
+        ...productRows.map(r => r.join(","))
+      ].join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `RamCart_Business_Report_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Dashboard export error:", err);
+    }
+  };
+
   return (
     <div className="dashboard-section animate-fade-in" style={{ color: 'var(--text-primary)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
@@ -192,6 +238,27 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
           <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Manage Catalog, Accounts, and Shop Status</p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
+          <button 
+            type="button"
+            onClick={handleExportBusinessReport}
+            title="Download full business intelligence CSV report"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 18px',
+              backgroundColor: 'var(--bg-tertiary)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-color)',
+              borderRadius: 'var(--border-radius-sm)',
+              fontSize: '0.85rem',
+              fontWeight: '700',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s'
+            }}
+          >
+            <Download size={16} /> Export Report (CSV)
+          </button>
           <button 
             onClick={fetchAllAdminData}
             style={{

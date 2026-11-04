@@ -100,6 +100,7 @@ export const AdminSidebar = ({
     { id: 'add', label: 'Add Product', icon: PlusCircle },
     { id: 'users', label: 'Users List', icon: Users, count: usersCount },
     { id: 'orders', label: 'Orders', icon: ShoppingCart, count: ordersCount },
+    { id: 'marketing', label: 'CRM & Marketing', icon: Send, count: 'New' },
     { id: 'coupons', label: 'Coupons', icon: Tag, count: couponsCount },
     { id: 'banners', label: 'Hero Banners', icon: ImageIcon, count: bannersCount },
     { id: 'categories', label: 'Category Showcase', icon: Layers },

@@ -12,6 +12,7 @@ import { AdminCouponsTab } from "../Components/admin/AdminCouponsTab";
 import { AdminBannersTab } from "../Components/admin/AdminBannersTab";
 import { AdminCategoriesTab } from "../Components/admin/AdminCategoriesTab";
 import { AdminSeasonalTab } from "../Components/admin/AdminSeasonalTab";
+import { AdminMarketingCRMTab } from "../Components/admin/AdminMarketingCRMTab";
 
 // UI Components
 import { AdminSidebar } from "../Components/admin/AdminSidebar";
@@ -401,6 +402,15 @@ export const AdminPanel: React.FC = () => {
               onRefreshOrders={fetchAllAdminData as any}
               addToast={triggerToast as any}
               triggerConfirm={triggerConfirm as any}
+              logAction={logAction as any}
+            />
+          )}
+
+          {activeTab === "marketing" && (
+            <AdminMarketingCRMTab 
+              users={users as any}
+              orders={orders as any}
+              addToast={triggerToast as any}
               logAction={logAction as any}
             />
           )}

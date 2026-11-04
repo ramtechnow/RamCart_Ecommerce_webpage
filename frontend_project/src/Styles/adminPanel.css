@@ -2252,3 +2252,56 @@
     font-size: 1.15rem !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CRISP DEVELOPER BOX AESTHETIC & ICON SPACING FIXES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Fix input text overlapping left search icons ── */
+.admin-panel .relative input[type="text"],
+.admin-panel .relative input[type="search"],
+.admin-content .relative input[type="text"],
+.admin-content .relative input[type="search"],
+.admin-panel input.pl-10,
+.admin-content input.pl-10,
+.admin-panel input.pl-9,
+.admin-content input.pl-9 {
+  padding-left: 38px !important;
+}
+
+/* ── 2. Fix Button Icon & Text Collision ── */
+.admin-panel button,
+.admin-content button {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+}
+
+.admin-panel button svg,
+.admin-content button svg {
+  flex-shrink: 0 !important;
+  margin-right: 1px !important;
+}
+
+/* ── 3. Crisp Developer Box Aesthetic (Remove AI bubbly curves & excessive radius) ── */
+.admin-panel,
+.admin-content,
+.admin-content .rounded-2xl,
+.admin-content .rounded-xl,
+.admin-content .rounded-3xl,
+.admin-content .rounded-lg,
+.admin-content .rounded-full:not(.notification-badge):not(.avatar) {
+  border-radius: 4px !important;
+}
+
+.admin-content input,
+.admin-content select,
+.admin-content textarea,
+.admin-content button:not(.rounded-full) {
+  border-radius: 4px !important;
+}
+
+/* ── 4. Clean compact padding spacing across Admin ── */
+.admin-content {
+  padding: 14px 18px !important;
+}

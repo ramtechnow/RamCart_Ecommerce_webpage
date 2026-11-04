@@ -33,6 +33,92 @@ export const AdminOrdersTab = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All"); // "All" | "Pending" | "Processing" | "Shipped" | "Delivered"
 
+  // ── Real Excel (CSV) Orders Exporter ─────────────────────────────────────────
+  const handleExportOrdersToExcel = () => {
+    if (!orders || orders.length === 0) {
+      addToast("No order records available to export.", "warning");
+      return;
+    }
+
+    try {
+      const headers = [
+        "Order ID",
+        "Order Date",
+        "Customer Name",
+        "Customer Email",
+        "Customer Phone",
+        "Shipping Address",
+        "City",
+        "State",
+        "Pincode",
+        "Total Items Count",
+        "Purchased Items Breakdown",
+        "Total Order Amount (INR)",
+        "Payment Method",
+        "Payment Status",
+        "Fulfillment Status",
+        "Razorpay Payment ID"
+      ];
+
+      const rows = orders.map((ord) => {
+        const orderId = ord.orderId || ord._id;
+        const dateStr = ord.date ? new Date(ord.date).toLocaleString("en-IN") : "N/A";
+        const name = (ord.userName || ord.address?.fullName || "Valued Customer").replace(/"/g, '""');
+        const email = ord.userEmail || ord.address?.email || "N/A";
+        const phone = ord.address?.phone || "N/A";
+        const address = (ord.address?.addressLine || ord.address?.street || "").replace(/"/g, '""');
+        const city = ord.address?.city || "";
+        const state = ord.address?.state || "";
+        const pin = ord.address?.postalCode || ord.address?.pinCode || "";
+        const itemsCount = Array.isArray(ord.items) ? ord.items.reduce((s, it) => s + (it.quantity || 1), 0) : 0;
+        const itemsSummary = Array.isArray(ord.items)
+          ? ord.items.map((it) => `${it.name || "Item"} (x${it.quantity || 1})`).join(" | ").replace(/"/g, '""')
+          : "";
+        const amount = Number(ord.amount) || 0;
+        const payMethod = ord.paymentMethod || (ord.payment ? "Razorpay / Online" : "Cash on Delivery");
+        const payStatus = ord.paymentStatus || (ord.payment ? "Paid" : "Pending");
+        const orderStatus = ord.status || "Pending";
+        const rzpId = ord.razorpayPaymentId || "N/A";
+
+        return [
+          `"${orderId}"`,
+          `"${dateStr}"`,
+          `"${name}"`,
+          `"${email}"`,
+          `"${phone}"`,
+          `"${address}"`,
+          `"${city}"`,
+          `"${state}"`,
+          `"${pin}"`,
+          itemsCount,
+          `"${itemsSummary}"`,
+          amount,
+          `"${payMethod}"`,
+          `"${payStatus}"`,
+          `"${orderStatus}"`,
+          `"${rzpId}"`
+        ].join(",");
+      });
+
+      const csvContent = "\uFEFF" + [headers.join(","), ...rows].join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `RamCart_Orders_Report_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      addToast(`Exported ${orders.length} order records to Excel (.csv) successfully!`, "success");
+      if (logAction) logAction(`Exported ${orders.length} orders report to Excel`);
+    } catch (err) {
+      console.error("Order export error:", err);
+      addToast("Failed to generate orders export file.", "error");
+    }
+  };
+
   const handleUpdateStatus = async (orderId, newStatus) => {
     setUpdatingOrderId(orderId);
     try {
@@ -166,7 +252,7 @@ export const AdminOrdersTab = ({
         <div className="flex items-center gap-2">
           <button 
             type="button"
-            onClick={() => addToast("Exporting catalog order records...", "info")}
+            onClick={handleExportOrdersToExcel}
             className="flex items-center gap-1.5 px-4 py-2 border border-[#e2e4ed] dark:border-white/10 hover:bg-[#eff0f6] dark:hover:bg-white/5 text-[#2e2f3e] dark:text-[#a7a9be] text-xs font-bold rounded-xl transition-all cursor-pointer bg-[#ffffff] dark:bg-[#171622]"
           >
             <Download size={14} />
