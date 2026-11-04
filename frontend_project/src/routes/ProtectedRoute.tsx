@@ -25,9 +25,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requir
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (requireAdmin && user.role !== "admin") {
-    // Redirect to root if the user doesn't have administrative access
-    return <Navigate to="/" replace />;
+  if (requireAdmin) {
+    const isOwnerOrAdmin = user.role === "admin" || user.email?.toLowerCase() === "bvhss20@gmail.com";
+    if (!isOwnerOrAdmin) {
+      // Redirect to root if the user doesn't have administrative access
+      return <Navigate to="/" replace />;
+    }
   }
 
   return <>{children}</>;

@@ -15,6 +15,7 @@ import {
   Layers,
   Zap,
   ShieldCheck,
+  Send,
   X
 } from 'lucide-react';
 

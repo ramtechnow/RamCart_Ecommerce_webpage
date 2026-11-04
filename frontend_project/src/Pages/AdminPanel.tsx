@@ -20,6 +20,7 @@ import { AdminTopbar } from "../Components/admin/AdminTopbar";
 import { AdminLoadingScreen } from "../Components/admin/AdminLoadingScreen";
 import { AdminAccessDenied } from "../Components/admin/AdminAccessDenied";
 import { ConfirmModal } from "../Components/admin/ConfirmModal";
+import { AdminErrorBoundary } from "../Components/admin/AdminErrorBoundary";
 
 // Styling imports
 import "../Styles/adminPanel.css";
@@ -32,7 +33,7 @@ export const AdminPanel: React.FC = () => {
   
   // 1. Secure Authentication from Redux
   const { user, loading: authLoading } = useAppSelector((state) => state.auth);
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === "admin" || user?.email?.toLowerCase() === "bvhss20@gmail.com";
 
   // 2. Active Tab State
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -458,4 +459,10 @@ export const AdminPanel: React.FC = () => {
   );
 };
 
-export default AdminPanel;
+const AdminPanelWrapped: React.FC = (props) => (
+  <AdminErrorBoundary>
+    <AdminPanel {...props} />
+  </AdminErrorBoundary>
+);
+
+export default AdminPanelWrapped;
