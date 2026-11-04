@@ -10,7 +10,7 @@ import { addToast } from "../store/slices/toastSlice";
 import { 
   Star, Heart, ShoppingCart, ShieldCheck, 
   Truck, RotateCcw, ChevronDown, ChevronUp, X, Ruler, 
-  Store, Info, Zap, Tag, Check
+  Store, Info, Zap, Tag, Check, Share2
 } from "lucide-react";
 import "../Styles/productDetail.css";
 
@@ -55,6 +55,7 @@ export const ProductDetail: React.FC = () => {
   // Load product
   useEffect(() => {
     const loadDetails = async () => {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       if (!productId) return;
       setLoading(true);
       try {
@@ -199,6 +200,31 @@ export const ProductDetail: React.FC = () => {
     setSelectedSize(tier.size);
     setSelectedPrice(tier.price);
     setSelectedOldPrice(tier.oldPrice || product?.oldPrice || 0);
+  };
+
+    // ── Share Product (WhatsApp / Native Share / Clipboard) ──────────────────────
+  const handleShareProduct = async () => {
+    if (!product) return;
+    const shareUrl = window.location.href;
+    const shareText = `Check out ${product.name} on RamCart for ₹${selectedPrice || product.newPrice}! Special deals available.`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${product.name} | RamCart`,
+          text: shareText,
+          url: shareUrl,
+        });
+        return;
+      } catch (err) {}
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      dispatch(addToast({ message: "🔗 Link copied to clipboard! Share on WhatsApp or Instagram.", type: "success" }));
+    } catch {
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + shareUrl)}`, "_blank");
+    }
   };
 
   const handleAddToCart = () => {
@@ -445,6 +471,17 @@ export const ProductDetail: React.FC = () => {
                 <Heart size={18} fill={isWishlisted ? "currentColor" : "none"} />
               </button>
 
+              {/* Share Floating Button */}
+              <button
+                type="button"
+                onClick={handleShareProduct}
+                className="rc-pdp-share-floating"
+                aria-label="Share product"
+                title="Share product on WhatsApp or copy link"
+              >
+                <Share2 size={18} />
+              </button>
+
               {isOutOfStock && (
                 <div className="rc-pdp-out-of-stock-overlay">
                   Out of Stock
@@ -455,6 +492,16 @@ export const ProductDetail: React.FC = () => {
 
           {/* Action CTA Buttons (Add to Cart / Buy Now) */}
           <div className="rc-pdp-action-buttons">
+            <button
+              type="button"
+              onClick={handleShareProduct}
+              className="rc-pdp-btn-share"
+              title="Share on WhatsApp or copy link"
+              aria-label="Share Product"
+            >
+              <Share2 size={18} />
+              <span>Share</span>
+            </button>
             <button
               type="button"
               onClick={handleAddToCart}

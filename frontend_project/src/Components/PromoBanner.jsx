@@ -7,53 +7,43 @@ import "../Styles/promobanner.css";
 const DEFAULT_FALLBACK_BANNERS = [
   {
     _id: "ramcart-showcase-1",
-    description: "Grand Wardrobe Festival — Exclusive Seasonal Drops",
-    image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1600&auto=format&fit=crop",
+    description: "Grand Festival Dhamaka — Up to 50% Off on Pure Silk Sarees & Festive Ethnic Wear",
+    image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1600&auto=format&fit=crop",
     discountType: "percentage",
     discountValue: 50,
     targetLink: "/womens",
-    tag: "RAMCART EXCLUSIVE",
-    badge: "SEASON SPECIAL"
+    tag: "FESTIVE SPECIAL",
+    badge: "LIMITED DEALS"
   },
   {
     _id: "ramcart-showcase-2",
-    description: "Everyday Classics, Polos & Tailored Outerwear",
-    image: "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?q=80&w=1600&auto=format&fit=crop",
+    description: "Men's Traditional Kurtas, Dhotis & Pure Cotton Shirts — Flat 40% Off",
+    image: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop",
     discountType: "percentage",
     discountValue: 40,
     targetLink: "/mens",
-    tag: "BESTSELLER EDIT",
-    badge: "TRENDING NOW"
+    tag: "BESTSELLER",
+    badge: "FAST DISPATCH"
   },
   {
     _id: "ramcart-showcase-3",
-    description: "Urban Travel Gear & Structured Essentials",
-    image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=1600&auto=format&fit=crop",
+    description: "Everyday Daily Wear Kurtis, Tops & Cotton Jeans — Starting from ₹299",
+    image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1600&auto=format&fit=crop",
     discountType: "percentage",
     discountValue: 35,
     targetLink: "/catalog",
-    tag: "NEW DROP",
-    badge: "TOP PICK"
+    tag: "BUDGET BUYS",
+    badge: "TOP RATED"
   },
   {
     _id: "ramcart-showcase-4",
-    description: "High-Performance Layers & Studio Comfortwear",
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1600&auto=format&fit=crop",
-    discountType: "percentage",
-    discountValue: 45,
-    targetLink: "/catalog",
-    tag: "LIMITED EDITION",
-    badge: "FEATURED"
-  },
-  {
-    _id: "ramcart-showcase-5",
-    description: "Kids & Juniors Vibrant Play Collection",
+    description: "Kids Pattu Pavadai, Traditional Sets & Casuals — Extra 30% Off",
     image: "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?q=80&w=1600&auto=format&fit=crop",
     discountType: "percentage",
     discountValue: 30,
     targetLink: "/kids",
-    tag: "PLAYFUL STYLES",
-    badge: "NEW ARRIVAL"
+    tag: "KIDS SPECIAL",
+    badge: "NEW COLLECTION"
   }
 ];
 

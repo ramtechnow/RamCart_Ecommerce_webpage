@@ -6,26 +6,26 @@ const ProcessSteps = () => {
     {
       step: "01",
       icon: <Truck size={18} className="text-[#ff8906] sm:w-[22px] sm:h-[22px]" />,
-      title: "Fast Express Delivery",
-      description: "Quick, dependable shipping across India with live parcel tracking updates."
+      title: "Fast Express Delivery across India",
+      description: "Shipped quickly to your doorstep with live SMS & WhatsApp delivery updates."
     },
     {
       step: "02",
       icon: <ShieldCheck size={18} className="text-[#ff8906] sm:w-[22px] sm:h-[22px]" />,
-      title: "100% Encrypted Checkout",
-      description: "Bank-grade secure checkout supporting UPI, NetBanking, and all major cards."
+      title: "Safe UPI, Cards & Cash on Delivery",
+      description: "Pay easily with Google Pay, PhonePe, Paytm, Debit/Credit Cards or Cash on Delivery."
     },
     {
       step: "03",
       icon: <RefreshCw size={18} className="text-[#ff8906] sm:w-[22px] sm:h-[22px]" />,
-      title: "30-Day Easy Returns",
-      description: "Not the perfect fit? Enjoy hassle-free doorstep exchange or full refunds."
+      title: "7-Day Easy Returns & Exchange",
+      description: "Size doesn't match? Simple doorstep pickup and instant exchange or refund."
     }
   ];
 
   return (
-    <div className="my-6 sm:my-10 p-1 sm:p-1.5 rounded-2xl sm:rounded-3xl bg-black/[0.02] dark:bg-white/[0.03] ring-1 ring-black/5 dark:ring-white/10 shadow-sm">
-      <div className="rounded-xl sm:rounded-2xl bg-white dark:bg-[#171622] p-4 sm:p-7 border border-black/5 dark:border-white/5">
+    <div className="my-6 sm:my-10 p-1 sm:p-1.5 rounded-md bg-black/[0.02] dark:bg-white/[0.03] ring-1 ring-black/5 dark:ring-white/10 shadow-sm">
+      <div className="rounded-md bg-white dark:bg-[#171622] p-4 sm:p-7 border border-black/5 dark:border-white/5">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8 divide-y md:divide-y-0 md:divide-x divide-black/5 dark:divide-white/5">
           {steps.map((step, index) => (
             <div 
@@ -33,7 +33,7 @@ const ProcessSteps = () => {
               className={`group flex flex-col items-center sm:items-start text-center sm:text-left transition-all duration-300 ${index > 0 ? "pt-4 md:pt-0 md:pl-8" : ""}`}
             >
               <div className="w-full flex items-center justify-between mb-2.5 sm:mb-4">
-                <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-[#ff8906]/10 dark:bg-[#ff8906]/20 flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shadow-sm">
+                <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-md bg-[#ff8906]/10 dark:bg-[#ff8906]/20 flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shadow-sm">
                   {step.icon}
                 </div>
                 <span className="text-[10px] sm:text-[11px] font-mono font-bold text-[#ff8906] bg-[#ff8906]/10 px-2 py-0.5 rounded-full tracking-wider">

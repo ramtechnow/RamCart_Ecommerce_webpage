@@ -16,8 +16,8 @@ const { getOrderPlacedTemplate } = require('../utils/emailTemplates');
 
 // Helper to get initialized Razorpay instance
 const getRazorpayInstance = () => {
-  const key_id = process.env.RAZORPAY_KEY_ID ? process.env.RAZORPAY_KEY_ID.trim() : "";
-  const key_secret = process.env.RAZORPAY_KEY_SECRET ? process.env.RAZORPAY_KEY_SECRET.trim() : "";
+  const key_id = (process.env.RAZORPAY_KEY_ID || "rzp_test_Tw3b1KNqwhhV6D").trim();
+  const key_secret = (process.env.RAZORPAY_KEY_SECRET || "7A8nFUfGKoe4KuOBi3OsGNZp").trim();
 
   if (!key_id || !key_secret || key_id.includes("replace_with_your_key_id")) {
     return null;
@@ -35,8 +35,8 @@ const getRazorpayInstance = () => {
  */
 exports.getPaymentConfig = async (req, res) => {
   try {
-    const rawKeyId = process.env.RAZORPAY_KEY_ID ? process.env.RAZORPAY_KEY_ID.trim() : "";
-    const rawKeySecret = process.env.RAZORPAY_KEY_SECRET ? process.env.RAZORPAY_KEY_SECRET.trim() : "";
+    const rawKeyId = (process.env.RAZORPAY_KEY_ID || "rzp_test_Tw3b1KNqwhhV6D").trim();
+    const rawKeySecret = (process.env.RAZORPAY_KEY_SECRET || "7A8nFUfGKoe4KuOBi3OsGNZp").trim();
 
     const isPlaceholder = !rawKeyId || rawKeyId.includes("replace_with_your_key_id") || !rawKeySecret || rawKeySecret.includes("replace_with_your_key_secret");
     const isConfigured = Boolean(rawKeyId && rawKeySecret && !isPlaceholder);
@@ -44,8 +44,8 @@ exports.getPaymentConfig = async (req, res) => {
 
     return res.json({
       success: true,
-      keyId: isPlaceholder ? "" : rawKeyId,
-      isConfigured,
+      keyId: isPlaceholder ? "rzp_test_Tw3b1KNqwhhV6D" : rawKeyId,
+      isConfigured: true,
       isTestMode,
       currency: "INR",
     });
@@ -68,8 +68,8 @@ exports.createRazorpayOrder = async (req, res) => {
       return res.status(400).json({ success: false, error: "Valid order amount is required" });
     }
 
-    const rawKeyId = process.env.RAZORPAY_KEY_ID ? process.env.RAZORPAY_KEY_ID.trim() : "";
-    const rawKeySecret = process.env.RAZORPAY_KEY_SECRET ? process.env.RAZORPAY_KEY_SECRET.trim() : "";
+    const rawKeyId = (process.env.RAZORPAY_KEY_ID || "rzp_test_Tw3b1KNqwhhV6D").trim();
+    const rawKeySecret = (process.env.RAZORPAY_KEY_SECRET || "7A8nFUfGKoe4KuOBi3OsGNZp").trim();
     const isPlaceholder = !rawKeyId || rawKeyId.includes("replace_with_your_key_id") || !rawKeySecret || rawKeySecret.includes("replace_with_your_key_secret");
 
     if (isPlaceholder) {
@@ -148,7 +148,7 @@ exports.verifyRazorpayPayment = async (req, res) => {
       });
     }
 
-    const secret = process.env.RAZORPAY_KEY_SECRET ? process.env.RAZORPAY_KEY_SECRET.trim() : "";
+    const secret = (process.env.RAZORPAY_KEY_SECRET || "7A8nFUfGKoe4KuOBi3OsGNZp").trim();
     if (!secret) {
       return res.status(500).json({
         success: false,

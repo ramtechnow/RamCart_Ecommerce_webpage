@@ -963,3 +963,53 @@
     font-size: 13px;
   }
 }
+
+/* ── PDP Share Floating & Action Buttons ── */
+.rc-pdp-share-floating {
+  position: absolute;
+  top: 12px;
+  right: 56px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+.rc-pdp-share-floating:hover {
+  transform: scale(1.1);
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.rc-pdp-btn-share {
+  height: 48px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--bg-secondary, #ffffff);
+  color: var(--text-primary, #18181b);
+  border: 1.5px solid var(--border-color, #e4e4e7);
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.rc-pdp-btn-share:hover {
+  background: var(--bg-tertiary, #f4f4f5);
+  border-color: #0284c7;
+  color: #0284c7;
+  transform: translateY(-1px);
+}

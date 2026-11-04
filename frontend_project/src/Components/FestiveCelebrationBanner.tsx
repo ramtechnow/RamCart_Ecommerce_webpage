@@ -14,8 +14,8 @@ interface FestiveCelebrationBannerProps {
 }
 
 export const FestiveCelebrationBanner: React.FC<FestiveCelebrationBannerProps> = ({
-  festivalTitle = "🪔 DIWALI & FESTIVE DHAMAKA SALE",
-  promoText = "Grand Festive Deals are Live! Extra 30% Savings on Ethnic & Modern Collections",
+  festivalTitle = "🪔 GRAND FESTIVE DHAMAKA SALE",
+  promoText = "Grand Festive Deals are Live! Extra 30% Savings on Pure Silk Sarees, Dhotis & Daily Wear",
   couponCode = "DIWALI30",
   discountBadge = "FLAT 30% OFF",
   mediaType = "fireworks",
@@ -162,7 +162,7 @@ export const FestiveCelebrationBanner: React.FC<FestiveCelebrationBannerProps> =
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 my-4 sm:my-6">
       <div 
-        className="relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-xl transition-all duration-300"
+        className="relative overflow-hidden rounded-md shadow-lg transition-all duration-300"
         style={{
           background: "linear-gradient(135deg, #1f0b12 0%, #3d0c1e 35%, #500724 70%, #1c0812 100%)",
           border: "1.5px solid rgba(251, 191, 36, 0.45)",

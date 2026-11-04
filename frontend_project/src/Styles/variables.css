@@ -80,9 +80,9 @@
 
 /* ── Dark Theme — RamCart Dark Palette ────────────────────── */
 .dark-theme {
-  --bg-primary: #1C1C1C;
-  --bg-secondary: #282828;
-  --bg-tertiary: #363636;
+  --bg-primary: #121214;
+  --bg-secondary: #18181b;
+  --bg-tertiary: #27272a;
 
   --text-primary: #EAEAEC;
   --text-secondary: #A8AAB4;
@@ -94,7 +94,7 @@
   --accent-hover: #E63060;
   --accent-light: #3D1C24;
 
-  --border-color: #3D3D3D;
+  --border-color: #27272a;
   --border-focus: #FF3F6C;
 
   --rating-green: #1DB6AF;

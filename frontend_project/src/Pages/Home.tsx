@@ -193,15 +193,15 @@ export const Home: React.FC = () => {
       {/* ── Instamart / JioMart Style Festive Celebration Ribbon (Diwali Crackers Animation & Sale Banner) ── */}
       <FestiveCelebrationBanner 
         festivalTitle={activePromo?.theme ? `🪔 ${activePromo.theme.toUpperCase()} DHAMAKA SALE` : "🪔 DIWALI & FESTIVE DHAMAKA SALE"}
-        promoText={activePromo?.announcementText || "Grand Festive Deals are Live! Extra 30% Savings on Ethnic & Modern Collections"}
+        promoText={activePromo?.announcementText || "Grand Festive Deals are Live! Extra 30% Savings on Silk Sarees, Dhotis & Daily Wear"}
         couponCode={activePromo?.theme ? `${activePromo.theme.toUpperCase()}30` : "DIWALI30"}
         discountBadge="FLAT 30% OFF"
       />
 
       {/* ── Double-Bezel Floating Trust Capsule (Hardware-grade aesthetic) ── */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 my-6 sm:my-8">
-        <div className="p-1 sm:p-1.5 rounded-2xl sm:rounded-3xl bg-black/[0.02] dark:bg-white/[0.03] ring-1 ring-black/5 dark:ring-white/10 shadow-sm">
-          <div className="rounded-xl sm:rounded-2xl bg-white/95 dark:bg-[#171622]/95 backdrop-blur-xl border border-black/5 dark:border-white/5 p-2.5 sm:p-5 flex items-center justify-between sm:justify-around gap-3 sm:gap-4 overflow-x-auto no-scrollbar">
+        <div className="p-1 sm:p-1.5 rounded-md bg-black/[0.02] dark:bg-white/[0.03] ring-1 ring-black/5 dark:ring-white/10 shadow-sm">
+          <div className="rounded-md bg-white/95 dark:bg-[#171622]/95 backdrop-blur-xl border border-black/5 dark:border-white/5 p-2.5 sm:p-5 flex items-center justify-between sm:justify-around gap-3 sm:gap-4 overflow-x-auto no-scrollbar">
             
             <div className="group flex items-center gap-3 shrink-0">
               <div className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-[#ff8906]/10 dark:bg-[#ff8906]/20 flex items-center justify-center text-[#ff8906] transition-transform duration-300 group-hover:scale-110 shrink-0">
@@ -209,10 +209,10 @@ export const Home: React.FC = () => {
               </div>
               <div>
                 <span className="block text-[11px] sm:text-sm font-extrabold text-[#0f0e17] dark:text-[#fffffe] leading-tight">
-                  Free Express Delivery
+                  Fast Free Delivery
                 </span>
                 <span className="block text-[10px] sm:text-xs text-[#52525b] dark:text-[#a1a1aa] mt-0.5 font-medium">
-                  On all orders above ₹499
+                  Free across India on orders &gt; ₹499
                 </span>
               </div>
             </div>
@@ -225,10 +225,10 @@ export const Home: React.FC = () => {
               </div>
               <div>
                 <span className="block text-[11px] sm:text-sm font-extrabold text-[#0f0e17] dark:text-[#fffffe] leading-tight">
-                  Hassle-Free Returns
+                  7-Day Easy Returns
                 </span>
                 <span className="block text-[10px] sm:text-xs text-[#52525b] dark:text-[#a1a1aa] mt-0.5 font-medium">
-                  30-day doorstep exchange
+                  Doorstep pickup & exchange
                 </span>
               </div>
             </div>
@@ -241,10 +241,10 @@ export const Home: React.FC = () => {
               </div>
               <div>
                 <span className="block text-[11px] sm:text-sm font-extrabold text-[#0f0e17] dark:text-[#fffffe] leading-tight">
-                  Encrypted Checkout
+                  Safe UPI & Cash on Delivery
                 </span>
                 <span className="block text-[10px] sm:text-xs text-[#52525b] dark:text-[#a1a1aa] mt-0.5 font-medium">
-                  100% bank-grade security
+                  GPay, PhonePe, Cards & COD
                 </span>
               </div>
             </div>
@@ -257,10 +257,10 @@ export const Home: React.FC = () => {
               </div>
               <div>
                 <span className="block text-[11px] sm:text-sm font-extrabold text-[#0f0e17] dark:text-[#fffffe] leading-tight">
-                  Unbeatable Value
+                  100% Genuine Quality
                 </span>
                 <span className="block text-[10px] sm:text-xs text-[#52525b] dark:text-[#a1a1aa] mt-0.5 font-medium">
-                  50,000+ satisfied patrons
+                  Direct from trusted weavers
                 </span>
               </div>
             </div>

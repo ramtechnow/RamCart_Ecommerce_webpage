@@ -1,26 +1,11 @@
-import React, { useContext } from "react";
-import { ThemeContext } from "../Context/ThemeContext";
-import "../Styles/pattern.css";
+import React from "react";
 
+/**
+ * Clean Background Layer — Replaces AI/noisy star animations with a calm, 
+ * solid developer-crafted layout.
+ */
 export const Pattern: React.FC = () => {
-  const themeContext = useContext(ThemeContext);
-  const isDarkMode = themeContext?.isDarkMode || false;
-
-  if (isDarkMode) {
-    return (
-      <div className="stars-container">
-        <div id="stars" />
-        <div id="stars2" />
-        <div id="stars3" />
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid-wrapper">
-      <div className="grid-background" />
-    </div>
-  );
+  return null;
 };
 
 export default Pattern;

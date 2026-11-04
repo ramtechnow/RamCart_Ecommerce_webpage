@@ -37,6 +37,14 @@ const FestiveParticlesWrapper: React.FC<{ promo: SeasonalPromo | null }> = ({ pr
   return <FestiveParticles type={promo.particleType} enable={true} />;
 };
 
+const ScrollResetOnNavigate: React.FC = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [pathname]);
+  return null;
+};
+
 const StorefrontChrome: React.FC = () => {
   const location = useLocation();
   const isAdminPage = location.pathname.startsWith("/admin");
@@ -94,6 +102,7 @@ export const App: React.FC = () => {
 
   return (
     <BrowserRouter>
+        <ScrollResetOnNavigate />
       {activePromo && (
         <AnnouncementMarquee 
           text={activePromo.announcementText} 

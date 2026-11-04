@@ -3,7 +3,7 @@
    Truthful data representation, responsive, zero fake metrics.
    ============================================================ */
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Heart, Star, ShoppingBag, Zap, Share2 } from "lucide-react";
 import { useWishlist } from "../features/catalog/hooks/useWishlist";
 import { useCart } from "../features/checkout/hooks/useCart";
@@ -72,8 +72,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const isOutOfStock = product.stockCount !== undefined && product.stockCount <= 0;
   const showAltName = imgError || !currentImg;
 
+  const [isTouchActive, setIsTouchActive] = useState(false);
+
   // ── Quick Add to Cart ────────────────────────────────────────────────────────
-  const handleQuickAddToCart = async (e: React.MouseEvent) => {
+  const handleQuickAddToCart = async (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (isOutOfStock || addingToCart) return;
@@ -96,7 +98,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   // ── 1-Click Buy Now (Direct to Checkout & Razorpay) ──────────────────────────
-  const handleQuickBuyNow = (e: React.MouseEvent) => {
+  const handleQuickBuyNow = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (isOutOfStock) return;
@@ -105,7 +107,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   };
 
   // ── Share Product (WhatsApp / Native Share / Clipboard) ──────────────────────
-  const handleShareProduct = async (e: React.MouseEvent) => {
+  const handleShareProduct = async (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -141,8 +143,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     }
   };
 
+  const handleImageAreaClick = (e: React.MouseEvent) => {
+    if (window.innerWidth <= 768) {
+      if (!isTouchActive) {
+        e.preventDefault();
+        setIsTouchActive(true);
+        return;
+      }
+    }
+    navigate(`/product/${product.id}`);
+  };
+
   return (
-    <div className={`product-card ${isOutOfStock ? "is-sold-out" : ""}`} style={{ position: "relative" }}>
+    <div 
+      className={`product-card ${isOutOfStock ? "is-sold-out" : ""} ${isTouchActive ? "touch-active" : ""}`} 
+      style={{ position: "relative" }}
+      onMouseLeave={() => setIsTouchActive(false)}
+    >
       {/* ── Wishlist Heart Button ── */}
       <button
         className={`product-card-wishlist-btn${isWishlisted ? " active" : ""}`}
@@ -167,12 +184,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <Share2 size={15} />
       </button>
 
-      <Link 
-        to={`/product/${product.id}`} 
-        style={{ display: "flex", flexDirection: "column", height: "100%", textDecoration: "none", color: "inherit" }}
-      >
+      <div style={{ display: "flex", flexDirection: "column", height: "100%", textDecoration: "none", color: "inherit" }}>
         {/* ── Image area ── */}
-        <div className="product-card-image-wrapper">
+        <div className="product-card-image-wrapper" onClick={handleImageAreaClick}>
           {discountPercent > 0 && !isOutOfStock && (
             <div className="product-card-badge">{discountPercent}% OFF</div>
           )}
@@ -245,7 +259,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </div>
 
         {/* ── Info panel ── */}
-        <div className="product-card-info">
+        <div 
+          className="product-card-info"
+          onClick={() => navigate(`/product/${product.id}`)}
+          style={{ cursor: "pointer" }}
+        >
           <span className="product-card-category">{brandLabel}</span>
           <h3 className="product-card-title">{product.name}</h3>
 
@@ -273,10 +291,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             )}
           </div>
           <div className="product-card-delivery-hint">
-            {price >= 499 ? "✓ Free Delivery" : "Standard Delivery"}
+            {price >= 499 ? "✓ Free Delivery Available" : "Standard Delivery"}
           </div>
         </div>
-      </Link>
+      </div>
     </div>
   );
 };
