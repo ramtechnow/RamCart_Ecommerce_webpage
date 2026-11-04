@@ -27,6 +27,29 @@ import "../Styles/orders.css";
 
 const STATUS_STEPS = ["Pending", "Processing", "Shipped", "Delivered"];
 
+const STATUS_COLORS: Record<string, { dot: string; text: string; bg: string }> = {
+  Pending: {
+    dot: "bg-amber-500 text-white border-amber-600 shadow-[0_0_10px_rgba(245,158,11,0.5)]",
+    text: "text-amber-700 dark:text-amber-400 font-extrabold",
+    bg: "bg-amber-50 dark:bg-amber-950/40"
+  },
+  Processing: {
+    dot: "bg-blue-600 text-white border-blue-700 shadow-[0_0_10px_rgba(37,99,235,0.5)]",
+    text: "text-blue-700 dark:text-blue-400 font-extrabold",
+    bg: "bg-blue-50 dark:bg-blue-950/40"
+  },
+  Shipped: {
+    dot: "bg-purple-600 text-white border-purple-700 shadow-[0_0_10px_rgba(147,51,234,0.5)]",
+    text: "text-purple-700 dark:text-purple-400 font-extrabold",
+    bg: "bg-purple-50 dark:bg-purple-950/40"
+  },
+  Delivered: {
+    dot: "bg-emerald-600 text-white border-emerald-700 shadow-[0_0_10px_rgba(16,185,129,0.5)]",
+    text: "text-emerald-700 dark:text-emerald-400 font-extrabold",
+    bg: "bg-emerald-50 dark:bg-emerald-950/40"
+  }
+};
+
 const STATUS_ICONS: Record<string, React.ReactNode> = {
   Pending: <Circle size={16} />,
   Processing: <Clock3 size={16} />,
@@ -335,20 +358,39 @@ export const Orders: React.FC = () => {
                           </div>
                         </div>
                       ) : (
-                        <div className="status-tracker flex items-center p-4 bg-bg-primary overflow-x-auto gap-1">
+                        <div className="status-tracker flex items-center p-4 bg-bg-primary overflow-x-auto gap-2">
                           {STATUS_STEPS.map((step, idx) => {
                             const isDone = idx <= currentStep;
                             const isCurrent = idx === currentStep;
+                            const colorCfg = STATUS_COLORS[step] || STATUS_COLORS.Pending;
                             return (
                               <React.Fragment key={step}>
-                                <div className={`tracker-step flex flex-col items-center gap-1.5 ${isDone ? "done" : ""} ${isCurrent ? "current animate-pulse" : ""}`}>
-                                  <div className="tracker-dot w-8 h-8 rounded-full border border-border bg-bg-secondary flex items-center justify-center text-text-muted transition-all">
+                                <div className={`tracker-step flex flex-col items-center gap-1.5 ${isCurrent ? "animate-pulse" : ""}`}>
+                                  <div className={`tracker-dot w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
+                                    isDone 
+                                      ? colorCfg.dot 
+                                      : "border-border bg-bg-secondary text-text-muted opacity-50"
+                                  }`}>
                                     {STATUS_ICONS[step]}
                                   </div>
-                                  <span className="tracker-label text-[9px] font-bold text-text-muted uppercase tracking-wider">{step}</span>
+                                  <span className={`tracker-label text-[9px] font-bold uppercase tracking-wider ${
+                                    isCurrent ? colorCfg.text : isDone ? "text-text-primary" : "text-text-muted opacity-60"
+                                  }`}>
+                                    {step}
+                                  </span>
                                 </div>
                                 {idx < STATUS_STEPS.length - 1 && (
-                                  <div className={`tracker-line flex-1 h-0.5 bg-border min-w-[20px] max-w-[80px] self-center -mt-4 ${idx < currentStep ? "done" : ""}`} />
+                                  <div 
+                                    className={`tracker-line flex-1 h-1 min-w-[24px] max-w-[80px] self-center -mt-4 rounded-full transition-all ${
+                                      idx < currentStep
+                                        ? idx === 0
+                                          ? "bg-gradient-to-r from-amber-500 to-blue-600 shadow-[0_0_6px_rgba(245,158,11,0.4)]"
+                                          : idx === 1
+                                          ? "bg-gradient-to-r from-blue-600 to-purple-600 shadow-[0_0_6px_rgba(37,99,235,0.4)]"
+                                          : "bg-gradient-to-r from-purple-600 to-emerald-600 shadow-[0_0_6px_rgba(16,185,129,0.4)]"
+                                        : "bg-border opacity-30"
+                                    }`} 
+                                  />
                                 )}
                               </React.Fragment>
                             );

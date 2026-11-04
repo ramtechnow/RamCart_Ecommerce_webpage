@@ -4,7 +4,8 @@ export interface UserState {
   uid: string;
   email: string | null;
   name: string | null;
-  role: "admin" | "customer";
+  role: "admin" | "customer" | "vendor";
+  vendorName?: string;
   emailVerified: boolean;
 }
 

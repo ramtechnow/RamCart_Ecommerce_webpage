@@ -33,7 +33,9 @@ export const AdminPanel: React.FC = () => {
   
   // 1. Secure Authentication from Redux
   const { user, loading: authLoading } = useAppSelector((state) => state.auth);
-  const isAdmin = user?.role === "admin" || user?.email?.toLowerCase() === "bvhss20@gmail.com";
+  const isSuperAdmin = user?.role === "admin" || user?.email?.toLowerCase() === "bvhss20@gmail.com";
+  const isVendor = user?.role === "vendor";
+  const isAuthorized = isSuperAdmin || isVendor;
 
   // 2. Active Tab State
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -238,7 +240,7 @@ export const AdminPanel: React.FC = () => {
 
   // Initial fetch and 10-second polling for real-time orders
   useEffect(() => {
-    if (isAdmin) {
+    if (isAuthorized) {
       fetchAllAdminData();
       const interval = setInterval(() => {
         adminApi.fetchOrders().then((freshOrders) => {
@@ -273,7 +275,7 @@ export const AdminPanel: React.FC = () => {
       }, 10000);
       return () => clearInterval(interval);
     }
-  }, [isAdmin, fetchAllAdminData, dispatch]);
+  }, [isAuthorized, fetchAllAdminData, dispatch]);
 
   // Loader UI
   if (authLoading) {
@@ -281,7 +283,7 @@ export const AdminPanel: React.FC = () => {
   }
 
   // Verification Failure UI
-  if (!isAdmin) {
+  if (!isAuthorized) {
     return <AdminAccessDenied />;
   }
 
@@ -411,6 +413,7 @@ export const AdminPanel: React.FC = () => {
             <AdminMarketingCRMTab 
               users={users as any}
               orders={orders as any}
+              coupons={coupons as any}
               addToast={triggerToast as any}
               logAction={logAction as any}
             />

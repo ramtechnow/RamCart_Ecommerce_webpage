@@ -28,6 +28,7 @@ router.get('/admin/verify', fetchAdmin, userController.verifyAdmin);
 router.get('/admin/users', fetchAdmin, userController.getAllUsers);
 router.post('/admin/updateuserrole', fetchAdmin, userController.updateUserRole);
 router.post('/admin/deleteuser', fetchAdmin, userController.deleteUser);
+router.post('/admin/send-campaign-email', fetchAdmin, userController.sendCampaignEmail);
 
 // Profile & Address Book routes
 router.get('/user/profile', fetchUser, userController.getProfile);

@@ -37,8 +37,10 @@ export const syncUserProfile = async (firebaseUser: FirebaseUser, customName?: s
     uid: firebaseUser.uid,
     email: result.user.email || firebaseUser.email || null,
     name: result.user.name || payload.name,
-    role: (result.user?.isAdmin || firebaseUser.email?.toLowerCase() === "bvhss20@gmail.com") ? "admin" : "customer",
+    role: (firebaseUser.email?.toLowerCase() === "bvhss20@gmail.com" || result.user?.isAdmin)
+      ? "admin"
+      : (result.user?.role === "vendor" ? "vendor" : "customer"),
+    vendorName: result.user?.vendorName || "",
     emailVerified: firebaseUser.emailVerified
   };
 };
-

@@ -1,350 +1,467 @@
 /* ============================================================
-   RAMCART MULTI-CARD PROMO CAROUSEL (Mobile & Laptop)
-   RAMCART Signature Showcase Banner with Multi-Card Peeking & Dynamic Indicators
+   RAMCART 2026 EDITORIAL HERO SHOWCASE CAROUSEL
+   Strict Square Box Geometry • Split-Screen Canvas • 0% Text Overlap
    ============================================================ */
 
-.ramcart-promo-carousel-wrapper {
+.editorial-carousel-container {
   width: 100%;
   max-width: 1440px;
-  margin: 12px auto 24px;
-  position: relative;
-  overflow: hidden;
-  user-select: none;
-  --slide-step: calc(48% + 16px);
-}
-
-.ramcart-promo-carousel-viewport {
-  width: 100%;
-  overflow: hidden;
-  padding: 4px 16px 8px;
+  margin: 10px auto 20px;
+  padding: 0 16px;
   box-sizing: border-box;
+  user-select: none;
 }
 
-.ramcart-promo-carousel-track {
-  display: flex;
-  transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
-  will-change: transform;
-}
-
-/* Individual RAMCART Banner Card */
-.ramcart-promo-banner-card {
-  flex-shrink: 0;
-  width: 48%;
-  margin-right: 16px;
-  aspect-ratio: 16 / 8.5;
-  min-height: 260px;
-  border-radius: 4px;
-  overflow: hidden;
-  position: relative;
-  cursor: pointer;
-  background-color: #0f1115;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-}
-
-.ramcart-promo-banner-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
-}
-
-.ramcart-promo-banner-img {
-  position: absolute;
-  inset: 0;
+/* Skeleton Loading Box */
+.editorial-skeleton-box {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  transition: transform 0.5s ease;
-  z-index: 1;
+  height: 440px;
+  background-color: var(--bg-secondary, #f4f4f5);
+  border: 1px solid var(--border-color, #e4e4e7);
+  border-radius: 0px;
 }
 
-.ramcart-promo-banner-card:hover .ramcart-promo-banner-img {
-  transform: scale(1.02);
-}
-
-/* Dark gradient overlay so text is 100% readable over any photo */
-.ramcart-promo-banner-gradient {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(15, 17, 21, 0.85) 0%,
-    rgba(15, 17, 21, 0.55) 50%,
-    rgba(15, 17, 21, 0.15) 100%
-  );
-  z-index: 2;
-  pointer-events: none;
-}
-
-/* Banner Content Text & Offer Badges */
-.ramcart-promo-banner-content {
+/* ── Main Square-Box Split Hero Stage ── */
+.editorial-hero-stage {
+  display: flex;
+  flex-direction: row;
+  min-height: 420px;
+  max-height: 480px;
   position: relative;
-  z-index: 3;
-  padding: clamp(12px, 2vw, 20px);
-  max-width: 65%;
+  overflow: hidden;
+  border-radius: 0px;
+  border: 1px solid var(--border-color, #e4e4e7);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+  transition: background-color 0.4s ease, border-color 0.4s ease;
+}
+
+/* ── Editorial Themes (High-End Colors, NOT generic B&W) ── */
+.editorial-hero-stage.theme-crimson-gold {
+  background-color: #faf6ef;
+  border-color: #f1dfc5;
+}
+.dark .editorial-hero-stage.theme-crimson-gold {
+  background-color: #191410;
+  border-color: #3b2c1d;
+}
+
+.editorial-hero-stage.theme-royal-indigo {
+  background-color: #f3f7fd;
+  border-color: #d7e4fa;
+}
+.dark .editorial-hero-stage.theme-royal-indigo {
+  background-color: #101524;
+  border-color: #1e2e4f;
+}
+
+.editorial-hero-stage.theme-terracotta {
+  background-color: #fdf5ef;
+  border-color: #f7ded0;
+}
+.dark .editorial-hero-stage.theme-terracotta {
+  background-color: #1e140e;
+  border-color: #452414;
+}
+
+.editorial-hero-stage.theme-emerald {
+  background-color: #f1faf4;
+  border-color: #cfead9;
+}
+.dark .editorial-hero-stage.theme-emerald {
+  background-color: #0e1a13;
+  border-color: #183d28;
+}
+
+/* ── Left Side: Structured Editorial Typography Canvas ── */
+.editorial-content-panel {
+  flex: 1 1 52%;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  color: #ffffff;
+  justify-content: center;
+  padding: clamp(24px, 4vw, 44px);
+  z-index: 2;
+  box-sizing: border-box;
+  max-width: 55%;
 }
 
-/* Yellow / Blue Early Bird Badge */
-.ramcart-promo-badge-earlybird {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: linear-gradient(135deg, #facc15, #eab308);
-  color: #1e1b4b;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 3px;
-  letter-spacing: 0.2px;
-  text-transform: capitalize;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.ramcart-promo-badge-discount {
-  display: inline-flex;
-  align-items: center;
-  background: #ef4444;
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 3px;
-  letter-spacing: 0.2px;
-}
-
-/* Headline */
-.ramcart-promo-banner-title {
-  font-size: clamp(14px, 1.6vw, 19px);
-  font-weight: 800;
-  line-height: 1.25;
-  color: #ffffff;
-  margin: 0;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  letter-spacing: -0.2px;
-}
-
-/* Hide or fade text on inactive peek slides to keep headings readable */
-.ramcart-promo-banner-card:not(.is-active) .ramcart-promo-banner-content {
-  opacity: 0.25;
-  transition: opacity 0.35s ease;
-}
-
-.ramcart-promo-banner-card.is-active .ramcart-promo-banner-content {
-  opacity: 1;
-  transition: opacity 0.35s ease;
-}
-
-/* Bank Offer Strip (like RAMCART Axis / ICICI Bank) */
-.ramcart-promo-bank-strip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.98);
-  padding: 5px 12px;
-  border-radius: 3px;
-  width: fit-content;
-  margin-top: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.bank-pill {
-  font-size: 11px;
-  font-weight: 800;
-  color: #991b1b;
-  border-right: 1px solid #d1d5db;
-  padding-right: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.2px;
-}
-
-.bank-text {
-  font-size: 12px;
-  font-weight: 700;
-  color: #18181b;
-  line-height: 1.4;
-}
-
-/* AD / Sponsored chip */
-.ramcart-promo-ad-tag {
-  position: absolute;
-  bottom: 12px;
-  right: 14px;
-  z-index: 3;
-  font-size: 11px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
-  background: rgba(0, 0, 0, 0.6);
-  padding: 3px 8px;
-  border-radius: 4px;
-  letter-spacing: 0.3px;
-}
-
-/* ─── RAMCART Signature Pill Indicators ─── */
-.ramcart-promo-indicators {
+.editorial-tag-row {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.editorial-eyebrow {
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
-  margin-top: 10px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #78350f;
+  background-color: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 3px 8px;
+  border-radius: 0px;
+}
+.dark .editorial-eyebrow {
+  color: #fbbf24;
+  background-color: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.4);
 }
 
-.ramcart-promo-indicator-dot {
-  height: 4px;
-  border-radius: 4px;
-  background-color: #d1d5db;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  border: none;
-  padding: 0;
-}
-
-.dark-theme .ramcart-promo-indicator-dot,
-.dark .ramcart-promo-indicator-dot {
-  background-color: #3f3f46;
-}
-
-.ramcart-promo-indicator-dot.active {
-  width: 32px !important;
+.editorial-discount-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   background-color: #000000;
+  color: #ffffff;
+  padding: 3px 10px;
+  border-radius: 0px;
+}
+.dark .editorial-discount-pill {
+  background-color: #ffffff;
+  color: #000000;
 }
 
-.dark-theme .ramcart-promo-indicator-dot.active,
-.dark .ramcart-promo-indicator-dot.active {
+/* Main Display Headline */
+.editorial-headline {
+  font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+  margin: 0 0 12px 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.dark .editorial-headline {
+  color: #f8fafc;
+}
+
+/* Description */
+.editorial-description {
+  font-size: clamp(0.8rem, 1.1vw, 0.95rem);
+  line-height: 1.55;
+  color: #475569;
+  margin: 0 0 16px 0;
+  max-width: 95%;
+  font-weight: 500;
+}
+.dark .editorial-description {
+  color: #cbd5e1;
+}
+
+/* Value Perks */
+.editorial-perks-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.editorial-perk {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0f766e;
+  letter-spacing: 0.2px;
+}
+.dark .editorial-perk {
+  color: #2dd4bf;
+}
+
+/* Action Row */
+.editorial-action-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+/* Crisp Square CTA Button */
+.editorial-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #000000;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 24px;
+  border-radius: 0px;
+  border: 1px solid #000000;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+.editorial-cta-btn:hover {
+  transform: translateY(-2px);
+  background-color: #1e293b;
+}
+.dark .editorial-cta-btn {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+}
+.dark .editorial-cta-btn:hover {
+  background-color: #e2e8f0;
+}
+
+/* Coupon Box */
+.editorial-coupon-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border: 1.5px dashed #000000;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 0px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.editorial-coupon-box:hover {
+  background-color: #ffffff;
+}
+.dark .editorial-coupon-box {
+  border-color: #ffffff;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+.coupon-prefix {
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+}
+.coupon-code {
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: 800;
+  color: #000000;
+  letter-spacing: 1px;
+}
+.dark .coupon-code {
+  color: #ffffff;
+}
+
+/* ── Modern Numeric Tracker Bar [ 01 / 04 ] ── */
+.editorial-tracker-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+.dark .editorial-tracker-bar {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.editorial-counter {
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.editorial-counter .active-idx {
+  color: #000000;
+}
+.dark .editorial-counter .active-idx {
+  color: #ffffff;
+}
+.editorial-counter .divider,
+.editorial-counter .total-idx {
+  color: #94a3b8;
+}
+
+.editorial-progress-track {
+  flex: 1;
+  max-width: 140px;
+  height: 3px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 0px;
+  overflow: hidden;
+}
+.dark .editorial-progress-track {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.editorial-progress-fill {
+  height: 100%;
+  background-color: #000000;
+  transition: width 0.4s ease;
+}
+.dark .editorial-progress-fill {
   background-color: #ffffff;
 }
 
-.ramcart-promo-indicator-dot.inactive {
-  width: 8px;
+.editorial-dots-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.ramcart-promo-indicator-dot:hover:not(.active) {
-  background-color: #9ca3af;
+.editorial-square-dot {
+  width: 10px;
+  height: 10px;
+  border: 1px solid #94a3b8;
+  background-color: transparent;
+  border-radius: 0px;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.editorial-square-dot.active {
+  background-color: #000000;
+  border-color: #000000;
+}
+.dark .editorial-square-dot.active {
+  background-color: #ffffff;
+  border-color: #ffffff;
 }
 
-/* ─── Floating Desktop Navigation Arrows (High-Contrast Glass) ─── */
-.ramcart-promo-nav-arrow {
+/* ── Right Side: Clean Unobscured Fashion Photography ── */
+.editorial-media-panel {
+  flex: 1 1 48%;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: #000000;
+}
+
+.editorial-hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.editorial-media-panel:hover .editorial-hero-image {
+  transform: scale(1.03);
+}
+
+/* Clean corner badge on photo */
+.editorial-image-tag {
   position: absolute;
-  top: 48%;
-  transform: translateY(-50%);
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: rgba(15, 14, 23, 0.82);
+  bottom: 12px;
+  right: 12px;
+  background-color: rgba(0, 0, 0, 0.7);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 0px;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* ── Sharp Square Navigation Arrows ── */
+.editorial-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  background-color: #ffffff;
+  color: #000000;
+  border: 1px solid #e2e8f0;
+  border-radius: 0px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 10;
-  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-  backdrop-filter: blur(8px);
+  z-index: 5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.editorial-nav-btn:hover {
+  background-color: #000000;
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.05);
+}
+.dark .editorial-nav-btn {
+  background-color: #1e293b;
+  color: #ffffff;
+  border-color: #334155;
+}
+.dark .editorial-nav-btn:hover {
+  background-color: #ffffff;
+  color: #000000;
 }
 
-.ramcart-promo-nav-arrow:hover {
-  background: rgba(15, 14, 23, 0.96);
-  transform: translateY(-50%) scale(1.08);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+.editorial-nav-btn.prev {
+  left: 12px;
+}
+.editorial-nav-btn.next {
+  right: 12px;
 }
 
-.ramcart-promo-nav-arrow.prev {
-  left: 16px;
-}
-
-.ramcart-promo-nav-arrow.next {
-  right: 16px;
-}
-
-/* Loading Skeleton */
-.ramcart-promo-skeleton-card {
-  width: 100%;
-  height: 260px;
-  border-radius: 4px;
-  background: linear-gradient(90deg, rgba(200, 200, 200, 0.15) 25%, rgba(200, 200, 200, 0.3) 50%, rgba(200, 200, 200, 0.15) 75%);
-  background-size: 200% 100%;
-}
-
-/* ─── RESPONSIVE BREAKPOINTS (Matching User Screenshots) ─── */
-
-/* 1. Desktop / Laptop (Screenshot 5: 2.2 cards visible at once) */
-@media (min-width: 1024px) {
-  .ramcart-promo-carousel-wrapper {
-    --slide-step: calc(48% + 16px);
+/* ── Responsive Mobile & Tablet Adjustments ── */
+@media (max-width: 868px) {
+  .editorial-hero-stage {
+    flex-direction: column-reverse;
+    min-height: auto;
+    max-height: none;
   }
 
-  .ramcart-promo-banner-card {
-    width: 48%;
-    margin-right: 16px;
-    min-height: 260px;
-  }
-}
-
-/* 2. Tablet View */
-@media (min-width: 641px) and (max-width: 1023px) {
-  .ramcart-promo-carousel-wrapper {
-    --slide-step: calc(72% + 14px);
+  .editorial-media-panel {
+    height: 240px;
+    width: 100%;
+    flex: none;
   }
 
-  .ramcart-promo-banner-card {
-    width: 72%;
-    margin-right: 14px;
-    min-height: 230px;
-  }
-}
-
-/* 3. Mobile View (Screenshots 1-4: 1 full card + peeking edge) */
-@media (max-width: 640px) {
-  .ramcart-promo-carousel-wrapper {
-    margin: 8px auto 16px;
-    --slide-step: calc(88vw + 12px);
+  .editorial-content-panel {
+    max-width: 100%;
+    width: 100%;
+    flex: none;
+    padding: 20px 16px;
   }
 
-  .ramcart-promo-carousel-viewport {
-    padding: 2px 12px 6px;
+  .editorial-headline {
+    font-size: 1.25rem;
+    margin-bottom: 8px;
   }
 
-  .ramcart-promo-banner-card {
-    width: 88vw;
-    margin-right: 12px;
-    min-height: 155px;
-    border-radius: 4px;
+  .editorial-description {
+    font-size: 0.82rem;
+    margin-bottom: 12px;
   }
 
-  .ramcart-promo-banner-content {
-    max-width: 85%;
-    padding: 14px;
-    gap: 6px;
+  .editorial-perks-row {
+    margin-bottom: 14px;
+    gap: 8px;
   }
 
-  .ramcart-promo-banner-title {
-    font-size: 13px;
-    line-height: 1.25;
+  .editorial-perk {
+    font-size: 10px;
   }
 
-  .ramcart-promo-bank-strip {
-    padding: 3px 8px;
-    margin-top: 2px;
+  .editorial-action-row {
+    margin-bottom: 16px;
   }
 
-  .bank-pill, .bank-text {
-    font-size: 8px;
+  .editorial-cta-btn {
+    padding: 10px 18px;
+    font-size: 11px;
   }
 
-  .ramcart-promo-nav-arrow {
-    display: none; /* Mobile uses natural touch swipe gesture */
+  .editorial-coupon-box {
+    padding: 7px 10px;
   }
 
-  .ramcart-promo-indicators {
-    margin-top: 8px;
+  .editorial-nav-btn {
+    display: none; /* Hide arrows on touch, relies on touch swipe & dots */
   }
 }

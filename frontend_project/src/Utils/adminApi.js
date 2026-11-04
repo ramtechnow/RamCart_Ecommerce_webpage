@@ -36,9 +36,13 @@ export const adminApi = {
     return adminService.fetchUsers();
   },
 
-  async updateUserRole(email, isAdmin) {
-    await adminService.updateUserRole(email, isAdmin);
+  async updateUserRole(email, isAdmin, role, vendorName) {
+    await adminService.updateUserRole(email, isAdmin, role, vendorName);
     return { success: true };
+  },
+
+  async sendCampaignEmail(payload) {
+    return adminService.sendCampaignEmail(payload);
   },
 
   async deleteUser(email) {

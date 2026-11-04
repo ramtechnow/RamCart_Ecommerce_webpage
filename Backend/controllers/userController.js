@@ -251,15 +251,34 @@ exports.getAllUsers = async (req, res) => {
 // Admin: Toggle user admin status / role
 exports.updateUserRole = async (req, res) => {
   try {
-    const { email, isAdmin } = req.body;
+    const { email, isAdmin, role, vendorName } = req.body;
+    const updateFields = {};
+    if (typeof isAdmin !== 'undefined') updateFields.isAdmin = Boolean(isAdmin);
+    if (role) {
+      updateFields.role = role;
+      if (role === 'admin') updateFields.isAdmin = true;
+      if (role === 'customer') updateFields.isAdmin = false;
+      if (role === 'vendor') updateFields.isAdmin = false;
+    }
+    if (typeof vendorName !== 'undefined') updateFields.vendorName = String(vendorName).trim();
+
     const updatedUser = await User.findOneAndUpdate(
       { email: { $regex: new RegExp("^" + email + "$", "i") } },
-      { $set: { isAdmin: Boolean(isAdmin) } },
+      { $set: updateFields },
       { new: true }
     );
     if (updatedUser) {
-      console.log(`Updated user role for ${email}: isAdmin = ${isAdmin}`);
-      res.json({ success: true, user: { name: updatedUser.name, email: updatedUser.email, isAdmin: updatedUser.isAdmin } });
+      console.log(`Updated user role for ${email}: role=${updatedUser.role}, vendorName=${updatedUser.vendorName}, isAdmin=${updatedUser.isAdmin}`);
+      res.json({ 
+        success: true, 
+        user: { 
+          name: updatedUser.name, 
+          email: updatedUser.email, 
+          isAdmin: updatedUser.isAdmin,
+          role: updatedUser.role || (updatedUser.isAdmin ? 'admin' : 'customer'),
+          vendorName: updatedUser.vendorName || ''
+        } 
+      });
     } else {
       res.status(404).json({ success: false, error: "User not found" });
     }
@@ -920,3 +939,66 @@ exports.subscribeNewsletter = async (req, res) => {
 };
 
 
+
+// POST: Dispatch promotional push campaign email
+exports.sendCampaignEmail = async (req, res) => {
+  try {
+    const { emails, subject, message, couponCode, imageUrl, title } = req.body;
+    if (!emails || !Array.isArray(emails) || emails.length === 0) {
+      return res.status(400).json({ success: false, error: "Recipient emails are required" });
+    }
+
+    const htmlBody = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e4e4e7; border-radius: 12px; overflow: hidden;">
+        <div style="background: #000000; padding: 24px; text-align: center; color: #ffffff;">
+          <h1 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 1px;">RAMCART</h1>
+          <p style="margin: 6px 0 0; font-size: 13px; color: #a1a1aa;">Exclusive Special Announcement</p>
+        </div>
+        ${imageUrl ? `<div style="text-align: center; background: #f4f4f5; padding: 10px;"><img src="${imageUrl}" alt="Promo Banner" style="max-width: 100%; max-height: 280px; object-fit: contain; border-radius: 8px;" /></div>` : ''}
+        <div style="padding: 28px 24px;">
+          <h2 style="font-size: 18px; font-weight: 700; color: #09090b; margin-top: 0;">${title || subject}</h2>
+          <p style="font-size: 14px; line-height: 1.6; color: #3f3f46; white-space: pre-wrap;">${message}</p>
+          ${couponCode ? `
+            <div style="background: #faf5ff; border: 1.5px dashed #a855f7; border-radius: 8px; padding: 14px; text-align: center; margin: 20px 0;">
+              <span style="font-size: 12px; font-weight: 600; color: #7e22ce; text-transform: uppercase;">Use Promo Coupon Code</span>
+              <div style="font-size: 20px; font-weight: 800; color: #6b21a8; letter-spacing: 2px; margin-top: 4px;">${couponCode}</div>
+            </div>
+          ` : ''}
+          <div style="text-align: center; margin-top: 24px;">
+            <a href="https://ecommerce-website-dfd55.web.app" style="display: inline-block; background: #000000; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 700; padding: 12px 28px; border-radius: 8px;">Shop Live Collection &rarr;</a>
+          </div>
+        </div>
+        <div style="background: #f4f4f5; padding: 16px; text-align: center; font-size: 11px; color: #71717a; border-top: 1px solid #e4e4e7;">
+          <p style="margin: 0;">RamCart E-Commerce • Quality Tested Directly From Weavers</p>
+          <p style="margin: 4px 0 0;">You received this email because you registered on RamCart.</p>
+        </div>
+      </div>
+    `;
+
+    let sentCount = 0;
+    let failedCount = 0;
+
+    const results = await Promise.allSettled(
+      emails.map(email => sendEmail(email, subject || "Exclusive Offer from RamCart", htmlBody))
+    );
+
+    results.forEach(r => {
+      if (r.status === 'fulfilled' && r.value && r.value.success) {
+        sentCount++;
+      } else {
+        failedCount++;
+      }
+    });
+
+    res.json({
+      success: true,
+      sentCount,
+      failedCount,
+      total: emails.length,
+      message: `Dispatched ${sentCount} of ${emails.length} emails successfully.`
+    });
+  } catch (error) {
+    console.error("Error in sendCampaignEmail:", error);
+    res.status(500).json({ success: false, error: error.message || "Failed to dispatch campaign email" });
+  }
+};

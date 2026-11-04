@@ -56,6 +56,14 @@ const ProductSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
+  vendor: {
+    type: String,
+    default: ""
+  },
+  vendorEmail: {
+    type: String,
+    default: ""
+  },
   date: {
     type: Date,
     default: Date.now,

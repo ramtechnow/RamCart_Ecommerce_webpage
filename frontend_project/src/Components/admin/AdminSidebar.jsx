@@ -27,6 +27,8 @@ export const AdminSidebar = ({
   ordersCount = 0,
   couponsCount = 0,
   bannersCount = 0,
+  isVendor = false,
+  vendorName = "",
   isMobileOpen = false,
   onCloseMobile = () => {}
 }) => {
@@ -95,18 +97,23 @@ export const AdminSidebar = ({
   };
 
   // ─── Menu Items ────────────────────────────────────────────────
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'list', label: 'Catalog', icon: ShoppingBag, count: productsCount },
-    { id: 'add', label: 'Add Product', icon: PlusCircle },
-    { id: 'users', label: 'Users List', icon: Users, count: usersCount },
-    { id: 'orders', label: 'Orders', icon: ShoppingCart, count: ordersCount },
-    { id: 'marketing', label: 'CRM & Marketing', icon: Send, count: 'New' },
-    { id: 'coupons', label: 'Coupons', icon: Tag, count: couponsCount },
-    { id: 'banners', label: 'Hero Banners', icon: ImageIcon, count: bannersCount },
-    { id: 'categories', label: 'Category Showcase', icon: Layers },
-    { id: 'seasonal', label: 'Seasonal Offers', icon: Sparkles }
-  ];
+  const menuItems = isVendor 
+    ? [
+        { id: 'list', label: 'Vendor Products', icon: ShoppingBag, count: productsCount },
+        { id: 'add', label: 'Add Product', icon: PlusCircle }
+      ]
+    : [
+        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        { id: 'list', label: 'Catalog', icon: ShoppingBag, count: productsCount },
+        { id: 'add', label: 'Add Product', icon: PlusCircle },
+        { id: 'users', label: 'Users List', icon: Users, count: usersCount },
+        { id: 'orders', label: 'Orders', icon: ShoppingCart, count: ordersCount },
+        { id: 'marketing', label: 'CRM & Marketing', icon: Send, count: 'New' },
+        { id: 'coupons', label: 'Coupons', icon: Tag, count: couponsCount },
+        { id: 'banners', label: 'Hero Banners', icon: ImageIcon, count: bannersCount },
+        { id: 'categories', label: 'Category Showcase', icon: Layers },
+        { id: 'seasonal', label: 'Seasonal Offers', icon: Sparkles }
+      ];
 
   return (
     <>

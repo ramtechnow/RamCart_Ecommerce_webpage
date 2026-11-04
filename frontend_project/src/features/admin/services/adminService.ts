@@ -83,7 +83,8 @@ export const adminService = {
         colors: productData.colors || [],
         variants: productData.variants || [],
         image: productData.image || "",
-        images: productData.images || []
+        images: productData.images || [],
+        vendor: (productData as any).vendor || "RamCart Direct"
       })
     });
     if (!res.ok) throw new Error("Failed to add product");
@@ -158,12 +159,13 @@ export const adminService = {
       email: u.email || "",
       role: u.role || (u.isAdmin ? "admin" : "customer"),
       isAdmin: u.isAdmin || u.role === "admin",
+      vendorName: u.vendorName || "",
       createdAt: u.date ? new Date(u.date).toISOString() : new Date().toISOString(),
       cartData: u.cartData || {}
     }));
   },
 
-  async updateUserRole(email: string, isAdmin: boolean): Promise<void> {
+    async updateUserRole(email: string, isAdmin?: boolean, role?: string, vendorName?: string): Promise<void> {
     const token = localStorage.getItem("auth-token");
     const res = await fetch(`${BACKEND_URL}/admin/updateuserrole`, {
       method: "POST",
@@ -171,9 +173,26 @@ export const adminService = {
         "auth-token": token || "",
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ email, isAdmin })
+      body: JSON.stringify({ email, isAdmin, role, vendorName })
     });
     if (!res.ok) throw new Error("Failed to update user role");
+  },
+
+  async sendCampaignEmail(payload: { emails: string[]; subject: string; message: string; couponCode?: string; imageUrl?: string; title?: string }): Promise<any> {
+    const token = localStorage.getItem("auth-token");
+    const res = await fetch(`${BACKEND_URL}/admin/send-campaign-email`, {
+      method: "POST",
+      headers: {
+        "auth-token": token || "",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || "Failed to dispatch campaign email");
+    }
+    return res.json();
   },
 
   async deleteUser(email: string): Promise<void> {

@@ -15,6 +15,56 @@ export const AdminUsersTab = ({
   const [cartFilter, setCartFilter] = useState("all"); // "all" | "active" | "empty"
   
   const [expandedUserEmail, setExpandedUserEmail] = useState(null);
+  const [vendorModal, setVendorModal] = useState({
+    isOpen: false,
+    user: null,
+    vendorName: ""
+  });
+
+  const handleOpenVendorModal = (user) => {
+    setVendorModal({
+      isOpen: true,
+      user,
+      vendorName: user.vendorName || user.name || ""
+    });
+  };
+
+  const handleSaveVendorPromotion = async () => {
+    if (!vendorModal.vendorName.trim()) {
+      addToast("Please enter an official Vendor / Business Name", "warning");
+      return;
+    }
+
+    try {
+      await adminApi.updateUserRole(vendorModal.user.email, false, 'vendor', vendorModal.vendorName.trim());
+      addToast(`🎉 Successfully promoted ${vendorModal.user.name} to Vendor "${vendorModal.vendorName.trim()}"!`, "success");
+      if (logAction) logAction(`Promoted user ${vendorModal.user.email} to Vendor: "${vendorModal.vendorName.trim()}"`);
+      setVendorModal({ isOpen: false, user: null, vendorName: "" });
+      onRefreshUsers();
+    } catch (err) {
+      console.error(err);
+      addToast(err.message || "Failed to promote to vendor", "error");
+    }
+  };
+
+  const handleRevokeVendor = (user) => {
+    triggerConfirm({
+      title: "Revoke Vendor Privileges?",
+      message: `Are you sure you want to revoke vendor privileges for "${user.name}" (${user.vendorName || user.email})? They will become a standard customer.`,
+      confirmText: "Revoke Vendor",
+      onConfirm: async () => {
+        try {
+          await adminApi.updateUserRole(user.email, false, 'customer', '');
+          addToast(`Revoked vendor rights for ${user.email}`, "success");
+          if (logAction) logAction(`Revoked vendor rights for ${user.email}`);
+          onRefreshUsers();
+        } catch (err) {
+          console.error(err);
+          addToast(err.message || "Failed to revoke vendor rights", "error");
+        }
+      }
+    });
+  };
 
   // Cart normalization helpers
   const getNormalizedCartItems = (cartData) => {
@@ -175,6 +225,7 @@ export const AdminUsersTab = ({
         >
           <option value="all">All Roles</option>
           <option value="admin">Super Admin</option>
+          <option value="vendor">Store Vendors</option>
           <option value="customer">Standard Customer</option>
         </select>
 

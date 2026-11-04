@@ -1,49 +1,57 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Zap } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight, Tag, Sparkles } from "lucide-react";
 import { BACKEND_URL } from "../config";
 import "../Styles/promobanner.css";
 
 const DEFAULT_FALLBACK_BANNERS = [
   {
     _id: "ramcart-showcase-1",
-    description: "Grand Festival Dhamaka — Up to 50% Off on Pure Silk Sarees & Festive Ethnic Wear",
+    tag: "FESTIVE COUTURE 2026",
+    title: "Pure Silk Sarees & Handloom Weaves",
+    description: "Grand Festival Dhamaka — Authentic Kanchipuram & Arani pure pattu with certified Silk Mark quality direct from weavers.",
     image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?q=80&w=1600&auto=format&fit=crop",
-    discountType: "percentage",
-    discountValue: 50,
+    discountBadge: "FLAT 50% OFF",
+    couponCode: "DIWALI50",
     targetLink: "/womens",
-    tag: "FESTIVE SPECIAL",
-    badge: "LIMITED DEALS"
+    themeClass: "theme-crimson-gold",
+    accent: "#b45309"
   },
   {
     _id: "ramcart-showcase-2",
-    description: "Men's Traditional Kurtas, Dhotis & Pure Cotton Shirts — Flat 40% Off",
+    tag: "MEN'S HERITAGE",
+    title: "Handcrafted Kurtas & Pure Cotton Dhotis",
+    description: "Tailored festive ethnic sets and premium 100% combed cotton shirts crafted for unmatched breathability and comfort.",
     image: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1600&auto=format&fit=crop",
-    discountType: "percentage",
-    discountValue: 40,
+    discountBadge: "FLAT 40% OFF",
+    couponCode: "MENS40",
     targetLink: "/mens",
-    tag: "BESTSELLER",
-    badge: "FAST DISPATCH"
+    themeClass: "theme-royal-indigo",
+    accent: "#2563eb"
   },
   {
     _id: "ramcart-showcase-3",
-    description: "Everyday Daily Wear Kurtis, Tops & Cotton Jeans — Starting from ₹299",
+    tag: "DAILY ESSENTIALS",
+    title: "Everyday Kurtis, Tops & Denim Fits",
+    description: "Ultra-breathable fabrics and contemporary modern silhouettes engineered for everyday office, college & casual outings.",
     image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1600&auto=format&fit=crop",
-    discountType: "percentage",
-    discountValue: 35,
+    discountBadge: "STARTING ₹299",
+    couponCode: "SAVE35",
     targetLink: "/catalog",
-    tag: "BUDGET BUYS",
-    badge: "TOP RATED"
+    themeClass: "theme-terracotta",
+    accent: "#c2410c"
   },
   {
     _id: "ramcart-showcase-4",
-    description: "Kids Pattu Pavadai, Traditional Sets & Casuals — Extra 30% Off",
+    tag: "LITTLE CHAMPIONS",
+    title: "Pattu Pavadai & Festive Kids Wear",
+    description: "Vibrant traditional sets, cotton dhotis, and festive frocks woven with hypoallergenic, skin-friendly pure natural dyes.",
     image: "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?q=80&w=1600&auto=format&fit=crop",
-    discountType: "percentage",
-    discountValue: 30,
+    discountBadge: "EXTRA 30% OFF",
+    couponCode: "KIDS30",
     targetLink: "/kids",
-    tag: "KIDS SPECIAL",
-    badge: "NEW COLLECTION"
+    themeClass: "theme-emerald",
+    accent: "#059669"
   }
 ];
 
@@ -57,7 +65,6 @@ export const PromoBanner = ({ page = "home" }) => {
   // Touch swipe handling
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
-  const isDragging = useRef(false);
 
   // Fetch active banners from backend or fallback
   useEffect(() => {
@@ -67,7 +74,7 @@ export const PromoBanner = ({ page = "home" }) => {
     const fetchActiveBanners = async (attempt = 1) => {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
 
         const res = await fetch(`${BACKEND_URL}/banners/active?page=${page}`, { signal: controller.signal });
         clearTimeout(timeoutId);
@@ -75,13 +82,28 @@ export const PromoBanner = ({ page = "home" }) => {
         if (res.ok) {
           const data = await res.json();
           if (isMounted && Array.isArray(data) && data.length > 0) {
-            setBanners(data);
+            // Normalize backend banner format to editorial template
+            const formatted = data.map((b, idx) => ({
+              _id: b._id || `ban-${idx}`,
+              tag: b.tag || "FESTIVE SPOTLIGHT",
+              title: b.title || b.description || "Seasonal Special Showcase",
+              description: b.description || "Explore verified quality handpicked designs curated direct from master artisans.",
+              image: b.image || DEFAULT_FALLBACK_BANNERS[idx % 4].image,
+              discountBadge: b.discountValue 
+                ? (b.discountType === "percentage" ? `${b.discountValue}% OFF` : `₹${b.discountValue} OFF`) 
+                : "SPECIAL DEAL",
+              couponCode: b.couponCode || "FESTIVE10",
+              targetLink: b.targetLink || "/catalog",
+              themeClass: DEFAULT_FALLBACK_BANNERS[idx % 4].themeClass,
+              accent: DEFAULT_FALLBACK_BANNERS[idx % 4].accent
+            }));
+            setBanners(formatted);
             setLoading(false);
             return;
           }
         }
       } catch (err) {
-        console.warn(`[PromoBanner] Attempt ${attempt} failed:`, err);
+        // Fallback to editorial defaults
       }
 
       if (isMounted) {
@@ -107,7 +129,6 @@ export const PromoBanner = ({ page = "home" }) => {
   const activeSlides = banners.length > 0 ? banners : DEFAULT_FALLBACK_BANNERS;
   const totalSlides = activeSlides.length;
 
-  // Next & Prev slide handlers
   const handleNext = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % totalSlides);
   }, [totalSlides]);
@@ -116,203 +137,198 @@ export const PromoBanner = ({ page = "home" }) => {
     setCurrentIndex((prev) => (prev - 1 + totalSlides) % totalSlides);
   }, [totalSlides]);
 
-  // Auto-play (every 4.5 seconds when not hovered)
+  // Auto-play (5.5s interval with smooth progress)
   useEffect(() => {
     if (isHovered || totalSlides <= 1) return;
-    const interval = setInterval(handleNext, 4500);
+    const interval = setInterval(handleNext, 5500);
     return () => clearInterval(interval);
   }, [isHovered, totalSlides, handleNext]);
 
-  // Click on a banner card -> navigate to target product/category
-  const handleBannerClick = (banner) => {
-    if (isDragging.current) return;
-    if (!banner) return;
-    const link = banner.targetLink;
-    if (!link) {
-      navigate('/womens');
+  const handleSlideClick = (targetLink) => {
+    if (!targetLink) {
+      navigate('/catalog');
       return;
     }
-
-    if (link.startsWith('http://') || link.startsWith('https://')) {
-      window.open(link, '_blank', 'noopener,noreferrer');
-    } else if (link.startsWith('/')) {
-      navigate(link);
-    } else if (!isNaN(Number(link))) {
-      navigate(`/product/${link}`);
+    if (targetLink.startsWith('http://') || targetLink.startsWith('https://')) {
+      window.open(targetLink, '_blank', 'noopener,noreferrer');
+    } else if (targetLink.startsWith('/')) {
+      navigate(targetLink);
     } else {
-      navigate(`/${link}`);
+      navigate(`/${targetLink}`);
     }
   };
 
-  // Touch event handlers for mobile swiping
+  // Touch handlers
   const handleTouchStart = (e) => {
     touchStartX.current = e.touches[0].clientX;
     touchEndX.current = e.touches[0].clientX;
-    isDragging.current = false;
   };
 
   const handleTouchMove = (e) => {
     touchEndX.current = e.touches[0].clientX;
-    if (Math.abs(touchEndX.current - touchStartX.current) > 10) {
-      isDragging.current = true;
-    }
   };
 
   const handleTouchEnd = () => {
     const diff = touchStartX.current - touchEndX.current;
-    const threshold = 40; // min swipe distance in px
-    if (diff > threshold) {
-      handleNext();
-    } else if (diff < -threshold) {
-      handlePrev();
-    }
-    setTimeout(() => {
-      isDragging.current = false;
-    }, 50);
+    if (diff > 45) handleNext();
+    else if (diff < -45) handlePrev();
   };
 
   if (loading) {
     return (
-      <div className="ramcart-promo-carousel-wrapper">
-        <div className="ramcart-promo-skeleton-card animate-pulse" />
+      <div className="editorial-carousel-container animate-pulse">
+        <div className="editorial-skeleton-box" />
       </div>
     );
   }
 
+  const currentSlide = activeSlides[currentIndex] || activeSlides[0];
+
   return (
     <section 
-      className="ramcart-promo-carousel-wrapper"
-      aria-label="Promotional Deals Carousel"
+      className="editorial-carousel-container"
+      aria-label="Editorial Showcase Carousel"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
-      {/* ─── Main Carousel Container ─── */}
-      <div 
-        className="ramcart-promo-carousel-viewport"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        <div 
-          className="ramcart-promo-carousel-track"
-          style={{
-            transform: `translateX(calc(-${currentIndex} * var(--slide-step, 100%)))`
-          }}
-        >
-          {activeSlides.map((ban, idx) => {
-            const isSlideActive = idx === currentIndex;
-            const discountLabel = ban.discountValue
-              ? ban.discountType === "percentage"
-                ? `${ban.discountValue}% OFF`
-                : `₹${ban.discountValue} OFF`
-              : null;
+      {/* ── Main Square-Box Split Hero Stage ── */}
+      <div className={`editorial-hero-stage ${currentSlide.themeClass}`}>
+        
+        {/* Left Side: Structured Editorial Typography Canvas */}
+        <div className="editorial-content-panel">
+          
+          {/* Eyebrow & Badges */}
+          <div className="editorial-tag-row">
+            <span className="editorial-eyebrow">
+              <Sparkles size={13} className="text-amber-500 fill-amber-500" />
+              <span>{currentSlide.tag || "FESTIVE SPOTLIGHT"}</span>
+            </span>
 
-            return (
-              <div
-                key={ban._id || idx}
-                onClick={() => handleBannerClick(ban)}
-                className={`ramcart-promo-banner-card ${isSlideActive ? 'is-active' : ''}`}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleBannerClick(ban);
-                  }
+            {currentSlide.discountBadge && (
+              <span className="editorial-discount-pill">
+                <Tag size={12} />
+                <span>{currentSlide.discountBadge}</span>
+              </span>
+            )}
+          </div>
+
+          {/* Main Headline */}
+          <h2 className="editorial-headline">
+            {currentSlide.title}
+          </h2>
+
+          {/* Subtitle / Description */}
+          <p className="editorial-description">
+            {currentSlide.description}
+          </p>
+
+          {/* Value Highlights */}
+          <div className="editorial-perks-row">
+            <span className="editorial-perk">✓ 100% Weavers Certified</span>
+            <span className="editorial-perk">✓ Free Express Delivery</span>
+            <span className="editorial-perk">✓ 7-Day Easy Returns</span>
+          </div>
+
+          {/* Action Row: Square Button + Coupon Code Pill */}
+          <div className="editorial-action-row">
+            <button
+              type="button"
+              onClick={() => handleSlideClick(currentSlide.targetLink)}
+              className="editorial-cta-btn"
+              title="Explore full collection"
+            >
+              <span>Explore Collection</span>
+              <ArrowRight size={15} />
+            </button>
+
+            {currentSlide.couponCode && (
+              <div 
+                className="editorial-coupon-box"
+                onClick={() => {
+                  navigator.clipboard.writeText(currentSlide.couponCode);
                 }}
-                aria-label={`Banner: ${ban.description || 'Promotional Offer'}`}
+                title="Click to copy coupon code"
               >
-                {/* Banner Background Image */}
-                <img
-                  src={ban.image}
-                  alt={ban.description || "Special offer banner"}
-                  className="ramcart-promo-banner-img"
-                  loading={idx < 2 ? "eager" : "lazy"}
-                  decoding="async"
-                />
-
-                {/* Subtle dark gradient overlay for text readability */}
-                <div className="ramcart-promo-banner-gradient" />
-
-                {/* RAMCART Style Content & Badges */}
-                <div className="ramcart-promo-banner-content">
-                  {/* Top Tags */}
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="ramcart-promo-badge-earlybird">
-                      <Zap size={12} className="fill-current" />
-                      {ban.tag ? ban.tag.charAt(0) + ban.tag.slice(1).toLowerCase() : "Early Bird Deals"}
-                    </span>
-                    {discountLabel && (
-                      <span className="ramcart-promo-badge-discount">
-                        {discountLabel}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Main Title / Description */}
-                  <h2 className="ramcart-promo-banner-title">
-                    {ban.description}
-                  </h2>
-
-                  {/* Partner / Bank Offers Strip */}
-                  <div className="ramcart-promo-bank-strip">
-                    <span className="bank-pill">RamCart Pay</span>
-                    <span className="bank-pill">All Cards</span>
-                    <span className="bank-text">{ban.bankOfferText || "Instant Discount on Prepaid Orders*"}</span>
-                  </div>
-                </div>
-
-                {/* Offer tag */}
-                <div className="ramcart-promo-ad-tag">Offer</div>
+                <span className="coupon-prefix">CODE:</span>
+                <span className="coupon-code">{currentSlide.couponCode}</span>
               </div>
-            );
-          })}
+            )}
+          </div>
+
+          {/* Modern Numeric Slide Tracker [ 01 / 04 ] + Progress Bar */}
+          <div className="editorial-tracker-bar">
+            <div className="editorial-counter">
+              <span className="active-idx">0{currentIndex + 1}</span>
+              <span className="divider">/</span>
+              <span className="total-idx">0{totalSlides}</span>
+            </div>
+
+            <div className="editorial-progress-track">
+              <div 
+                className="editorial-progress-fill" 
+                style={{ width: `${((currentIndex + 1) / totalSlides) * 100}%` }} 
+              />
+            </div>
+
+            {/* Direct tactile slide step selectors */}
+            <div className="editorial-dots-row">
+              {activeSlides.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setCurrentIndex(idx)}
+                  className={`editorial-square-dot ${idx === currentIndex ? "active" : ""}`}
+                  aria-label={`Jump to slide ${idx + 1}`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* ─── Floating Navigation Arrows (High-Contrast Glass) ─── */}
-        {totalSlides > 1 && (
-          <>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handlePrev();
-              }}
-              className="ramcart-promo-nav-arrow prev"
-              aria-label="Previous Slide"
-            >
-              <ChevronLeft size={20} />
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleNext();
-              }}
-              className="ramcart-promo-nav-arrow next"
-              aria-label="Next Slide"
-            >
-              <ChevronRight size={20} />
-            </button>
-          </>
-        )}
+        {/* Right Side: Clean Unobscured Fashion Photography */}
+        <div 
+          className="editorial-media-panel"
+          onClick={() => handleSlideClick(currentSlide.targetLink)}
+          role="button"
+          tabIndex={0}
+        >
+          <img
+            key={currentSlide._id || currentIndex}
+            src={currentSlide.image}
+            alt={currentSlide.title}
+            className="editorial-hero-image"
+            loading="eager"
+            decoding="async"
+          />
+
+          {/* Crisp square tag in the image corner */}
+          <div className="editorial-image-tag">
+            <span>Direct Weavers Edition</span>
+          </div>
+        </div>
+
+        {/* ── Sharp Square Arrow Controls ── */}
+        <button
+          type="button"
+          onClick={handlePrev}
+          className="editorial-nav-btn prev"
+          aria-label="Previous Slide"
+        >
+          <ChevronLeft size={18} />
+        </button>
+
+        <button
+          type="button"
+          onClick={handleNext}
+          className="editorial-nav-btn next"
+          aria-label="Next Slide"
+        >
+          <ChevronRight size={18} />
+        </button>
       </div>
-
-      {/* ─── RAMCART Signature Elongated Pill Indicators ─── */}
-      {totalSlides > 1 && (
-        <div className="ramcart-promo-indicators" aria-label="Slide Indicators">
-          {activeSlides.map((_, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => setCurrentIndex(idx)}
-              className={`ramcart-promo-indicator-dot ${idx === currentIndex ? "active" : "inactive"}`}
-              aria-label={`Go to slide ${idx + 1}`}
-              aria-current={idx === currentIndex ? "true" : undefined}
-            />
-          ))}
-        </div>
-      )}
     </section>
   );
 };

@@ -11,12 +11,16 @@ interface AdminAddProductTabProps {
   onProductAdded: () => void;
   addToast: (message: string, type: "success" | "error" | "info" | "warning") => void;
   logAction: (message: string) => void;
+  isVendor?: boolean;
+  vendorName?: string;
 }
 
 export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
   onProductAdded,
   addToast,
-  logAction
+  logAction,
+  isVendor = false,
+  vendorName = ""
 }) => {
   // Form Details
   const [name, setName] = useState("");
@@ -292,7 +296,8 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
       stockCount: totalCalculatedStock,
       image: primaryImage,
       images: images,
-      available: true
+      available: true,
+      vendor: isVendor ? (vendorName || "Store Vendor") : "RamCart Direct"
     };
 
     try {

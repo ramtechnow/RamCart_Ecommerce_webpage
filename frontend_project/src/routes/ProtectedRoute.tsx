@@ -26,9 +26,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requir
   }
 
   if (requireAdmin) {
-    const isOwnerOrAdmin = user.role === "admin" || user.email?.toLowerCase() === "bvhss20@gmail.com";
-    if (!isOwnerOrAdmin) {
-      // Redirect to root if the user doesn't have administrative access
+    const isOwnerOrAdminOrVendor = user.role === "admin" || user.role === "vendor" || user.email?.toLowerCase() === "bvhss20@gmail.com";
+    if (!isOwnerOrAdminOrVendor) {
+      // Redirect to root if the user doesn't have administrative or vendor access
       return <Navigate to="/" replace />;
     }
   }
