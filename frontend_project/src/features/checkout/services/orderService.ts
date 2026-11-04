@@ -93,7 +93,9 @@ export const fetchUserOrders = async (_userId: string): Promise<Order[]> => {
 
     const data = await res.json();
     return data.map((order: any) => ({
-      id: order._id || order.id,
+      id: order.orderId || order._id || order.id,
+      orderId: order.orderId || order._id || order.id,
+      _id: order._id,
       userId: order.userId,
       items: order.items || [],
       amount: Number(order.amount),

@@ -2154,3 +2154,101 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+
+/* ── Admin Notifications Dropdown (Fixed width on laptop, responsive on mobile) ── */
+.admin-notifications-dropdown {
+  width: 420px !important;
+  min-width: 380px !important;
+  max-width: calc(100vw - 24px) !important;
+}
+
+@media (max-width: 640px) {
+  .admin-notifications-dropdown {
+    position: fixed !important;
+    top: 68px !important;
+    right: 12px !important;
+    left: 12px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+}
+
+
+/* ── Admin Global Compact Typography Scaling (Laptop & Mobile Responsive) ── */
+.admin-panel,
+.admin-console-root,
+.admin-content {
+  font-size: 13px !important;
+}
+
+.admin-panel h1, .admin-content h1 {
+  font-size: clamp(16px, 1.8vw, 20px) !important;
+}
+
+.admin-panel h2, .admin-content h2 {
+  font-size: clamp(14px, 1.4vw, 17px) !important;
+}
+
+.admin-panel h3, .admin-content h3 {
+  font-size: clamp(12px, 1.1vw, 14px) !important;
+}
+
+.admin-panel .metric-value,
+.admin-content .metric-value {
+  font-size: clamp(1.2rem, 1.7vw, 1.45rem) !important;
+}
+
+.admin-panel .metric-icon,
+.admin-content .metric-icon {
+  font-size: 1.4rem !important;
+}
+
+.admin-panel .metric-title,
+.admin-content .metric-title {
+  font-size: 10px !important;
+}
+
+.admin-panel table th {
+  font-size: 10px !important;
+  padding: 8px 12px !important;
+  letter-spacing: 0.5px !important;
+}
+
+.admin-panel table td {
+  font-size: 11px !important;
+  padding: 8px 12px !important;
+}
+
+.admin-panel input,
+.admin-panel select,
+.admin-panel textarea {
+  font-size: 11px !important;
+  height: auto !important;
+  min-height: 32px !important;
+  padding: 6px 10px !important;
+}
+
+.admin-panel .sidebar-menu button,
+.admin-sidebar button {
+  font-size: 11.5px !important;
+  padding: 7px 12px !important;
+}
+
+@media (max-width: 768px) {
+  .admin-panel,
+  .admin-content {
+    font-size: 11.5px !important;
+  }
+  .admin-panel h2, .admin-content h2 {
+    font-size: 14px !important;
+  }
+  .admin-panel h3, .admin-content h3 {
+    font-size: 12px !important;
+  }
+  .admin-panel .metric-value,
+  .admin-content .metric-value {
+    font-size: 1.15rem !important;
+  }
+}

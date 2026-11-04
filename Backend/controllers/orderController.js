@@ -1,3 +1,9 @@
+// Helper to generate clean alphabetic + numeric RamCart Order IDs (e.g. RC-784920)
+function generateOrderNumber() {
+  const randomNum = Math.floor(100000 + Math.random() * 900000);
+  return `RC-${randomNum}`;
+}
+
 const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const User = require('../models/User');
@@ -80,6 +86,7 @@ exports.placeOrder = async (req, res) => {
 
     // Create new Order document
     const newOrder = new Order({
+      orderId: generateOrderNumber(),
       userId,
       userEmail: customerEmail,
       userName: customerName,
@@ -140,7 +147,7 @@ exports.placeOrder = async (req, res) => {
     if (customerEmail) {
       try {
         const emailHtml = getOrderPlacedTemplate({
-          orderId: newOrder._id,
+          orderId: newOrder.orderId || newOrder._id, rawId: newOrder._id,
           customerName,
           items: newOrder.items,
           totalAmount: newOrder.amount,
@@ -177,7 +184,14 @@ exports.getUserOrders = async (req, res) => {
   try {
     const userId = req.user.id;
     const orders = await Order.find({ userId }).sort({ date: -1 });
-    res.json(orders);
+    const formattedOrders = orders.map(o => {
+      const obj = o.toObject();
+      if (!obj.orderId) {
+        obj.orderId = `RC-${String(o._id).slice(-6).toUpperCase()}`;
+      }
+      return obj;
+    });
+    res.json(formattedOrders);
   } catch (error) {
     console.error("Error fetching user orders:", error);
     res.status(500).json({ success: false, error: "Internal Server Error" });
@@ -199,6 +213,9 @@ exports.getAllOrders = async (req, res) => {
 
     const enrichedOrders = orders.map(order => {
       const orderObj = order.toObject();
+      if (!orderObj.orderId) {
+        orderObj.orderId = `RC-${String(order._id).slice(-6).toUpperCase()}`;
+      }
       const user = userMap[order.userId];
       orderObj.userEmail = user ? user.email : (order.address?.email || "Deleted User");
       orderObj.userName = user ? user.name : (order.address?.fullName || "Deleted User");
@@ -222,7 +239,12 @@ exports.cancelUserOrder = async (req, res) => {
       return res.status(400).json({ success: false, error: "Missing required orderId field" });
     }
 
-    const order = await Order.findById(orderId);
+    const order = await Order.findOne({
+      $or: [
+        { orderId: orderId },
+        { _id: mongoose.Types.ObjectId.isValid(orderId) ? orderId : null }
+      ]
+    });
     if (!order) {
       return res.status(404).json({ success: false, error: "Order not found" });
     }

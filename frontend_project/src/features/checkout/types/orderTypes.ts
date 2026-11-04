@@ -25,24 +25,18 @@ export const addressSchema = z.object({
     .regex(/^\+?[0-9\s\-()]+$/, "Invalid phone number format")
 });
 
-// Zod schema for validating the simulated credit card details
+// Zod schema for validating the payment details (optional when using Razorpay Checkout)
 export const paymentSchema = z.object({
-  cardholderName: z.string()
-    .min(3, "Cardholder name must be at least 3 characters")
-    .max(50, "Cardholder name must not exceed 50 characters")
-    .regex(/^[a-zA-Z\s]+$/, "Cardholder name must contain only letters and spaces"),
-  cardNumber: z.string()
-    .regex(/^\d{4} \d{4} \d{4} \d{4}$/, "Card number must be in '1234 5678 1234 5678' format"),
-  expiryDate: z.string()
-    .regex(/^(0[1-9]|1[0-2])\/\d{2}$/, "Expiry date must be in MM/YY format"),
-  cvv: z.string()
-    .regex(/^\d{3}$/, "CVV must be exactly 3 digits")
+  cardholderName: z.string().optional(),
+  cardNumber: z.string().optional(),
+  expiryDate: z.string().optional(),
+  cvv: z.string().optional()
 });
 
 // Combined checkout validation schema
 export const checkoutSchema = z.object({
   address: addressSchema,
-  payment: paymentSchema
+  payment: paymentSchema.optional()
 });
 
 export type AddressValues = z.infer<typeof addressSchema>;
@@ -62,6 +56,7 @@ export interface OrderItem {
 
 export interface Order {
   id?: string;
+  _id?: string;
   userId: string;
   userEmail?: string;
   userName?: string;
@@ -71,7 +66,13 @@ export interface Order {
   couponCode: string | null;
   status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
   payment: boolean;
+  paymentMethod?: string;
+  paymentStatus?: "Paid" | "Pending" | "Failed" | "Refunded";
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  razorpaySignature?: string;
   cancelledAt?: any;
   cancellationReason?: string;
-  createdAt: any; // Server timestamp or Date object
+  date?: any;
+  createdAt?: any;
 }

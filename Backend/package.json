@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "test": "node --check index.js && node --check controllers/productController.js && node --check controllers/userController.js"
+    "test": "node --check index.js && node --check controllers/productController.js && node --check controllers/userController.js && node --check controllers/paymentController.js"
   },
   "author": "",
   "license": "ISC",
@@ -19,6 +19,7 @@
     "mongodb-memory-server": "^11.1.0",
     "mongoose": "^8.18.0",
     "multer": "^2.0.2",
-    "nodemailer": "^9.0.1"
+    "nodemailer": "^9.0.1",
+    "razorpay": "^2.9.8"
   }
 }

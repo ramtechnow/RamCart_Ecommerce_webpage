@@ -3,9 +3,12 @@
    Truthful data representation, responsive, zero fake metrics.
    ============================================================ */
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Heart, Star } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Heart, Star, ShoppingBag, Zap, Share2 } from "lucide-react";
 import { useWishlist } from "../features/catalog/hooks/useWishlist";
+import { useCart } from "../features/checkout/hooks/useCart";
+import { useAppDispatch } from "../store/hooks";
+import { addToast } from "../store/slices/toastSlice";
 import { Product } from "../features/catalog/types/productTypes";
 import "../Styles/productGrid.css";
 
@@ -14,8 +17,12 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const { addToCart } = useCart();
   const isWishlisted = isInWishlist(product.id);
+
   // Compute primary image source with HTTPS safety
   const rawImg = product.image || (product.images && product.images[0]) || "";
   const initialImg = rawImg.replace(/^http:\/\/frontend-project-jucn\.onrender\.com/, "https://frontend-project-jucn.onrender.com");
@@ -23,6 +30,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const [currentImg, setCurrentImg] = useState<string>(initialImg);
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
 
   const handleImageError = () => {
     // If primary failed, try first item of images array if different
@@ -62,20 +70,101 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     : "RamCart";
 
   const isOutOfStock = product.stockCount !== undefined && product.stockCount <= 0;
-
-  // Show styled name-alt instead of broken image
   const showAltName = imgError || !currentImg;
+
+  // ── Quick Add to Cart ────────────────────────────────────────────────────────
+  const handleQuickAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isOutOfStock || addingToCart) return;
+
+    setAddingToCart(true);
+    try {
+      await addToCart(product.id, "M", "Default", 1);
+      dispatch(addToast({ 
+        message: `🛒 Added "${product.name.slice(0, 22)}..." to your cart!`, 
+        type: "success" 
+      }));
+    } catch (err: any) {
+      dispatch(addToast({ 
+        message: err.message || "Failed to add to cart", 
+        type: "error" 
+      }));
+    } finally {
+      setAddingToCart(false);
+    }
+  };
+
+  // ── 1-Click Buy Now (Direct to Checkout & Razorpay) ──────────────────────────
+  const handleQuickBuyNow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isOutOfStock) return;
+
+    navigate(`/checkout?buyNow=true&productId=${product.id}&price=${price}&size=M&qty=1`);
+  };
+
+  // ── Share Product (WhatsApp / Native Share / Clipboard) ──────────────────────
+  const handleShareProduct = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const shareUrl = `${window.location.origin}/product/${product.id}`;
+    const shareText = `Check out ${product.name} for ₹${price} on RamCart!`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${product.name} | RamCart`,
+          text: shareText,
+          url: shareUrl
+        });
+        return;
+      } catch (err) {
+        // Fallback if user dismissed share sheet
+      }
+    }
+
+    // Clipboard copy fallback
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      dispatch(addToast({ 
+        message: "🔗 Product link copied to clipboard! Share anywhere.", 
+        type: "success" 
+      }));
+    } catch {
+      // Direct WhatsApp share URL fallback
+      window.open(
+        `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + shareUrl)}`,
+        "_blank"
+      );
+    }
+  };
 
   return (
     <div className={`product-card ${isOutOfStock ? "is-sold-out" : ""}`} style={{ position: "relative" }}>
+      {/* ── Wishlist Heart Button ── */}
       <button
         className={`product-card-wishlist-btn${isWishlisted ? " active" : ""}`}
         onClick={handleWishlistToggle}
         onMouseDown={(e) => e.stopPropagation()}
         aria-label={isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
+        title={isWishlisted ? "In your Wishlist" : "Save to Wishlist"}
         style={{ zIndex: 20 }}
       >
         <Heart size={16} fill={isWishlisted ? "currentColor" : "none"} />
+      </button>
+
+      {/* ── Share Button (WhatsApp / Copy Link) ── */}
+      <button
+        className="product-card-share-btn"
+        onClick={handleShareProduct}
+        onMouseDown={(e) => e.stopPropagation()}
+        aria-label="Share this Product"
+        title="Share on WhatsApp or copy link"
+        style={{ zIndex: 20 }}
+      >
+        <Share2 size={15} />
       </button>
 
       <Link 
@@ -126,6 +215,32 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 transition: "opacity 0.3s ease-in-out"
               }}
             />
+          )}
+
+          {/* ── Box-Type Quick Actions Overlay (Add to Cart & Buy Now) ── */}
+          {!isOutOfStock && (
+            <div className="product-card-hover-actions">
+              <button
+                type="button"
+                onClick={handleQuickAddToCart}
+                disabled={addingToCart}
+                className="product-card-btn-cart"
+                title="Add to Shopping Cart"
+              >
+                <ShoppingBag size={13} />
+                <span>{addingToCart ? "Adding..." : "Add to Cart"}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleQuickBuyNow}
+                className="product-card-btn-buynow"
+                title="Instant Checkout with Razorpay"
+              >
+                <Zap size={13} />
+                <span>Buy Now</span>
+              </button>
+            </div>
           )}
         </div>
 

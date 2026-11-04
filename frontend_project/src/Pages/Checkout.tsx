@@ -16,7 +16,13 @@ import {
   X, 
   AlertCircle,
   Lock,
-  ChevronRight
+  ChevronRight,
+  Smartphone,
+  QrCode,
+  Building,
+  Wallet,
+  Zap,
+  Info
 } from "lucide-react";
 
 import { useCart } from "../features/checkout/hooks/useCart";
@@ -29,6 +35,12 @@ import {
   placeOrderTransaction, 
   validateCoupon 
 } from "../features/checkout/services/orderService";
+import {
+  loadRazorpayScript,
+  fetchPaymentConfig,
+  createRazorpayOrder,
+  verifyRazorpayPayment
+} from "../features/checkout/services/razorpayService";
 import { useAppDispatch } from "../store/hooks";
 import { addToast } from "../store/slices/toastSlice";
 import { fetchProductById } from "../features/catalog/services/productService";
@@ -36,28 +48,17 @@ import { BACKEND_URL } from "../config";
 
 import "../Styles/checkout.css";
 
-// Helper to detect card brand
-const getCardBrand = (cardNumber: string): "visa" | "mastercard" | "amex" | "discover" | "unknown" => {
-  const cleanNumber = cardNumber.replace(/\D/g, "");
-  if (cleanNumber.startsWith("4")) return "visa";
-  if (/^(5[1-5]|2[2-7])/.test(cleanNumber)) return "mastercard";
-  if (/^3[47]/.test(cleanNumber)) return "amex";
-  if (/^(6011|65)/.test(cleanNumber)) return "discover";
-  return "unknown";
-};
-
 export const Checkout: React.FC = () => {
   const { cartItems, cartTotal, cartCount, clearCart, cartLoading } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  // ── Form Configuration (Moved up) ───────────────────────────────────────────
+  // ── Form Configuration ────────────────────────────────────────────────────────
   const {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors }
   } = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
@@ -70,12 +71,6 @@ export const Checkout: React.FC = () => {
         state: "",
         postalCode: "",
         phone: ""
-      },
-      payment: {
-        cardholderName: "",
-        cardNumber: "",
-        expiryDate: "",
-        cvv: ""
       }
     }
   });
@@ -100,7 +95,17 @@ export const Checkout: React.FC = () => {
   const checkoutTotal = buyNow && buyNowItem ? buyNowItem.price * buyNowItem.quantity : cartTotal;
   const checkoutCount = buyNow && buyNowItem ? buyNowItem.quantity : cartCount;
 
-  // ── Other States ─────────────────────────────────────────────────────────────
+  // ── Payment Gateway State ────────────────────────────────────────────────────
+  const [paymentConfig, setPaymentConfig] = useState<{
+    keyId: string;
+    isConfigured: boolean;
+    isTestMode: boolean;
+  }>({
+    keyId: "",
+    isConfigured: false,
+    isTestMode: true,
+  });
+
   const [couponInput, setCouponInput] = useState("");
   const [couponCode, setCouponCode] = useState<string | null>(null);
   const [couponResult, setCouponResult] = useState<{
@@ -112,11 +117,11 @@ export const Checkout: React.FC = () => {
   } | null>(null);
   const [couponLoading, setCouponLoading] = useState(false);
 
-  const [focusedField, setFocusedField] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [processingStep, setProcessingStep] = useState(0);
+  const [processingMessage, setProcessingMessage] = useState("Initializing Razorpay Secure Gateway...");
   const [isSuccess, setIsSuccess] = useState(false);
   const [createdOrderId, setCreatedOrderId] = useState("");
+  const [verifiedPaymentId, setVerifiedPaymentId] = useState("");
   const [transactionError, setTransactionError] = useState<string | null>(null);
 
   // Billing address state
@@ -133,22 +138,24 @@ export const Checkout: React.FC = () => {
   const finalPayable = couponResult?.finalTotal ?? checkoutTotal;
   const savings = couponResult?.discountAmount ?? 0;
 
-  const steps = [
-    "Establishing SSL connection...",
-    "Securing credit card details...",
-    "Authorizing with bank partner...",
-    "Finalizing purchase in DB..."
-  ];
+  // ── Effects ──────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    // Load Razorpay config from backend
+    const initGateway = async () => {
+      const cfg = await fetchPaymentConfig();
+      if (cfg.success) {
+        setPaymentConfig({
+          keyId: cfg.keyId,
+          isConfigured: cfg.isConfigured,
+          isTestMode: cfg.isTestMode
+        });
+      }
+      // Pre-load Razorpay checkout script
+      loadRazorpayScript();
+    };
+    initGateway();
+  }, []);
 
-  // Watch card input fields for live card rendering
-  const watchCardholder = watch("payment.cardholderName");
-  const watchCardNumber = watch("payment.cardNumber") || "";
-  const watchExpiry = watch("payment.expiryDate");
-  const watchCvv = watch("payment.cvv");
-
-  const cardBrand = getCardBrand(watchCardNumber);
-
-  // ── Effects & Helpers ────────────────────────────────────────────────────────
   useEffect(() => {
     if (buyNow && buyNowProductId) {
       const loadBuyNowProduct = async () => {
@@ -211,7 +218,7 @@ export const Checkout: React.FC = () => {
     if (user) {
       fetchSavedAddresses();
     }
-  }, [user]);
+  }, [user, setValue]);
 
   const handleSelectAddress = (addrId: string) => {
     setSelectedAddressId(addrId);
@@ -233,27 +240,6 @@ export const Checkout: React.FC = () => {
         setValue("address.phone", selected.phone);
       }
     }
-  };
-
-  // Caret-aware input formats
-  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, "").substring(0, 16);
-    const matches = value.match(/.{1,4}/g);
-    value = matches ? matches.join(" ") : value;
-    setValue("payment.cardNumber", value, { shouldValidate: true });
-  };
-
-  const handleExpiryDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, "").substring(0, 4);
-    if (value.length >= 2) {
-      value = value.substring(0, 2) + "/" + value.substring(2);
-    }
-    setValue("payment.expiryDate", value, { shouldValidate: true });
-  };
-
-  const handleCvvChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, "").substring(0, 3);
-    setValue("payment.cvv", value, { shouldValidate: true });
   };
 
   const handleApplyCoupon = useCallback(async () => {
@@ -283,22 +269,10 @@ export const Checkout: React.FC = () => {
     dispatch(addToast({ message: "Coupon removed.", type: "info" }));
   };
 
-  const onSubmitCheckout = async (data: CheckoutValues) => {
-    if (!user) {
-      dispatch(addToast({ message: "Please sign in to place an order.", type: "error" }));
-      navigate("/login", { state: { from: { pathname: "/checkout" } } });
-      return;
-    }
-
+  // ── Place Order via Direct Sandbox Fallback (if Razorpay keys not yet set) ──
+  const handleDirectSimulationOrder = async (addressData: any) => {
     setIsProcessing(true);
-    setTransactionError(null);
-    setProcessingStep(0);
-
-    // Simulated Visual Progression
-    for (let i = 0; i < steps.length; i++) {
-      setProcessingStep(i);
-      await new Promise((resolve) => setTimeout(resolve, 850));
-    }
+    setProcessingMessage("Processing Sandbox Test Order...");
 
     const orderItems = checkoutItems.map((item) => ({
       productId: String(item.productId),
@@ -311,24 +285,153 @@ export const Checkout: React.FC = () => {
     }));
 
     const result = await placeOrderTransaction(
-      user.uid,
+      user!.uid,
       orderItems,
-      data.address,
+      addressData,
       couponCode,
       finalPayable
     );
 
     if (result.success && result.orderId) {
       setCreatedOrderId(result.orderId);
+      setVerifiedPaymentId(`TEST_PAY_${Date.now()}`);
       setIsSuccess(true);
       if (!buyNow) {
         await clearCart();
       }
-      dispatch(addToast({ message: "Order placed successfully!", type: "success" }));
+      dispatch(addToast({ message: "Test order placed successfully in MongoDB!", type: "success" }));
     } else {
       setTransactionError(result.error || "Failed to complete transaction.");
       setIsProcessing(false);
       dispatch(addToast({ message: result.error || "Order placement failed.", type: "error" }));
+    }
+  };
+
+  // ── Main Razorpay Standard Checkout Flow ────────────────────────────────────
+  const onSubmitCheckout = async (data: CheckoutValues) => {
+    if (!user) {
+      dispatch(addToast({ message: "Please sign in to place an order.", type: "error" }));
+      navigate("/login", { state: { from: { pathname: "/checkout" } } });
+      return;
+    }
+
+    if (checkoutCount === 0) {
+      dispatch(addToast({ message: "Your cart is empty.", type: "error" }));
+      return;
+    }
+
+    setIsProcessing(true);
+    setTransactionError(null);
+    setProcessingMessage("Contacting Razorpay Secure Gateway...");
+
+    // Format order items
+    const orderItems = checkoutItems.map((item) => ({
+      productId: String(item.productId),
+      name: item.name,
+      image: item.image,
+      size: item.size,
+      color: item.color,
+      quantity: item.quantity,
+      price: item.price
+    }));
+
+    // Step 1: Ensure Razorpay SDK is loaded
+    const sdkLoaded = await loadRazorpayScript();
+    if (!sdkLoaded || typeof window.Razorpay === "undefined") {
+      setIsProcessing(false);
+      setTransactionError("Could not load Razorpay payment script. Please check your internet connection.");
+      dispatch(addToast({ message: "Payment SDK failed to load.", type: "error" }));
+      return;
+    }
+
+    // Step 2: Create Razorpay Order on Express Backend
+    setProcessingMessage("Generating secure payment token...");
+    const orderResponse = await createRazorpayOrder(finalPayable, "INR");
+
+    if (!orderResponse.success || !orderResponse.order) {
+      // If keys are not configured yet, offer clear feedback and demo test mode
+      console.warn("Razorpay order creation response:", orderResponse.error);
+      setIsProcessing(false);
+      setTransactionError(orderResponse.error || "Unable to initiate Razorpay payment. Please verify RAZORPAY_KEY_ID in Backend/.env");
+      return;
+    }
+
+    const razorpayOrder = orderResponse.order;
+    const keyId = orderResponse.keyId || paymentConfig.keyId;
+
+    // Step 3: Open Razorpay Standard Checkout Modal
+    setProcessingMessage("Waiting for payment completion in Razorpay window...");
+
+    const options = {
+      key: keyId,
+      amount: razorpayOrder.amount, // in paise
+      currency: razorpayOrder.currency || "INR",
+      name: "RamCart Fashion",
+      description: `Purchase of ${checkoutCount} item${checkoutCount > 1 ? "s" : ""}`,
+      image: "/RamCart_brand_logo_v2.png",
+      order_id: razorpayOrder.id,
+      prefill: {
+        name: data.address.fullName,
+        email: user.email || "",
+        contact: data.address.phone
+      },
+      notes: {
+        shipping_address: `${data.address.addressLine}, ${data.address.city}, ${data.address.state} - ${data.address.postalCode}`
+      },
+      theme: {
+        color: "#f23e70"
+      },
+      handler: async function (response: any) {
+        // Payment successful on Razorpay side, now verify signature on server!
+        setProcessingMessage("Cryptographically verifying payment signature with server...");
+        setIsProcessing(true);
+
+        const verifyResponse = await verifyRazorpayPayment({
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature,
+          items: orderItems,
+          amount: finalPayable,
+          address: data.address,
+          couponCode: couponCode
+        });
+
+        if (verifyResponse.success && verifyResponse.orderId) {
+          setCreatedOrderId(verifyResponse.orderId);
+          setVerifiedPaymentId(response.razorpay_payment_id);
+          setIsSuccess(true);
+          if (!buyNow) {
+            await clearCart();
+          }
+          dispatch(addToast({ message: "Payment verified! Order confirmed.", type: "success" }));
+        } else {
+          setIsProcessing(false);
+          setTransactionError(verifyResponse.error || "Payment signature verification failed. Please contact support.");
+          dispatch(addToast({ message: "Verification failed.", type: "error" }));
+        }
+      },
+      modal: {
+        ondismiss: function () {
+          setIsProcessing(false);
+          dispatch(addToast({ message: "Payment window was closed. Cart items are safe.", type: "info" }));
+        }
+      }
+    };
+
+    try {
+      const rzpInstance = new window.Razorpay(options);
+
+      rzpInstance.on("payment.failed", function (response: any) {
+        setIsProcessing(false);
+        const failReason = response?.error?.description || "Payment failed or was declined by bank.";
+        setTransactionError(`Payment Failed: ${failReason}`);
+        dispatch(addToast({ message: failReason, type: "error" }));
+      });
+
+      rzpInstance.open();
+    } catch (err: any) {
+      setIsProcessing(false);
+      setTransactionError(err.message || "Failed to launch Razorpay popup.");
     }
   };
 
@@ -362,18 +465,36 @@ export const Checkout: React.FC = () => {
           {/* Left Column Form Stack */}
           <div className="checkout-forms-col">
             <form onSubmit={handleSubmit(onSubmitCheckout)} className="checkout-form-stack">
+              
+              {/* Error Alert Banner */}
               {transactionError && (
-                <div className="flex items-center gap-3 bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-red-500 text-xs md:text-sm animate-shake">
-                  <AlertCircle className="flex-shrink-0" size={18} />
-                  <span>{transactionError}</span>
+                <div className="flex flex-col gap-2 bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-red-500 text-xs md:text-sm animate-shake">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="flex-shrink-0" size={18} />
+                    <span className="font-bold">Payment Error</span>
+                  </div>
+                  <p className="text-xs text-text-primary pl-6">{transactionError}</p>
+                  
+                  {/* Fallback Simulation Button if keys are not ready */}
+                  {transactionError.includes("RAZORPAY_KEY") && (
+                    <div className="mt-2 pl-6">
+                      <button
+                        type="button"
+                        onClick={handleSubmit((data) => handleDirectSimulationOrder(data.address))}
+                        className="text-xs font-bold px-4 py-2 bg-amber-500 text-black rounded-lg hover:bg-amber-400 transition-colors inline-flex items-center gap-1.5"
+                      >
+                        <Zap size={14} /> Run Instant Test Order (Bypass Key Check)
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* Shipping Address */}
+              {/* Step 1: Shipping Address */}
               <div className="checkout-section-card">
                 <h3 className="section-card-title">
                   <MapPin className="title-icon text-accent-pink" size={18} />
-                  Shipping Address Details
+                  1. Shipping &amp; Delivery Address
                 </h3>
 
                 {/* Saved Address Book Selector */}
@@ -428,14 +549,14 @@ export const Checkout: React.FC = () => {
 
                 <div className="form-grid-2">
                   <div className="field-wrap span-2">
-                    <label>Full Name</label>
+                    <label>Recipient Full Name</label>
                     <div className="input-icon-wrap">
                       <User className="field-icon" size={16} />
                       <input
                         type="text"
                         {...register("address.fullName")}
                         className={`form-field with-icon ${errors.address?.fullName ? "border-red-500" : ""}`}
-                        placeholder="John Doe"
+                        placeholder="e.g. Ramesh Kumar"
                       />
                     </div>
                     {errors.address?.fullName && (
@@ -444,12 +565,12 @@ export const Checkout: React.FC = () => {
                   </div>
 
                   <div className="field-wrap span-2">
-                    <label>Address Line</label>
+                    <label>Street Address / Door No / Area</label>
                     <input
                       type="text"
                       {...register("address.addressLine")}
                       className={`form-field ${errors.address?.addressLine ? "border-red-500" : ""}`}
-                      placeholder="Flat No, Street Address, Area"
+                      placeholder="e.g. 42, Anna Nagar, 2nd Cross Street"
                     />
                     {errors.address?.addressLine && (
                       <span className="error-hint">{errors.address.addressLine.message}</span>
@@ -462,7 +583,7 @@ export const Checkout: React.FC = () => {
                       type="text"
                       {...register("address.city")}
                       className={`form-field ${errors.address?.city ? "border-red-500" : ""}`}
-                      placeholder="Mumbai"
+                      placeholder="e.g. Chennai / Coimbatore"
                     />
                     {errors.address?.city && (
                       <span className="error-hint">{errors.address.city.message}</span>
@@ -476,19 +597,19 @@ export const Checkout: React.FC = () => {
                         type="text"
                         {...register("address.state")}
                         className={`form-field ${errors.address?.state ? "border-red-500" : ""}`}
-                        placeholder="Maharashtra"
+                        placeholder="Tamil Nadu"
                       />
                       {errors.address?.state && (
                         <span className="error-hint">{errors.address.state.message}</span>
                       )}
                     </div>
                     <div className="field-wrap">
-                      <label>Postal Code</label>
+                      <label>Postal PIN Code</label>
                       <input
                         type="text"
                         {...register("address.postalCode")}
                         className={`form-field ${errors.address?.postalCode ? "border-red-500" : ""}`}
-                        placeholder="400001"
+                        placeholder="600001"
                       />
                       {errors.address?.postalCode && (
                         <span className="error-hint">{errors.address.postalCode.message}</span>
@@ -497,7 +618,7 @@ export const Checkout: React.FC = () => {
                   </div>
 
                   <div className="field-wrap span-2">
-                    <label>Phone Number</label>
+                    <label>Contact Phone Number (For Courier &amp; SMS)</label>
                     <div className="input-icon-wrap">
                       <Phone className="field-icon" size={16} />
                       <input
@@ -527,7 +648,7 @@ export const Checkout: React.FC = () => {
                     <span className="switch-slider"></span>
                   </label>
                 </div>
-                <p className="text-xs text-text-muted mt-1.5">Same as shipping address</p>
+                <p className="text-xs text-text-muted mt-1.5">Same as delivery shipping address</p>
 
                 <AnimatePresence>
                   {!billingSameAsShipping && (
@@ -546,7 +667,7 @@ export const Checkout: React.FC = () => {
                             value={billingAddress.fullName}
                             onChange={(e) => setBillingAddress({ ...billingAddress, fullName: e.target.value })}
                             className="form-field"
-                            placeholder="John Doe"
+                            placeholder="Full Name"
                           />
                         </div>
                         <div className="field-wrap span-2">
@@ -556,7 +677,7 @@ export const Checkout: React.FC = () => {
                             value={billingAddress.addressLine}
                             onChange={(e) => setBillingAddress({ ...billingAddress, addressLine: e.target.value })}
                             className="form-field"
-                            placeholder="Flat No, Street Address"
+                            placeholder="Flat / Building / Street"
                           />
                         </div>
                         <div className="field-wrap">
@@ -566,7 +687,7 @@ export const Checkout: React.FC = () => {
                             value={billingAddress.city}
                             onChange={(e) => setBillingAddress({ ...billingAddress, city: e.target.value })}
                             className="form-field"
-                            placeholder="Mumbai"
+                            placeholder="City"
                           />
                         </div>
                         <div className="form-grid-2-inner">
@@ -577,17 +698,17 @@ export const Checkout: React.FC = () => {
                               value={billingAddress.state}
                               onChange={(e) => setBillingAddress({ ...billingAddress, state: e.target.value })}
                               className="form-field"
-                              placeholder="MH"
+                              placeholder="State"
                             />
                           </div>
                           <div className="field-wrap">
-                            <label>Postal Code</label>
+                            <label>PIN Code</label>
                             <input
                               type="text"
                               value={billingAddress.postalCode}
                               onChange={(e) => setBillingAddress({ ...billingAddress, postalCode: e.target.value })}
                               className="form-field"
-                              placeholder="400001"
+                              placeholder="PIN Code"
                             />
                           </div>
                         </div>
@@ -597,135 +718,89 @@ export const Checkout: React.FC = () => {
                 </AnimatePresence>
               </div>
 
-              {/* Secure Payments Section */}
+              {/* Step 2: Payment Method (Razorpay Integration) */}
               <div className="checkout-section-card">
                 <h3 className="section-card-title">
                   <CreditCard className="title-icon text-accent-pink" size={18} />
-                  Secure Card Payment
+                  2. Payment Method
                 </h3>
 
-                {/* Animated credit card */}
-                <div className="card-scene">
-                  <div className={`animated-credit-card ${focusedField === "cvv" ? "is-flipped" : ""} brand-${cardBrand}`}>
-                    <div className="card-face card-front">
-                      <div className="card-top-row">
-                        <div className="card-chip" />
-                        <span className="card-brand-badge uppercase">{cardBrand === "unknown" ? "card" : cardBrand}</span>
-                      </div>
-                      <div className="card-number-display text-sm md:text-base">
-                        {watchCardNumber || "•••• •••• •••• ••••"}
-                      </div>
-                      <div className="card-bottom-row">
-                        <div className="card-holder-block">
-                          <span className="card-meta-label">Card Holder</span>
-                          <span className="card-meta-value truncate max-w-[150px]">
-                            {watchCardholder?.toUpperCase() || "YOUR NAME"}
-                          </span>
-                        </div>
-                        <div className="card-expiry-block">
-                          <span className="card-meta-label">Expires</span>
-                          <span className="card-meta-value">
-                            {watchExpiry || "MM/YY"}
-                          </span>
-                        </div>
+                {/* Razorpay Gateway Card */}
+                <div className="razorpay-method-card">
+                  <div className="razorpay-method-header">
+                    <div className="razorpay-brand-wrap">
+                      <span className="razorpay-logo-badge">
+                        <Zap size={14} /> Razorpay
+                      </span>
+                      <div className="razorpay-title-group">
+                        <h4>Online Payment (Instant &amp; 100% Secure)</h4>
+                        <p>Pay smoothly via UPI, Cards, NetBanking, or Wallets</p>
                       </div>
                     </div>
-                    <div className="card-face card-back">
-                      <div className="magnetic-strip" />
-                      <div className="cvv-row">
-                        <div className="cvv-signature">{watchCvv || "•••"}</div>
-                      </div>
-                      <p className="card-disclaimer">
-                        256-bit encrypted checkout. PCI-DSS compliant payment processing.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Payment Fields */}
-                <div className="payment-fields-stack">
-                  <div className="field-wrap">
-                    <label>Cardholder Name</label>
-                    <input
-                      type="text"
-                      {...register("payment.cardholderName")}
-                      className={`form-field ${errors.payment?.cardholderName ? "border-red-500" : ""}`}
-                      placeholder="SOPHIA MARTINEZ"
-                      onFocus={() => setFocusedField("cardholderName")}
-                      onBlur={() => setFocusedField(null)}
-                    />
-                    {errors.payment?.cardholderName && (
-                      <span className="error-hint">{errors.payment.cardholderName.message}</span>
-                    )}
-                  </div>
-
-                  <div className="field-wrap">
-                    <label>Card Number</label>
-                    <input
-                      type="text"
-                      value={watchCardNumber}
-                      onChange={handleCardNumberChange}
-                      className={`form-field mono ${errors.payment?.cardNumber ? "border-red-500" : ""}`}
-                      placeholder="4000 1234 5678 9010"
-                      onFocus={() => setFocusedField("cardNumber")}
-                      onBlur={() => setFocusedField(null)}
-                    />
-                    {errors.payment?.cardNumber && (
-                      <span className="error-hint">{errors.payment.cardNumber.message}</span>
-                    )}
-                  </div>
-
-                  <div className="form-grid-2">
-                    <div className="field-wrap">
-                      <label>Expiry Date</label>
-                      <input
-                        type="text"
-                        value={watchExpiry || ""}
-                        onChange={handleExpiryDateChange}
-                        className={`form-field mono ${errors.payment?.expiryDate ? "border-red-500" : ""}`}
-                        placeholder="MM/YY"
-                        onFocus={() => setFocusedField("expiryDate")}
-                        onBlur={() => setFocusedField(null)}
-                      />
-                      {errors.payment?.expiryDate && (
-                        <span className="error-hint">{errors.payment.expiryDate.message}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="recommended-pill">Recommended</span>
+                      {paymentConfig.isTestMode && (
+                        <span className="test-mode-pill">
+                          <Info size={12} /> Test Mode Active
+                        </span>
                       )}
                     </div>
-                    <div className="field-wrap">
-                      <label>CVV</label>
-                      <input
-                        type="password"
-                        value={watchCvv || ""}
-                        onChange={handleCvvChange}
-                        className={`form-field mono ${errors.payment?.cvv ? "border-red-500" : ""}`}
-                        placeholder="•••"
-                        onFocus={() => setFocusedField("cvv")}
-                        onBlur={() => setFocusedField(null)}
-                      />
-                      {errors.payment?.cvv && (
-                        <span className="error-hint">{errors.payment.cvv.message}</span>
-                      )}
+                  </div>
+
+                  {/* Payment Methods Visual Badges */}
+                  <div className="payment-options-grid">
+                    <div className="payment-option-pill active">
+                      <Smartphone size={16} className="text-green-500" />
+                      <span>UPI &amp; GPay</span>
+                    </div>
+                    <div className="payment-option-pill active">
+                      <QrCode size={16} className="text-cyan-500" />
+                      <span>Scan QR Code</span>
+                    </div>
+                    <div className="payment-option-pill active">
+                      <CreditCard size={16} className="text-blue-500" />
+                      <span>All Bank Cards</span>
+                    </div>
+                    <div className="payment-option-pill active">
+                      <Building size={16} className="text-purple-500" />
+                      <span>NetBanking</span>
+                    </div>
+                    <div className="payment-option-pill active">
+                      <Wallet size={16} className="text-amber-500" />
+                      <span>Wallets</span>
+                    </div>
+                  </div>
+
+                  {/* Security Points */}
+                  <div className="razorpay-trust-points">
+                    <div className="razorpay-trust-item">
+                      <ShieldCheck size={14} />
+                      <span>256-bit Bank Grade SSL Encryption | RBI Regulated Gateway</span>
+                    </div>
+                    <div className="razorpay-trust-item">
+                      <CheckCircle2 size={14} />
+                      <span>Instant automatic refunds if transaction is interrupted at any stage</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Secure Checkout Action */}
+              {/* Secure Checkout Action Button */}
               <button 
                 type="submit" 
                 disabled={checkoutTotal === 0 || isProcessing}
-                className="checkout-submit-btn cursor-pointer py-4 hover:opacity-95 text-xs md:text-sm font-extrabold uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed"
+                className="checkout-submit-btn cursor-pointer py-4 hover:opacity-95 text-xs md:text-sm font-extrabold uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-accent-pink text-white rounded-xl shadow-lg"
               >
                 {savings > 0 && (
                   <span className="savings-badge">Saving ₹{savings.toFixed(2)}</span>
                 )}
                 <Lock size={16} />
-                Pay &amp; Complete Order (₹{finalPayable.toFixed(2)})
+                Proceed to Pay ₹{finalPayable.toFixed(2)} via Razorpay
               </button>
             </form>
           </div>
 
-          {/* Right Column Sticky summary */}
+          {/* Right Column Sticky Summary */}
           <div className="checkout-summary-col">
             <div className="summary-sticky-card">
               <h3 className="section-card-title border-none m-0 pb-3">
@@ -810,84 +885,89 @@ export const Checkout: React.FC = () => {
                 </div>
                 <div className="total-line grand-total flex justify-between text-sm font-extrabold text-text-primary pt-3 border-t border-dashed border-border mt-2">
                   <span>Payable Total:</span>
-                  <span className="text-accent-pink text-base">₹{finalPayable.toFixed(2)}</span>
+                  <span className="text-accent-pink text-base font-black">₹{finalPayable.toFixed(2)}</span>
                 </div>
+              </div>
+
+              {/* Secure Checkout Trust Footer */}
+              <div className="mt-4 pt-3 border-t border-border flex items-center justify-center gap-2 text-[10px] text-text-muted">
+                <ShieldCheck size={14} className="text-green-500" />
+                <span>Protected by Razorpay Checkout</span>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Secure Checkout Processing Overlay */}
+      {/* Secure Checkout Processing Overlay / Modal */}
       <AnimatePresence>
         {isProcessing && (
           <div className="checkout-overlay">
-            {!isSuccess ? (
-              <div className="processing-card max-w-sm w-full mx-4 text-center">
-                <Loader2 className="animate-spin text-accent-pink mx-auto mb-4" size={40} />
-                <h3>Verifying Transaction Security</h3>
-                <p className="processing-step-text text-center text-xs text-text-muted mt-2">{steps[processingStep]}</p>
-                <div className="processing-progress-bar w-full mt-4">
-                  <div
-                    className="processing-progress-fill"
-                    style={{ 
-                      width: `${((processingStep + 1) / steps.length) * 100}%`, 
-                      transition: "width 0.4s ease" 
-                    }}
-                  />
+            <div className="processing-card max-w-sm w-full mx-4 text-center bg-bg-secondary p-6 rounded-2xl border border-border shadow-2xl">
+              <Loader2 className="animate-spin text-accent-pink mx-auto mb-4" size={44} />
+              <h3 className="font-extrabold text-base mb-2">Connecting to Razorpay</h3>
+              <p className="text-xs text-text-muted">{processingMessage}</p>
+              <div className="pci-badge flex items-center justify-center gap-1.5 text-[10px] text-text-muted mt-4">
+                <ShieldCheck className="pci-icon text-green-500" size={14} />
+                256-Bit SSL Bank Grade Security
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isSuccess && (
+          <div className="checkout-overlay">
+            <div className="success-card max-w-md w-full mx-4 text-center bg-bg-secondary p-6 rounded-2xl border border-border shadow-2xl">
+              <div className="success-icon-wrap text-green-500 mx-auto mb-4">
+                <CheckCircle2 size={56} />
+              </div>
+              <h2 className="text-xl font-black">Payment Verified &amp; Order Confirmed!</h2>
+              <p className="text-xs text-text-muted mt-1">
+                Your payment was received successfully via Razorpay. We have sent an invoice to your registered email.
+              </p>
+
+              <div className="success-details w-full mt-4 p-4 bg-bg-primary border border-border rounded-xl text-left">
+                <div className="success-row flex justify-between text-xs py-1.5 border-b border-border/10">
+                  <span className="text-text-muted">Order ID:</span>
+                  <strong className="order-id-val text-cyan-400 font-mono font-bold">{createdOrderId}</strong>
                 </div>
-                <div className="pci-badge flex items-center justify-center gap-1.5 text-[10px] text-text-muted mt-4">
-                  <ShieldCheck className="pci-icon text-green-500" size={14} />
-                  SSL Certified Secure Sandbox Environment
+                {verifiedPaymentId && (
+                  <div className="success-row flex justify-between text-xs py-1.5 border-b border-border/10">
+                    <span className="text-text-muted">Razorpay Payment ID:</span>
+                    <strong className="text-green-400 font-mono text-[11px]">{verifiedPaymentId}</strong>
+                  </div>
+                )}
+                <div className="success-row flex justify-between text-xs py-1.5 border-b border-border/10">
+                  <span className="text-text-muted">Total Paid:</span>
+                  <strong className="text-text-primary font-bold">₹{finalPayable.toFixed(2)}</strong>
+                </div>
+                <div className="success-row flex justify-between text-xs py-1.5">
+                  <span className="text-text-muted">Payment Mode:</span>
+                  <strong className="text-accent-pink font-bold">Razorpay (UPI / Card)</strong>
                 </div>
               </div>
-            ) : (
-              <div className="success-card max-w-sm w-full mx-4 text-center">
-                <div className="success-icon-wrap text-green-500 mx-auto mb-4">
-                  <CheckCircle2 size={56} />
-                </div>
-                <h2 className="text-xl font-black">Order Placed Successfully!</h2>
-                <p className="text-xs text-text-muted mt-1">Thank you for your order. A confirmation email and tracking updates have been dispatched.</p>
 
-                <div className="success-details w-full mt-4 p-3 bg-bg-secondary border border-border rounded-xl">
-                  <div className="success-row flex justify-between text-xs py-1.5 border-b border-border/10 last:border-b-0">
-                    <span>Order ID:</span>
-                    <strong className="order-id-val text-cyan-400 font-mono">{createdOrderId}</strong>
-                  </div>
-                  <div className="success-row flex justify-between text-xs py-1.5 border-b border-border/10 last:border-b-0">
-                    <span>Total Amount:</span>
-                    <strong className="text-text-primary">₹{finalPayable.toFixed(2)}</strong>
-                  </div>
-                  {savings > 0 && (
-                    <div className="success-row savings-row flex justify-between text-xs py-1.5 border-b border-border/10 last:border-b-0">
-                      <span>Total Savings:</span>
-                      <strong className="text-green-500">₹{savings.toFixed(2)}</strong>
-                    </div>
-                  )}
-                </div>
-
-                <div className="success-actions flex flex-col gap-2.5 w-full mt-6">
-                  <button 
-                    className="btn-view-orders w-full py-3 font-bold text-xs md:text-sm flex items-center justify-center gap-1.5 rounded-full bg-accent-pink hover:bg-accent-pink/90 text-white cursor-pointer" 
-                    onClick={() => { 
-                      setIsProcessing(false); 
-                      navigate("/orders"); 
-                    }}
-                  >
-                    View My Purchase History <ChevronRight size={14} />
-                  </button>
-                  <button 
-                    className="btn-continue-shop w-full py-2.5 text-xs font-semibold text-text-secondary hover:text-text-primary cursor-pointer" 
-                    onClick={() => { 
-                      setIsProcessing(false); 
-                      navigate("/catalog"); 
-                    }}
-                  >
-                    Continue Shopping
-                  </button>
-                </div>
+              <div className="success-actions flex flex-col gap-2.5 w-full mt-6">
+                <button 
+                  className="btn-view-orders w-full py-3 font-bold text-xs md:text-sm flex items-center justify-center gap-1.5 rounded-full bg-accent-pink hover:bg-accent-pink/90 text-white cursor-pointer" 
+                  onClick={() => { 
+                    setIsSuccess(false); 
+                    navigate("/orders"); 
+                  }}
+                >
+                  View My Order History <ChevronRight size={14} />
+                </button>
+                <button 
+                  className="btn-continue-shop w-full py-2.5 text-xs font-semibold text-text-secondary hover:text-text-primary cursor-pointer" 
+                  onClick={() => { 
+                    setIsSuccess(false); 
+                    navigate("/catalog"); 
+                  }}
+                >
+                  Continue Shopping
+                </button>
               </div>
-            )}
+            </div>
           </div>
         )}
       </AnimatePresence>

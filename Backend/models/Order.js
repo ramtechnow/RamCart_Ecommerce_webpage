@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const OrderSchema = new mongoose.Schema({
+  orderId: {
+    type: String,
+    sparse: true,
+    index: true,
+  },
   userId: {
     type: String,
     required: true,
@@ -42,11 +47,31 @@ const OrderSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    default: "Pending", // Pending, Processing, Shipped, Delivered
+    default: "Pending", // Pending, Processing, Shipped, Delivered, Cancelled
   },
   payment: {
     type: Boolean,
     default: true,
+  },
+  paymentMethod: {
+    type: String,
+    default: "Razorpay",
+  },
+  paymentStatus: {
+    type: String,
+    default: "Paid", // Paid, Pending, Failed
+  },
+  razorpayOrderId: {
+    type: String,
+    default: null,
+  },
+  razorpayPaymentId: {
+    type: String,
+    default: null,
+  },
+  razorpaySignature: {
+    type: String,
+    default: null,
   },
   notificationSeen: {
     type: Boolean,

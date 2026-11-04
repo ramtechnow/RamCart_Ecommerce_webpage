@@ -106,7 +106,19 @@ export const AdminTopbar = ({
           {/* Notifications Dropdown */}
           {showNotifications && (
             <div 
-              className="fixed sm:absolute right-2 sm:right-0 top-16 sm:top-auto sm:mt-3 w-[calc(100vw-16px)] sm:w-[420px] max-w-[450px] max-h-[85vh] sm:max-h-[520px] rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden animate-fade-in bg-white dark:bg-[#121214] border border-zinc-200 dark:border-zinc-800"
+              className="admin-notifications-dropdown shadow-2xl z-50 flex flex-col overflow-hidden animate-fade-in bg-white dark:bg-[#121214] border border-zinc-200 dark:border-zinc-800"
+              style={{
+                position: "absolute",
+                top: "calc(100% + 10px)",
+                right: 0,
+                width: "420px",
+                minWidth: "380px",
+                maxWidth: "calc(100vw - 24px)",
+                maxHeight: "min(520px, 80vh)",
+                borderRadius: "16px",
+                zIndex: 1000,
+                boxShadow: "0 20px 40px -8px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.08)"
+              }}
             >
               {/* Header */}
               <div className="flex items-center justify-between p-3.5 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">

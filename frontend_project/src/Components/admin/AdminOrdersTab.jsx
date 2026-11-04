@@ -343,7 +343,7 @@ export const AdminOrdersTab = ({
                         <div className="flex items-center gap-1.5">
                           <span className={`w-1.5 h-1.5 rounded-full bg-black dark:bg-white ${isDelayedRow ? 'animate-ping' : ''}`}></span>
                           <span className="text-xs font-bold font-mono text-[#0f0e17] dark:text-[#fffffe]">
-                            #ORD-{o._id ? o._id.slice(-6).toUpperCase() : 'N/A'}
+                            {o.orderId || (o._id ? `#RC-${o._id.slice(-6).toUpperCase()}` : 'N/A')}
                           </span>
                         </div>
                       </td>

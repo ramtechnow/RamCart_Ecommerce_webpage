@@ -170,11 +170,11 @@ export const AdminPanel: React.FC = () => {
         setAdminNotifications(prevNotifs => {
           if (prevNotifs.length === 0 && freshOrders && freshOrders.length > 0) {
             return freshOrders.slice(0, 10).map((o: any) => {
-              const oId = String(o.id || o._id || "");
+              const oId = String(o.orderId || o.id || o._id || "");
               const orderDate = o.date ? new Date(o.date).toLocaleDateString() : "Recent";
               return {
                 id: `init-${oId}-${Date.now()}`,
-                title: `Order #${oId.substring(0, 8).toUpperCase()}`,
+                title: `Order #${o.orderId || oId.substring(0, 8).toUpperCase()}`,
                 message: `Placed by ${o.userName || o.userEmail || "Customer"} (₹${o.amount}) • Status: ${o.status || 'Ordered'}`,
                 time: orderDate,
                 type: "order",
@@ -190,7 +190,7 @@ export const AdminPanel: React.FC = () => {
         setKnownOrderIds(prev => {
           if (prev.size > 0) {
             freshOrders.forEach((o: any) => {
-              const oId = String(o.id || o._id);
+              const oId = String(o.orderId || o.id || o._id);
               if (oId && !prev.has(oId)) {
                 // New order detected!
                 dispatch(addToast({

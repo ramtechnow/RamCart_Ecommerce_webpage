@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import PromoBanner from "../Components/PromoBanner";
+import FestiveCelebrationBanner from "../Components/FestiveCelebrationBanner";
 import ProductCard from "../Components/ProductCard";
 import ProcessSteps from "../Components/ProcessSteps";
 import Newsletter from "../Components/Newsletter";
@@ -189,20 +190,28 @@ export const Home: React.FC = () => {
       {/* 1. Hero Promo Banner (Flipkart-style multi-card peeking carousel) */}
       <PromoBanner />
 
+      {/* ── Instamart / JioMart Style Festive Celebration Ribbon (Diwali Crackers Animation & Sale Banner) ── */}
+      <FestiveCelebrationBanner 
+        festivalTitle={activePromo?.theme ? `🪔 ${activePromo.theme.toUpperCase()} DHAMAKA SALE` : "🪔 DIWALI & FESTIVE DHAMAKA SALE"}
+        promoText={activePromo?.announcementText || "Grand Festive Deals are Live! Extra 30% Savings on Ethnic & Modern Collections"}
+        couponCode={activePromo?.theme ? `${activePromo.theme.toUpperCase()}30` : "DIWALI30"}
+        discountBadge="FLAT 30% OFF"
+      />
+
       {/* ── Double-Bezel Floating Trust Capsule (Hardware-grade aesthetic) ── */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 my-6 sm:my-8">
         <div className="p-1 sm:p-1.5 rounded-2xl sm:rounded-3xl bg-black/[0.02] dark:bg-white/[0.03] ring-1 ring-black/5 dark:ring-white/10 shadow-sm">
-          <div className="rounded-xl sm:rounded-2xl bg-white/95 dark:bg-[#171622]/95 backdrop-blur-xl border border-black/5 dark:border-white/5 p-3.5 sm:p-5 flex items-center justify-between sm:justify-around gap-4 overflow-x-auto no-scrollbar">
+          <div className="rounded-xl sm:rounded-2xl bg-white/95 dark:bg-[#171622]/95 backdrop-blur-xl border border-black/5 dark:border-white/5 p-2.5 sm:p-5 flex items-center justify-between sm:justify-around gap-3 sm:gap-4 overflow-x-auto no-scrollbar">
             
             <div className="group flex items-center gap-3 shrink-0">
               <div className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-[#ff8906]/10 dark:bg-[#ff8906]/20 flex items-center justify-center text-[#ff8906] transition-transform duration-300 group-hover:scale-110 shrink-0">
                 <Truck size={18} />
               </div>
               <div>
-                <span className="block text-xs sm:text-sm font-extrabold text-[#0f0e17] dark:text-[#fffffe] leading-tight">
+                <span className="block text-[11px] sm:text-sm font-extrabold text-[#0f0e17] dark:text-[#fffffe] leading-tight">
                   Free Express Delivery
                 </span>
-                <span className="block text-xs text-[#52525b] dark:text-[#a1a1aa] mt-0.5 font-medium">
+                <span className="block text-[10px] sm:text-xs text-[#52525b] dark:text-[#a1a1aa] mt-0.5 font-medium">
                   On all orders above ₹499
                 </span>
               </div>
@@ -215,10 +224,10 @@ export const Home: React.FC = () => {
                 <RotateCcw size={18} />
               </div>
               <div>
-                <span className="block text-xs sm:text-sm font-extrabold text-[#0f0e17] dark:text-[#fffffe] leading-tight">
+                <span className="block text-[11px] sm:text-sm font-extrabold text-[#0f0e17] dark:text-[#fffffe] leading-tight">
                   Hassle-Free Returns
                 </span>
-                <span className="block text-xs text-[#52525b] dark:text-[#a1a1aa] mt-0.5 font-medium">
+                <span className="block text-[10px] sm:text-xs text-[#52525b] dark:text-[#a1a1aa] mt-0.5 font-medium">
                   30-day doorstep exchange
                 </span>
               </div>
@@ -231,10 +240,10 @@ export const Home: React.FC = () => {
                 <Shield size={18} />
               </div>
               <div>
-                <span className="block text-xs sm:text-sm font-extrabold text-[#0f0e17] dark:text-[#fffffe] leading-tight">
+                <span className="block text-[11px] sm:text-sm font-extrabold text-[#0f0e17] dark:text-[#fffffe] leading-tight">
                   Encrypted Checkout
                 </span>
-                <span className="block text-xs text-[#52525b] dark:text-[#a1a1aa] mt-0.5 font-medium">
+                <span className="block text-[10px] sm:text-xs text-[#52525b] dark:text-[#a1a1aa] mt-0.5 font-medium">
                   100% bank-grade security
                 </span>
               </div>
@@ -247,10 +256,10 @@ export const Home: React.FC = () => {
                 <Tag size={18} />
               </div>
               <div>
-                <span className="block text-xs sm:text-sm font-extrabold text-[#0f0e17] dark:text-[#fffffe] leading-tight">
+                <span className="block text-[11px] sm:text-sm font-extrabold text-[#0f0e17] dark:text-[#fffffe] leading-tight">
                   Unbeatable Value
                 </span>
-                <span className="block text-xs text-[#52525b] dark:text-[#a1a1aa] mt-0.5 font-medium">
+                <span className="block text-[10px] sm:text-xs text-[#52525b] dark:text-[#a1a1aa] mt-0.5 font-medium">
                   50,000+ satisfied patrons
                 </span>
               </div>
@@ -284,7 +293,7 @@ export const Home: React.FC = () => {
               <Link
                 key={card.categoryKey}
                 to={card.link || (card.categoryKey === 'women' ? '/womens' : card.categoryKey === 'men' ? '/mens' : '/kids')}
-                className="group relative w-full aspect-[3/4] min-h-[420px] sm:min-h-[450px] lg:min-h-[480px] rounded-3xl overflow-hidden shadow-sm border border-black/5 dark:border-white/10 flex flex-col justify-between p-5 sm:p-7 transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 cursor-pointer"
+                className="group relative w-full aspect-[4/5] max-h-[380px] min-h-[290px] sm:min-h-[340px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border border-black/5 dark:border-white/10 flex flex-col justify-between p-4 sm:p-6 transition-all duration-500 hover:shadow-xl hover:-translate-y-1 cursor-pointer"
               >
                 {/* Responsive Image with Object Containment & Top Alignment */}
                 <img
