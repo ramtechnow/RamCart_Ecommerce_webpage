@@ -28,7 +28,7 @@
 
 ---
 
-### 🛍️ 2. Product Detail, Cart & Order Tracking
+### 🛍️ 2. Product Detail, Cart & Mobile Experience
 
 | Product Details (Size Selection & Dynamic Pricing) | Shopping Cart & Price Breakdown |
 | :---: | :---: |
@@ -37,6 +37,10 @@
 | Customer Wishlist | Customer Orders & Live Status Tracking |
 | :---: | :---: |
 | ![Wishlist](Screenshots/09_customer_wishlist.png) | ![Customer Orders](Screenshots/10_customer_orders_tracking.png) |
+
+| Mobile Responsive Checkout & Address Selection | Mobile Product Detail View & Sticky Action Bar |
+| :---: | :---: |
+| ![Mobile Checkout](Screenshots/26_mobile_checkout_shipping_address.jpg) | ![Mobile PDP](Screenshots/27_mobile_product_detail_and_sticky_bar.jpg) |
 
 ---
 
@@ -58,13 +62,25 @@
 | :---: | :---: |
 | ![Seasonal Campaigns](Screenshots/20_admin_festive_seasonal.png) | ![User Management](Screenshots/21_admin_user_management.png) |
 
+| Real-Time Notification Bell & Drawer | Category Showcase Management |
+| :---: | :---: |
+| ![Notification Bell](Screenshots/25_admin_notification_bell_drawer.png) | ![Category Showcase](Screenshots/30_category_showcase_management.png) |
+
 ---
 
-### 📧 4. Automated Transactional Email Notifications (Nodemailer SMTP)
+### 🏢 4. Multi-Vendor Portal & CRM Marketing Engine
 
-| Order Placed Confirmation | Out for Delivery / Delivered Receipt | Order Cancellation & Restock Notification |
-| :---: | :---: | :---: |
-| ![Order Placed](Screenshots/22_email_order_placed.png) | ![Order Delivered](Screenshots/23_email_order_delivered.png) | ![Order Cancelled](Screenshots/24_email_order_cancelled.png) |
+| RamCart Vendor Management Console | CRM Campaign & Automated Dispatcher |
+| :---: | :---: |
+| ![Vendor Console](Screenshots/28_vendor_management_console_add_product.png) | ![CRM Dispatcher](Screenshots/29_crm_marketing_dispatcher.png) |
+
+---
+
+### 📧 5. Automated Transactional & Promotional Email Notifications (Nodemailer SMTP)
+
+| Order Placed Confirmation | Out for Delivery / Delivered Receipt | Order Cancellation & Restock Notification | Branded Campaign Offer Dispatch |
+| :---: | :---: | :---: | :---: |
+| ![Order Placed](Screenshots/22_email_order_placed.png) | ![Order Delivered](Screenshots/23_email_order_delivered.png) | ![Order Cancelled](Screenshots/24_email_order_cancelled.png) | ![Promotional Offer](Screenshots/31_email_campaign_promotional_dispatch.png) |
 
 ---
 
@@ -115,6 +131,25 @@
 - **Warehouse Asset Valuation**: Real-time calculation of total warehoused units and gross catalog monetary valuation (`stockCount × price`).
 - **Classic Minimalist Monochrome Theme**: Pure jet black (`#000000`) and crisp white (`#ffffff`) high-contrast palette with strict `darkMode: 'class'` support.
 
+### 8. 🏢 Dedicated Multi-Vendor Management Console & Strict Access Isolation
+- **Self-Service Vendor Dashboard**: Dedicated topbar branding ("RamCart Vendor Management Console") with an amber "Vendor Portal" badge, store subtitle, and verified vendor profile identity capsule.
+- **Strict RBAC & Navigation Guarding**: 8 administrative tabs (*Dashboard, Users List, Orders, CRM & Marketing, Coupons, Hero Banners, Category Showcase, Seasonal Offers*) are completely hidden and protected against URL query tampering. Vendors are strictly restricted to **Vendor Products** and **Add Product**.
+- **Seamless Storefront Navigation**: Instant "Add Product (Vendor)" shortcut built into the customer profile dropdown and mobile navigation drawer between `My Orders` and `Logout`.
+
+### 9. 📊 Catalog Audit — Vendor Performance & Sales Turnover Bento
+- **Vendor-Filtered Inventory**: Catalog view automatically scopes exclusively to listings owned by the authenticated vendor.
+- **Real-Time Performance Bento**: Live KPI tiles tracking active listings, aggregate available stock across sizes/variants, total units sold turnover, and pending admin restock requests.
+- **Role-Safe Operations**: Destructive deletions are restricted to root admins; vendors have direct inline edit access and live storefront previews.
+
+### 10. 🔔 Admin-to-Vendor Restock Loop & Real-Time Alert Ecosystem
+- **1-Click Restock Dispatch**: Store admins can trigger formal restock requests (`ramcart_stock_requests`) with custom units and instructions directly from low-inventory catalog rows.
+- **Vendor Notification Bell Drawer**: Unread badge counter and high-priority drawer alert notifying vendors of admin restock demands with a single-click **"Restock +Units"** instant database updater.
+- **Admin Operations Notifications**: Automated alerts for newly placed orders, out-of-stock items, and customer cancellation refund notices.
+
+### 11. 📣 Multi-Channel CRM & Marketing Dispatcher
+- **One-Click WhatsApp Broadcast**: Seamless pre-filled WhatsApp campaign generator linking active coupons and editable promotional copy.
+- **Promotional Push Email Dispatcher**: Bulk campaign mailer featuring live coupon attachments and ultra-lightweight inline KB-optimized campaign banners.
+
 ---
 
 ## 🏛️ System Architecture
@@ -154,14 +189,20 @@
 
 ```plaintext
 D:\Ecommerce/
-├── Screenshots/                  # High-Resolution Application Screen Captures
+├── Screenshots/                  # High-Resolution Application Screen Captures (31 Assets)
 │   ├── 01_storefront_home.png
 │   ├── 02_storefront_carousel.png
 │   ├── 03_storefront_dark_mode.png
 │   ├── 04_search_voice_filters.png
 │   ├── 05_catalog_grid.png
 │   ├── ...
-│   └── 24_email_order_cancelled.png
+│   ├── 25_admin_notification_bell_drawer.png
+│   ├── 26_mobile_checkout_shipping_address.jpg
+│   ├── 27_mobile_product_detail_and_sticky_bar.jpg
+│   ├── 28_vendor_management_console_add_product.png
+│   ├── 29_crm_marketing_dispatcher.png
+│   ├── 30_category_showcase_management.png
+│   └── 31_email_campaign_promotional_dispatch.png
 │
 ├── frontend_project/             # React 19 + TypeScript Web Application
 │   ├── src/
