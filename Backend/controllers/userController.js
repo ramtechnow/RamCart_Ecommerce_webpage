@@ -33,7 +33,10 @@ exports.signup = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        isAdmin: user.isAdmin
+        isAdmin: user.isAdmin,
+        role: user.role || (user.isAdmin ? 'admin' : 'customer'),
+        vendorName: user.vendorName || '',
+        vendorAddress: user.vendorAddress || ''
       }
     };
     const token = jwt.sign(data, process.env.JWT_SECRET);
@@ -314,15 +317,28 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-// Admin: Verify admin token credentials
+// Admin / Vendor: Verify credentials
 exports.verifyAdmin = async (req, res) => {
   try {
-    // req.user has already been set and validated by fetchAdmin middleware
-    const user = await User.findById(req.user.id, { name: 1, email: 1, isAdmin: 1 });
-    if (!user || !user.isAdmin) {
-      return res.status(403).json({ success: false, error: "Access denied. Admin privileges required." });
+    const userId = req.user.id || req.user._id;
+    const query = userId ? { _id: userId } : { email: req.user.email };
+    const user = await User.findOne(query, { name: 1, email: 1, isAdmin: 1, role: 1, vendorName: 1, vendorAddress: 1 });
+    const isSuper = user && (user.isAdmin || user.email?.toLowerCase() === "bvhss20@gmail.com");
+    const isVendor = user && user.role === 'vendor';
+    if (!user || (!isSuper && !isVendor)) {
+      return res.status(403).json({ success: false, error: "Access denied. Admin or Vendor privileges required." });
     }
-    res.json({ success: true, user: { name: user.name, email: user.email, isAdmin: user.isAdmin } });
+    res.json({
+      success: true,
+      user: {
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        role: user.role || (user.isAdmin ? 'admin' : 'customer'),
+        vendorName: user.vendorName || '',
+        vendorAddress: user.vendorAddress || ''
+      }
+    });
   } catch (error) {
     console.error("Error verifying admin status:", error);
     res.status(500).json({ success: false, error: "Internal Server Error" });
@@ -610,7 +626,10 @@ exports.verifyLoginOtp = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        isAdmin: user.isAdmin
+        isAdmin: user.isAdmin,
+        role: user.role || (user.isAdmin ? 'admin' : 'customer'),
+        vendorName: user.vendorName || '',
+        vendorAddress: user.vendorAddress || ''
       }
     };
     const token = jwt.sign(data, process.env.JWT_SECRET);
@@ -771,7 +790,10 @@ exports.firebaseSync = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        isAdmin: user.isAdmin
+        isAdmin: user.isAdmin,
+        role: user.role || (user.isAdmin ? 'admin' : 'customer'),
+        vendorName: user.vendorName || '',
+        vendorAddress: user.vendorAddress || ''
       }
     };
     

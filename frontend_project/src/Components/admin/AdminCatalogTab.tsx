@@ -17,6 +17,8 @@ interface AdminCatalogTabProps {
     onConfirm: () => void;
   }) => void;
   logAction: (message: string) => void;
+  isVendor?: boolean;
+  vendorName?: string;
 }
 
 interface EditFormState {
@@ -38,7 +40,9 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
   onRefreshProducts,
   addToast,
   triggerConfirm,
-  logAction
+  logAction,
+  isVendor = false,
+  vendorName = ""
 }) => {
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState("");
@@ -106,6 +110,15 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
   // Filtered list
   const filteredProducts = useMemo(() => {
     return products.filter((prod) => {
+      // Vendor filter: when logged in as vendor, view only this vendor's listings
+      if (isVendor && vendorName) {
+        const prodVendor = (prod.vendor || "").toLowerCase().trim();
+        const vName = vendorName.toLowerCase().trim();
+        if (!prodVendor.includes(vName) && !vName.includes(prodVendor)) {
+          return false;
+        }
+      }
+
       const nameMatch = prod.name.toLowerCase().includes(searchQuery.toLowerCase());
       
       let catMatch = true;
@@ -128,7 +141,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
       
       return nameMatch && catMatch && stockMatch;
     });
-  }, [products, searchQuery, categoryFilter, stockFilter]);
+  }, [products, searchQuery, categoryFilter, stockFilter, isVendor, vendorName]);
 
   // Edit Handlers
   const syncVariants = (
@@ -656,7 +669,7 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                               </span>
                             )}
 
-                            {prod.vendor && prod.vendor !== "RamCart Direct" && (
+                            {prod.vendor && prod.vendor !== "RamCart Direct" && !isVendor && (
                               <button
                                 type="button"
                                 onClick={() => handleOpenStockRequest(prod)}

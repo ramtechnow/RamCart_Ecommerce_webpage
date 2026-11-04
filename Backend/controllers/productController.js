@@ -15,18 +15,21 @@ exports.addProduct = async (req, res) => {
       old_price: Number(v.old_price !== undefined ? v.old_price : (v.oldPrice !== undefined ? v.oldPrice : (req.body.old_price || 0)))
     })) : [];
 
+    const primaryImg = req.body.image || (Array.isArray(req.body.images) && req.body.images[0]) || "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800";
+    const allImages = Array.isArray(req.body.images) && req.body.images.length > 0 ? req.body.images : [primaryImg];
+
     const product = new Product({
       id: id,
-      name: req.body.name,
-      image: req.body.image,
-      category: req.body.category,
-      new_price: req.body.new_price,
-      old_price: req.body.old_price,
-      sizes: req.body.sizes,
-      colors: req.body.colors,
+      name: req.body.name || "Untitled Product",
+      image: primaryImg,
+      category: req.body.category || "men",
+      new_price: Number(req.body.new_price || 0),
+      old_price: Number(req.body.old_price || req.body.new_price || 0),
+      sizes: Array.isArray(req.body.sizes) && req.body.sizes.length > 0 ? req.body.sizes : ['M', 'L'],
+      colors: Array.isArray(req.body.colors) && req.body.colors.length > 0 ? req.body.colors : ['Black'],
       variants: variantsInput,
       stockCount: variantsInput.length > 0 ? variantsInput.reduce((sum, v) => sum + Number(v.stock), 0) : Number(req.body.stockCount || 100),
-      images: req.body.images || [],
+      images: allImages,
       description: req.body.description || "",
       fabric: req.body.fabric || "Cotton Blend",
       pattern: req.body.pattern || "Solid",
@@ -38,14 +41,15 @@ exports.addProduct = async (req, res) => {
     });
     
     await product.save();
-    console.log("Saved Product successfully:", req.body.name);
+    console.log("Saved Product successfully:", req.body.name, "ID:", id);
     res.json({
       success: true,
       name: req.body.name,
+      id: product.id
     });
   } catch (error) {
     console.error("Error adding product:", error);
-    res.status(500).json({ success: false, error: "Internal Server Error" });
+    res.status(500).json({ success: false, error: error.message || "Internal Server Error" });
   }
 };
 

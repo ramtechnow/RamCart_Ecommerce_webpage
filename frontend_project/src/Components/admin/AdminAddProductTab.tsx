@@ -1,4 +1,4 @@
-import React, { useState, useMemo, DragEvent, ChangeEvent } from 'react';
+import React, { useState, useEffect, useMemo, DragEvent, ChangeEvent } from 'react';
 import { FolderPlus, Upload, ShieldAlert, Loader2, Trash2, Plus, FileText, DollarSign, Tag, Image as ImageIcon } from 'lucide-react';
 import { adminApi } from '../../Utils/adminApi';
 import { compressImageToBase64 } from '../../Utils/adminHelpers';
@@ -33,6 +33,12 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
   const [fit, setFit] = useState("Regular");
   const [vendorInput, setVendorInput] = useState(vendorName || (isVendor ? (vendorName || "Store Vendor") : "RamCart Direct"));
   const [vendorAddress, setVendorAddress] = useState("");
+
+  useEffect(() => {
+    if (vendorName) {
+      setVendorInput(vendorName);
+    }
+  }, [vendorName]);
   
   // Chip selections
   const [selectedSizes, setSelectedSizes] = useState<string[]>(['S', 'M', 'L', 'XL', 'XXL']);

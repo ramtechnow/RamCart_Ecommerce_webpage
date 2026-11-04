@@ -156,11 +156,23 @@ export const AdminPanel: React.FC = () => {
     dispatch(addToast({ message: `📦 Processing Order #${orderId ? orderId.substring(0, 8).toUpperCase() : 'RC'}`, type: "info" }));
   };
 
-  // Load Admin Data from Firestore
+  // Load Admin Data from Firestore / Backend
   const fetchAllAdminData = useCallback(async () => {
     setFetchingData(true);
     setFetchError(null);
     try {
+      if (isVendor) {
+        // Vendors only manage their catalog products; avoid calling restricted admin-only endpoints
+        try {
+          const freshProds = await adminApi.fetchProducts();
+          const prodsList = Array.isArray(freshProds) ? freshProds : (freshProds as any)?.products || [];
+          setProducts(prodsList);
+        } catch (err: any) {
+          console.warn("Could not fetch catalog products for vendor:", err);
+        }
+        return;
+      }
+
       const [prodData, usersData, ordersData, couponsData, bannersData] = await Promise.allSettled([
         adminApi.fetchProducts(),
         adminApi.fetchUsers(),
@@ -294,46 +306,50 @@ export const AdminPanel: React.FC = () => {
     } finally {
       setFetchingData(false);
     }
-  }, [dispatch]);
+  }, [dispatch, isVendor]);
 
-  // Initial fetch and 10-second polling for real-time orders
+  // Initial fetch and polling
   useEffect(() => {
     if (isAuthorized) {
       fetchAllAdminData();
-      const interval = setInterval(() => {
-        adminApi.fetchOrders().then((freshOrders) => {
-          setOrders(freshOrders);
-          setKnownOrderIds(prev => {
-            if (prev.size > 0) {
-              freshOrders.forEach((o: any) => {
-                const oId = String(o.id || o._id);
-                if (oId && !prev.has(oId)) {
-                  dispatch(addToast({
-                    message: `🛒 REAL-TIME ALERT: New Order #${oId.substring(0, 8).toUpperCase()} (₹${o.amount})`,
-                    type: "success"
-                  }));
-                  setAdminNotifications(nPrev => [
-                    {
-                      id: `notif-${Date.now()}`,
-                      title: "🎉 New Order Placed!",
-                      message: `Order #${oId.substring(0, 8).toUpperCase()} placed by ${o.userName || o.userEmail || "Customer"} (₹${o.amount})`,
-                      time: "Just now",
-                      type: "order",
-                      unread: true,
-                      orderId: oId
-                    },
-                    ...nPrev
-                  ]);
-                }
-              });
-            }
-            return new Set(freshOrders.map((o: any) => String(o.id || o._id)));
-          });
-        }).catch(() => {});
-      }, 10000);
-      return () => clearInterval(interval);
+      
+      // Super admins poll real-time incoming orders every 10s
+      if (isSuperAdmin) {
+        const interval = setInterval(() => {
+          adminApi.fetchOrders().then((freshOrders) => {
+            setOrders(freshOrders);
+            setKnownOrderIds(prev => {
+              if (prev.size > 0) {
+                freshOrders.forEach((o: any) => {
+                  const oId = String(o.id || o._id);
+                  if (oId && !prev.has(oId)) {
+                    dispatch(addToast({
+                      message: `🛒 REAL-TIME ALERT: New Order #${oId.substring(0, 8).toUpperCase()} (₹${o.amount})`,
+                      type: "success"
+                    }));
+                    setAdminNotifications(nPrev => [
+                      {
+                        id: `notif-${Date.now()}`,
+                        title: "🎉 New Order Placed!",
+                        message: `Order #${oId.substring(0, 8).toUpperCase()} placed by ${o.userName || o.userEmail || "Customer"} (₹${o.amount})`,
+                        time: "Just now",
+                        type: "order",
+                        unread: true,
+                        orderId: oId
+                      },
+                      ...nPrev
+                    ]);
+                  }
+                });
+              }
+              return new Set(freshOrders.map((o: any) => String(o.id || o._id)));
+            });
+          }).catch(() => {});
+        }, 10000);
+        return () => clearInterval(interval);
+      }
     }
-  }, [isAuthorized, fetchAllAdminData, dispatch]);
+  }, [isAuthorized, isSuperAdmin, fetchAllAdminData, dispatch]);
 
   // Loader UI
   if (authLoading) {
@@ -431,6 +447,8 @@ export const AdminPanel: React.FC = () => {
               addToast={triggerToast as any}
               triggerConfirm={triggerConfirm as any}
               logAction={logAction as any}
+              isVendor={isVendor}
+              vendorName={user?.vendorName || user?.name || ""}
             />
           )}
 

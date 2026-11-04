@@ -82,12 +82,26 @@ export const adminService = {
         sizes: productData.sizes || [],
         colors: productData.colors || [],
         variants: productData.variants || [],
-        image: productData.image || "",
+        image: productData.image || (productData.images && productData.images[0]) || "",
         images: productData.images || [],
-        vendor: (productData as any).vendor || "RamCart Direct"
+        stockCount: (productData as any).stockCount,
+        fabric: (productData as any).fabric,
+        pattern: (productData as any).pattern,
+        fit: (productData as any).fit,
+        vendor: (productData as any).vendor || "RamCart Direct",
+        vendorEmail: (productData as any).vendorEmail || "",
+        vendorAddress: (productData as any).vendorAddress || "",
+        vendorRating: (productData as any).vendorRating || 4.2
       })
     });
-    if (!res.ok) throw new Error("Failed to add product");
+    if (!res.ok) {
+      let errMsg = "Failed to add product";
+      try {
+        const errJson = await res.json();
+        errMsg = errJson.errors || errJson.error || errJson.message || errMsg;
+      } catch (e) {}
+      throw new Error(errMsg);
+    }
   },
 
   async updateProduct(id: string, productData: Partial<Product>): Promise<void> {
@@ -109,10 +123,24 @@ export const adminService = {
         category: productData.category,
         colors: productData.colors,
         sizes: productData.sizes,
-        description: productData.description
+        description: productData.description,
+        fabric: (productData as any).fabric,
+        pattern: (productData as any).pattern,
+        fit: (productData as any).fit,
+        vendor: (productData as any).vendor,
+        vendorEmail: (productData as any).vendorEmail,
+        vendorAddress: (productData as any).vendorAddress,
+        vendorRating: (productData as any).vendorRating
       })
     });
-    if (!res.ok) throw new Error("Failed to update product");
+    if (!res.ok) {
+      let errMsg = "Failed to update product";
+      try {
+        const errJson = await res.json();
+        errMsg = errJson.errors || errJson.error || errJson.message || errMsg;
+      } catch (e) {}
+      throw new Error(errMsg);
+    }
   },
 
   async removeProduct(id: string): Promise<void> {
@@ -125,7 +153,14 @@ export const adminService = {
       },
       body: JSON.stringify({ id: Number(id.replace("prod_", "")) || Number(id) })
     });
-    if (!res.ok) throw new Error("Failed to remove product");
+    if (!res.ok) {
+      let errMsg = "Failed to remove product";
+      try {
+        const errJson = await res.json();
+        errMsg = errJson.errors || errJson.error || errJson.message || errMsg;
+      } catch (e) {}
+      throw new Error(errMsg);
+    }
   },
 
   async updateVariantStock(id: string, color: string, change: number): Promise<void> {

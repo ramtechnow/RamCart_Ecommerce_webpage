@@ -25,8 +25,8 @@ const Product = require('./models/Product');
 const User = require('./models/User');
 const Coupon = require('./models/Coupon');
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.set('trust proxy', 1);
 app.use(cors({
   origin(origin, callback) {
