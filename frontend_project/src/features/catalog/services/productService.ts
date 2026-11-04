@@ -54,7 +54,14 @@ const mapRawProduct = (p: any): Product => {
     image: primaryImage,
     images: additionalImages.length > 0 ? additionalImages : (primaryImage ? [primaryImage] : []),
     available: p.available !== false,
-    createdAt: p.date
+    createdAt: p.date,
+    fabric: p.fabric || "Cotton Blend",
+    pattern: p.pattern || "Solid",
+    fit: p.fit || "Regular",
+    vendor: p.vendor || "RamCart Direct",
+    vendorEmail: p.vendorEmail || "",
+    vendorAddress: p.vendorAddress || "",
+    vendorRating: Number(p.vendorRating || 4.2)
   };
 };
 

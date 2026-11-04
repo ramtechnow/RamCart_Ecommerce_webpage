@@ -18,14 +18,16 @@ export const AdminUsersTab = ({
   const [vendorModal, setVendorModal] = useState({
     isOpen: false,
     user: null,
-    vendorName: ""
+    vendorName: "",
+    vendorAddress: ""
   });
 
   const handleOpenVendorModal = (user) => {
     setVendorModal({
       isOpen: true,
       user,
-      vendorName: user.vendorName || user.name || ""
+      vendorName: user.vendorName || user.name || "",
+      vendorAddress: user.vendorAddress || ""
     });
   };
 
@@ -36,11 +38,24 @@ export const AdminUsersTab = ({
     }
 
     try {
-      await adminApi.updateUserRole(vendorModal.user.email, false, 'vendor', vendorModal.vendorName.trim());
-      addToast(`🎉 Successfully promoted ${vendorModal.user.name} to Vendor "${vendorModal.vendorName.trim()}"!`, "success");
-      if (logAction) logAction(`Promoted user ${vendorModal.user.email} to Vendor: "${vendorModal.vendorName.trim()}"`);
-      setVendorModal({ isOpen: false, user: null, vendorName: "" });
-      onRefreshUsers();
+      await adminApi.updateUserRole(
+        vendorModal.user.email, 
+        false, 
+        'vendor', 
+        vendorModal.vendorName.trim(),
+        vendorModal.vendorAddress.trim()
+      );
+      // Instant local state update for 0ms latency in UI!
+      if (vendorModal.user) {
+        vendorModal.user.role = 'vendor';
+        vendorModal.user.vendorName = vendorModal.vendorName.trim();
+        vendorModal.user.vendorAddress = vendorModal.vendorAddress.trim();
+        vendorModal.user.isAdmin = false;
+      }
+      addToast(`🎉 Successfully updated Vendor "${vendorModal.vendorName.trim()}"!`, "success");
+      if (logAction) logAction(`Updated user ${vendorModal.user.email} to Vendor: "${vendorModal.vendorName.trim()}"`);
+      setVendorModal({ isOpen: false, user: null, vendorName: "", vendorAddress: "" });
+      if (onRefreshUsers) onRefreshUsers();
     } catch (err) {
       console.error(err);
       addToast(err.message || "Failed to promote to vendor", "error");
@@ -54,10 +69,15 @@ export const AdminUsersTab = ({
       confirmText: "Revoke Vendor",
       onConfirm: async () => {
         try {
-          await adminApi.updateUserRole(user.email, false, 'customer', '');
+          await adminApi.updateUserRole(user.email, false, 'customer', '', '');
+          if (user) {
+            user.role = 'customer';
+            user.vendorName = '';
+            user.vendorAddress = '';
+          }
           addToast(`Revoked vendor rights for ${user.email}`, "success");
           if (logAction) logAction(`Revoked vendor rights for ${user.email}`);
-          onRefreshUsers();
+          if (onRefreshUsers) onRefreshUsers();
         } catch (err) {
           console.error(err);
           addToast(err.message || "Failed to revoke vendor rights", "error");
@@ -287,9 +307,14 @@ export const AdminUsersTab = ({
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-semibold text-[#717388]">Role Profile</span>
                   {u.role === 'vendor' ? (
-                    <span className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
-                      <Store size={10} /> Vendor: {u.vendorName || u.name}
-                    </span>
+                    <div className="flex flex-col items-end gap-0.5">
+                      <span className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                        <Store size={10} /> Vendor: {u.vendorName || u.name}
+                      </span>
+                      {u.vendorAddress && (
+                        <span className="text-[10px] text-zinc-500 font-medium">📍 {u.vendorAddress}</span>
+                      )}
+                    </div>
                   ) : (
                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
                       u.isAdmin 
@@ -463,6 +488,19 @@ export const AdminUsersTab = ({
               <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
                 This brand name will be stamped on products uploaded by this vendor account.
               </p>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                Vendor Business Address / Location (City, State)
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Salem, Tamil Nadu or Surat, Gujarat"
+                value={vendorModal.vendorAddress}
+                onChange={(e) => setVendorModal(prev => ({ ...prev, vendorAddress: e.target.value }))}
+                className="h-10 px-3 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs font-medium text-zinc-900 dark:text-zinc-100 outline-none"
+              />
             </div>
 
             <div className="flex justify-end gap-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">

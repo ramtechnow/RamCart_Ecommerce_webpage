@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import { adminApi } from "../Utils/adminApi";
 
@@ -37,8 +38,18 @@ export const AdminPanel: React.FC = () => {
   const isVendor = user?.role === "vendor";
   const isAuthorized = isSuperAdmin || isVendor;
 
-  // 2. Active Tab State
-  const [activeTab, setActiveTab] = useState("dashboard");
+  // 2. Active Tab State with query parameter support (e.g. /admin?tab=add)
+  const [searchParams] = useSearchParams();
+  const queryTab = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState(queryTab || (isVendor ? "add" : "dashboard"));
+
+  useEffect(() => {
+    if (queryTab) {
+      setActiveTab(queryTab);
+    } else if (isVendor && activeTab === "dashboard") {
+      setActiveTab("add");
+    }
+  }, [queryTab, isVendor]);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // 3. Database State
@@ -170,24 +181,71 @@ export const AdminPanel: React.FC = () => {
         const freshOrders = ordersData.value;
         setOrders(freshOrders);
 
-        // Populate notification drawer with initial recent orders if empty
-        setAdminNotifications(prevNotifs => {
-          if (prevNotifs.length === 0 && freshOrders && freshOrders.length > 0) {
-            return freshOrders.slice(0, 10).map((o: any) => {
-              const oId = String(o.orderId || o.id || o._id || "");
-              const orderDate = o.date ? new Date(o.date).toLocaleDateString() : "Recent";
-              return {
-                id: `init-${oId}-${Date.now()}`,
+        // Populate rich admin notifications: Cancelled orders, Vendor products, Orders
+        const freshProds: any[] = prodData.status === "fulfilled" 
+          ? (Array.isArray(prodData.value) ? prodData.value : (prodData.value as any)?.products || []) 
+          : [];
+        setAdminNotifications(() => {
+          const notifs: any[] = [];
+
+          // A. Cancelled Orders Needing Refund Action
+          const cancelledOrders = freshOrders.filter((o: any) => o.status === "Cancelled");
+          cancelledOrders.slice(0, 5).forEach((o: any) => {
+            const oId = String(o.orderId || o.id || o._id || "");
+            notifs.push({
+              id: `cancel-${oId}`,
+              title: `⚠️ Order #${oId.substring(0, 8).toUpperCase()} Cancelled`,
+              message: `Cancelled by ${o.userName || o.userEmail || "Customer"} (₹${o.amount}) • Refund Action Required`,
+              time: o.date ? new Date(o.date).toLocaleDateString() : "Recent",
+              type: "alert",
+              unread: true,
+              orderId: oId
+            });
+          });
+
+          // B. Vendor Uploaded Products
+          const vendorProds = freshProds.filter((p: any) => p.vendor && p.vendor !== "RamCart Direct");
+          vendorProds.slice(0, 5).forEach((p: any) => {
+            notifs.push({
+              id: `vprod-${p.id}`,
+              title: `📦 Vendor Product: ${p.vendor}`,
+              message: `"${p.name}" (ID #${p.id}) added in ${p.category}. Stock: ${p.stockCount ?? 0} units`,
+              time: "Vendor Upload",
+              type: "product",
+              unread: false
+            });
+          });
+
+          // C. Low Stock Warnings
+          const lowStockProds = freshProds.filter((p: any) => p.stockCount !== undefined && p.stockCount < 15);
+          lowStockProds.slice(0, 4).forEach((p: any) => {
+            notifs.push({
+              id: `stock-${p.id}`,
+              title: `⚠️ Low Stock: ${p.name}`,
+              message: `Only ${p.stockCount} units remaining in stock. Please restock or request vendor!`,
+              time: "Stock Alert",
+              type: "alert",
+              unread: true
+            });
+          });
+
+          // D. Recent Orders
+          freshOrders.slice(0, 6).forEach((o: any) => {
+            const oId = String(o.orderId || o.id || o._id || "");
+            if (o.status !== "Cancelled") {
+              notifs.push({
+                id: `order-${oId}`,
                 title: `Order #${o.orderId || oId.substring(0, 8).toUpperCase()}`,
                 message: `Placed by ${o.userName || o.userEmail || "Customer"} (₹${o.amount}) • Status: ${o.status || 'Ordered'}`,
-                time: orderDate,
+                time: o.date ? new Date(o.date).toLocaleDateString() : "Recent",
                 type: "order",
                 unread: false,
                 orderId: oId
-              };
-            });
-          }
-          return prevNotifs;
+              });
+            }
+          });
+
+          return notifs;
         });
 
         // Detect new incoming orders for real-time pop-up notification
@@ -384,6 +442,8 @@ export const AdminPanel: React.FC = () => {
               }) as any}
               addToast={triggerToast as any}
               logAction={logAction as any}
+              isVendor={isVendor}
+              vendorName={user?.vendorName || user?.name || ""}
             />
           )}
 

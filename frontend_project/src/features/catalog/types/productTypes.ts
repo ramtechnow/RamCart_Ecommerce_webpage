@@ -23,4 +23,11 @@ export interface Product {
   images?: string[]; // Multiple image URLs list
   available: boolean;
   createdAt: any;
+  fabric?: string;
+  pattern?: string;
+  fit?: string;
+  vendor?: string;
+  vendorEmail?: string;
+  vendorAddress?: string;
+  vendorRating?: number;
 }

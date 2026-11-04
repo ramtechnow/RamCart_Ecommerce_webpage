@@ -71,7 +71,10 @@ exports.login = async (req, res) => {
             id: user.id,
             name: user.name,
             email: user.email,
-            isAdmin: user.isAdmin
+            isAdmin: user.isAdmin,
+            role: user.role || (user.isAdmin ? 'admin' : 'customer'),
+            vendorName: user.vendorName || '',
+            vendorAddress: user.vendorAddress || ''
           }
         };
         const token = jwt.sign(data, process.env.JWT_SECRET);
@@ -240,7 +243,7 @@ exports.removeFromWishlist = async (req, res) => {
 // Admin: Get all registered user credentials and carts
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find({}, { name: 1, email: 1, isAdmin: 1, cartData: 1, date: 1 });
+    const users = await User.find({}, { name: 1, email: 1, isAdmin: 1, role: 1, vendorName: 1, vendorAddress: 1, cartData: 1, date: 1 });
     res.json(users);
   } catch (error) {
     console.error("Error fetching registered users:", error);
@@ -251,7 +254,7 @@ exports.getAllUsers = async (req, res) => {
 // Admin: Toggle user admin status / role
 exports.updateUserRole = async (req, res) => {
   try {
-    const { email, isAdmin, role, vendorName } = req.body;
+    const { email, isAdmin, role, vendorName, vendorAddress } = req.body;
     const updateFields = {};
     if (typeof isAdmin !== 'undefined') updateFields.isAdmin = Boolean(isAdmin);
     if (role) {
@@ -261,6 +264,7 @@ exports.updateUserRole = async (req, res) => {
       if (role === 'vendor') updateFields.isAdmin = false;
     }
     if (typeof vendorName !== 'undefined') updateFields.vendorName = String(vendorName).trim();
+    if (typeof vendorAddress !== 'undefined') updateFields.vendorAddress = String(vendorAddress).trim();
 
     const updatedUser = await User.findOneAndUpdate(
       { email: { $regex: new RegExp("^" + email + "$", "i") } },
@@ -276,7 +280,8 @@ exports.updateUserRole = async (req, res) => {
           email: updatedUser.email, 
           isAdmin: updatedUser.isAdmin,
           role: updatedUser.role || (updatedUser.isAdmin ? 'admin' : 'customer'),
-          vendorName: updatedUser.vendorName || ''
+          vendorName: updatedUser.vendorName || '',
+          vendorAddress: updatedUser.vendorAddress || ''
         } 
       });
     } else {
@@ -780,7 +785,10 @@ exports.firebaseSync = async (req, res) => {
         name: user.name,
         email: user.email,
         phone: user.phone || "",
-        isAdmin: user.isAdmin
+        isAdmin: user.isAdmin,
+        role: user.role || (user.isAdmin ? 'admin' : 'customer'),
+        vendorName: user.vendorName || '',
+        vendorAddress: user.vendorAddress || ''
       }
     });
   } catch (error) {

@@ -4,7 +4,7 @@ import "../Styles/navbar.css";
 import {
   ShoppingCart, Heart, LogOut, ChevronDown,
   Sun, Moon, X, Home, LayoutGrid, User, LogIn,
-  Package, ShieldCheck, Menu, Mic, Search, Bell
+  Package, ShieldCheck, Menu, Mic, Search, Bell, PlusCircle
 } from "lucide-react";
 import { useCart } from "../features/checkout/hooks/useCart";
 import { useAuth } from "../features/auth/hooks/useAuth";
@@ -259,22 +259,38 @@ export const Navbar: React.FC = () => {
                           No unread notifications. Your orders are up to date!
                         </div>
                       ) : (
-                        unseenOrders.map((order: any) => (
-                          <div
-                            key={order.id}
-                            style={{
-                              padding: "10px 12px",
-                              borderRadius: "8px",
-                              backgroundColor: "var(--accent-light)",
-                              fontSize: "12px",
-                              color: "var(--text-primary)",
-                              lineHeight: "1.4"
-                            }}
-                          >
-                            <strong style={{ color: "var(--accent-pink)" }}>Order Status Update!</strong><br/>
-                            Your order <strong>#RC-{order.id ? order.id.substring(0, 8).toUpperCase() : 'ORDER'}</strong> is currently <strong>{order.status}</strong>.
-                          </div>
-                        ))
+                        unseenOrders.map((order: any) => {
+                          const status = order.status || "Ordered";
+                          const isDelivered = status === "Delivered";
+                          const isShipped = status === "Shipped";
+                          const isProcessing = status === "Processing";
+                          const isCancelled = status === "Cancelled";
+
+                          const badgeBg = isDelivered ? "#10b981" : isShipped ? "#8b5cf6" : isProcessing ? "#f59e0b" : isCancelled ? "#ef4444" : "#3b82f6";
+
+                          return (
+                            <div
+                              key={order.id}
+                              style={{
+                                padding: "10px 12px",
+                                borderRadius: "8px",
+                                backgroundColor: "var(--accent-light)",
+                                fontSize: "12px",
+                                color: "var(--text-primary)",
+                                lineHeight: "1.4",
+                                borderLeft: `4px solid ${badgeBg}`
+                              }}
+                            >
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                                <strong style={{ color: "var(--text-primary)" }}>Status Changed!</strong>
+                                <span style={{ backgroundColor: badgeBg, color: "#fff", fontSize: "10px", fontWeight: "800", padding: "1px 6px", borderRadius: "4px", textTransform: "uppercase" }}>
+                                  {status}
+                                </span>
+                              </div>
+                              Your order <strong>#RC-{order.id ? order.id.substring(0, 8).toUpperCase() : 'ORDER'}</strong> is now <strong>{status}</strong>.
+                            </div>
+                          );
+                        })
                       )}
                     </div>
 
@@ -309,6 +325,11 @@ export const Navbar: React.FC = () => {
                       <div>
                         <p className="dropdown-user-name">{user.name || "User"}</p>
                         <p className="dropdown-user-email">{user.email}</p>
+                        {user.role === 'vendor' && (
+                          <span style={{ display: 'inline-block', marginTop: '4px', fontSize: '10px', fontWeight: '800', background: 'rgba(255, 137, 6, 0.15)', color: '#ff8906', padding: '2px 6px', borderRadius: '4px' }}>
+                            VENDOR: {user.vendorName || user.name}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="dropdown-divider" />
@@ -322,6 +343,16 @@ export const Navbar: React.FC = () => {
                         <Package size={15} /> My Orders
                       </button>
                     </Link>
+                    {(user.role === "vendor" || user.role === "admin") && (
+                      <>
+                        <div className="dropdown-divider" />
+                        <Link to="/admin?tab=add" onClick={() => setUserDropdownOpen(false)}>
+                          <button className="dropdown-item vendor" role="menuitem" style={{ color: "#ff8906", fontWeight: "700" }}>
+                            <PlusCircle size={15} /> Add Product {user.role === "vendor" ? "(Vendor)" : ""}
+                          </button>
+                        </Link>
+                      </>
+                    )}
                     {user.role === "admin" && (
                       <>
                         <div className="dropdown-divider" />
@@ -486,6 +517,12 @@ export const Navbar: React.FC = () => {
                       <span className="mob-drawer-link-icon"><Package size={17} /></span>
                       Orders
                     </Link>
+                    {(user.role === "vendor" || user.role === "admin") && (
+                      <Link to="/admin?tab=add" className="mob-drawer-link" onClick={() => setMobileMenuOpen(false)} style={{ color: "#ff8906", fontWeight: "700" }}>
+                        <span className="mob-drawer-link-icon"><PlusCircle size={17} /></span>
+                        Add Product {user.role === "vendor" ? "(Vendor)" : ""}
+                      </Link>
+                    )}
                     {user.role === "admin" && (
                       <Link to="/admin" className="mob-drawer-link mob-drawer-link--admin" onClick={() => setMobileMenuOpen(false)}>
                         <span className="mob-drawer-link-icon"><ShieldCheck size={17} /></span>

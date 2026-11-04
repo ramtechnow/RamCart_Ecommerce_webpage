@@ -165,7 +165,7 @@ export const adminService = {
     }));
   },
 
-    async updateUserRole(email: string, isAdmin?: boolean, role?: string, vendorName?: string): Promise<void> {
+    async updateUserRole(email: string, isAdmin?: boolean, role?: string, vendorName?: string, vendorAddress?: string): Promise<void> {
     const token = localStorage.getItem("auth-token");
     const res = await fetch(`${BACKEND_URL}/admin/updateuserrole`, {
       method: "POST",
@@ -173,7 +173,7 @@ export const adminService = {
         "auth-token": token || "",
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ email, isAdmin, role, vendorName })
+      body: JSON.stringify({ email, isAdmin, role, vendorName, vendorAddress })
     });
     if (!res.ok) throw new Error("Failed to update user role");
   },

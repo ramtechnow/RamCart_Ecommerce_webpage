@@ -36,8 +36,8 @@ export const adminApi = {
     return adminService.fetchUsers();
   },
 
-  async updateUserRole(email, isAdmin, role, vendorName) {
-    await adminService.updateUserRole(email, isAdmin, role, vendorName);
+  async updateUserRole(email, isAdmin, role, vendorName, vendorAddress) {
+    await adminService.updateUserRole(email, isAdmin, role, vendorName, vendorAddress);
     return { success: true };
   },
 

@@ -27,6 +27,13 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("women");
   
+  // Product Highlights & Specifications (Fabric, Pattern, Fit, Vendor)
+  const [fabric, setFabric] = useState("Cotton Blend");
+  const [pattern, setPattern] = useState("Solid");
+  const [fit, setFit] = useState("Regular");
+  const [vendorInput, setVendorInput] = useState(vendorName || (isVendor ? (vendorName || "Store Vendor") : "RamCart Direct"));
+  const [vendorAddress, setVendorAddress] = useState("");
+  
   // Chip selections
   const [selectedSizes, setSelectedSizes] = useState<string[]>(['S', 'M', 'L', 'XL', 'XXL']);
   const [selectedColors, setSelectedColors] = useState<string[]>(['Black', 'White']);
@@ -297,7 +304,11 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
       image: primaryImage,
       images: images,
       available: true,
-      vendor: isVendor ? (vendorName || "Store Vendor") : "RamCart Direct"
+      fabric: fabric || "Cotton Blend",
+      pattern: pattern || "Solid",
+      fit: fit || "Regular",
+      vendor: isVendor ? (vendorName || "Store Vendor") : (vendorInput.trim() || "RamCart Direct"),
+      vendorAddress: vendorAddress.trim()
     };
 
     try {
@@ -376,6 +387,111 @@ export const AdminAddProductTab: React.FC<AdminAddProductTabProps> = ({
                     <ShieldAlert size={12}/>{fieldErrors.description}
                   </span>
                 )}
+              </div>
+            </div>
+
+            {/* ── Product Highlights & Material Specifications ── */}
+            <div className="bg-[#ffffff] dark:bg-[#171622] rounded-2xl shadow-sm border border-[#e2e4ed]/40 dark:border-white/10 p-6 flex flex-col gap-4">
+              <div className="border-b border-[#e2e4ed]/20 dark:border-white/5 pb-3">
+                <h3 className="text-sm font-black text-[#e53170] dark:text-[#ff8906] uppercase tracking-wider flex items-center gap-2">
+                  <Tag size={18} /> Product Highlights &amp; Specifications
+                </h3>
+                <p className="text-[11px] text-[#717388] mt-1">
+                  These structured specifications appear under &quot;Product Highlights&quot; on the storefront product page.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Fabric */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-[#2e2f3e] dark:text-[#a7a9be]">Fabric / Material</label>
+                  <select
+                    value={fabric}
+                    onChange={(e) => setFabric(e.target.value)}
+                    className="w-full h-10 px-3 rounded-xl border border-[#e2e4ed]/40 dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] text-xs font-semibold outline-none"
+                  >
+                    <option value="Cotton Blend">Cotton Blend</option>
+                    <option value="100% Pure Cotton">100% Pure Cotton</option>
+                    <option value="Pure Silk / Pattu">Pure Silk / Pattu</option>
+                    <option value="Art Silk">Art Silk</option>
+                    <option value="Linen">Linen</option>
+                    <option value="Rayon">Rayon</option>
+                    <option value="Denim">Denim</option>
+                    <option value="Georgette">Georgette</option>
+                    <option value="Chiffon">Chiffon</option>
+                    <option value="Polyester">Polyester</option>
+                    <option value="Velvet">Velvet</option>
+                  </select>
+                </div>
+
+                {/* Pattern */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-[#2e2f3e] dark:text-[#a7a9be]">Pattern</label>
+                  <select
+                    value={pattern}
+                    onChange={(e) => setPattern(e.target.value)}
+                    className="w-full h-10 px-3 rounded-xl border border-[#e2e4ed]/40 dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] text-xs font-semibold outline-none"
+                  >
+                    <option value="Solid">Solid</option>
+                    <option value="Striped">Striped</option>
+                    <option value="Printed">Printed</option>
+                    <option value="Checked">Checked</option>
+                    <option value="Floral">Floral</option>
+                    <option value="Embroidered">Embroidered</option>
+                    <option value="Woven / Zari">Woven / Zari</option>
+                    <option value="Self Design">Self Design</option>
+                  </select>
+                </div>
+
+                {/* Fit / Shape */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-[#2e2f3e] dark:text-[#a7a9be]">Fit / Shape</label>
+                  <select
+                    value={fit}
+                    onChange={(e) => setFit(e.target.value)}
+                    className="w-full h-10 px-3 rounded-xl border border-[#e2e4ed]/40 dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] text-xs font-semibold outline-none"
+                  >
+                    <option value="Regular">Regular</option>
+                    <option value="Slim Fit">Slim Fit</option>
+                    <option value="Relaxed Fit">Relaxed Fit</option>
+                    <option value="Oversized">Oversized</option>
+                    <option value="Straight">Straight</option>
+                    <option value="A-Line">A-Line</option>
+                    <option value="Tailored">Tailored</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Vendor / Seller attribution */}
+              <div className="mt-2 pt-3 border-t border-[#e2e4ed]/20 dark:border-white/5 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold text-[#2e2f3e] dark:text-[#a7a9be] block">
+                    Seller / Vendor Attribution
+                  </span>
+                  <span className="text-[11px] text-[#717388]">
+                    {isVendor 
+                      ? `Stamped under your store "${vendorName || 'Vendor'}"` 
+                      : 'Assign store or vendor name for this product'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {!isVendor && (
+                    <input
+                      type="text"
+                      placeholder="e.g. RamCart Direct or Vendor Name"
+                      value={vendorInput}
+                      onChange={(e) => setVendorInput(e.target.value)}
+                      className="h-9 px-3 rounded-lg border border-[#e2e4ed]/40 dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] text-xs font-semibold"
+                    />
+                  )}
+                  <input
+                    type="text"
+                    placeholder="Vendor City / Location"
+                    value={vendorAddress}
+                    onChange={(e) => setVendorAddress(e.target.value)}
+                    className="h-9 px-3 rounded-lg border border-[#e2e4ed]/40 dark:border-white/10 bg-[#ffffff] dark:bg-[#212030] text-xs font-semibold"
+                  />
+                </div>
               </div>
             </div>
 

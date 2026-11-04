@@ -6,6 +6,7 @@ export interface UserState {
   name: string | null;
   role: "admin" | "customer" | "vendor";
   vendorName?: string;
+  vendorAddress?: string;
   emailVerified: boolean;
 }
 

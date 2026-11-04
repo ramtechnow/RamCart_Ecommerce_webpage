@@ -1,5 +1,5 @@
 import React, { useState, useMemo, ChangeEvent } from 'react';
-import { Pencil, Trash2, X, Search, Filter, Loader2, Plus, AlertTriangle, Check, ExternalLink } from 'lucide-react';
+import { Pencil, Trash2, X, Search, Filter, Loader2, Plus, AlertTriangle, Check, ExternalLink, Store, Mail, Send } from 'lucide-react';
 import { adminApi } from '../../Utils/adminApi';
 import { compressImageToBase64, normalizeCategory } from '../../Utils/adminHelpers';
 import { Product, ProductVariant } from '../../features/catalog/types/productTypes';
@@ -48,6 +48,55 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
   // Editing Product Inline State
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [previewProduct, setPreviewProduct] = useState<Product | null>(null);
+
+  // Stock Request Modal state
+  const [stockRequestModal, setStockRequestModal] = useState<{
+    isOpen: boolean;
+    product: Product | null;
+    requestedUnits: number;
+    note: string;
+  }>({
+    isOpen: false,
+    product: null,
+    requestedUnits: 50,
+    note: ""
+  });
+
+  const handleOpenStockRequest = (prod: Product) => {
+    setStockRequestModal({
+      isOpen: true,
+      product: prod,
+      requestedUnits: 50,
+      note: `High customer demand. Please dispatch an additional batch of ${prod.name} at the earliest.`
+    });
+  };
+
+  const handleSendStockRequest = () => {
+    const { product, requestedUnits, note } = stockRequestModal;
+    if (!product) return;
+
+    // Trigger in-app toast
+    addToast(`📨 Stock request for ${requestedUnits} units sent to ${product.vendor || 'Vendor'}!`, 'success');
+    logAction(`Sent Stock Request: ${requestedUnits} units of "${product.name}" to ${product.vendor}`);
+
+    // Prepare mailto link for direct vendor communication
+    const vendorMail = product.vendorEmail || 'ramcart.vendors@gmail.com';
+    const subject = encodeURIComponent(`[RamCart Stock Request] Urgent Restock Required for "${product.name}" (ID #${product.id})`);
+    const body = encodeURIComponent(
+      `Hello ${product.vendor || 'Vendor Partner'},\n\n` +
+      `We have an active stock replenishment request for your product:\n` +
+      `- Product Name: ${product.name}\n` +
+      `- Product ID: #${product.id}\n` +
+      `- Category: ${product.category}\n` +
+      `- Units Requested: ${requestedUnits}\n\n` +
+      `Admin Note: ${note}\n\n` +
+      `Please log in to your Vendor Portal to increase stock or reply to this email with your dispatch ETA.\n\n` +
+      `Best regards,\nRamCart Operations Team`
+    );
+
+    window.open(`mailto:${vendorMail}?subject=${subject}&body=${body}`, '_blank');
+    setStockRequestModal({ isOpen: false, product: null, requestedUnits: 50, note: '' });
+  };
   const [editForm, setEditForm] = useState<EditFormState | null>(null);
   const [replaceIndex, setReplaceIndex] = useState<number | null>(null);
 
@@ -594,6 +643,30 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                               🎨 Colors: <strong className="text-[#2e2f3e] dark:text-[#fffffe]">{prod.colors?.join(', ') || 'N/A'}</strong>
                             </span>
                           </div>
+
+                          {/* Vendor Origin & Stock Request Action */}
+                          <div className="flex flex-wrap items-center gap-2 mt-2">
+                            {prod.vendor ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-black bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30">
+                                <Store size={10} /> Vendor: {prod.vendor}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400">
+                                In-House
+                              </span>
+                            )}
+
+                            {prod.vendor && prod.vendor !== "RamCart Direct" && (
+                              <button
+                                type="button"
+                                onClick={() => handleOpenStockRequest(prod)}
+                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-800/40 cursor-pointer transition-colors"
+                                title="Request vendor to dispatch more units"
+                              >
+                                <Mail size={11} /> Request Stock
+                              </button>
+                            )}
+                          </div>
                         </div>
                       )}
                     </td>
@@ -810,6 +883,78 @@ export const AdminCatalogTab: React.FC<AdminCatalogTabProps> = ({
                 className="px-3.5 py-1.5 bg-black dark:bg-white text-white dark:text-black font-bold rounded flex items-center gap-1.5 cursor-pointer border-none text-xs hover:opacity-90"
               >
                 Open Live Page &rarr;
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Stock Request Communication Modal */}
+      {stockRequestModal.isOpen && stockRequestModal.product && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#171622] border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-md w-full p-6 shadow-2xl flex flex-col gap-4 animate-scale-up">
+            <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Mail size={18} className="text-blue-500" />
+                <h3 className="text-sm font-extrabold text-zinc-900 dark:text-zinc-100">
+                  Request Stock from Vendor
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setStockRequestModal({ isOpen: false, product: null, requestedUnits: 50, note: '' })}
+                className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent border-none cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="bg-zinc-50 dark:bg-zinc-900/60 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs flex flex-col gap-1">
+              <span className="font-extrabold text-zinc-900 dark:text-zinc-100">{stockRequestModal.product.name}</span>
+              <span className="text-[11px] text-zinc-500">
+                Vendor: <strong>{stockRequestModal.product.vendor || 'Vendor'}</strong> &bull; Current Stock: <strong>{stockRequestModal.product.stockCount ?? 0} units</strong>
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                Units Required
+              </label>
+              <input
+                type="number"
+                min={1}
+                value={stockRequestModal.requestedUnits}
+                onChange={(e) => setStockRequestModal(prev => ({ ...prev, requestedUnits: Number(e.target.value) || 1 }))}
+                className="h-10 px-3 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs font-medium text-zinc-900 dark:text-zinc-100 outline-none"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                Note / Message to Vendor
+              </label>
+              <textarea
+                rows={3}
+                value={stockRequestModal.note}
+                onChange={(e) => setStockRequestModal(prev => ({ ...prev, note: e.target.value }))}
+                className="p-3 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs font-medium text-zinc-900 dark:text-zinc-100 outline-none resize-none"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">
+              <button
+                type="button"
+                onClick={() => setStockRequestModal({ isOpen: false, product: null, requestedUnits: 50, note: '' })}
+                className="px-4 py-2 text-xs font-bold rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSendStockRequest}
+                className="px-4 py-2 text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-700 text-white cursor-pointer shadow-xs border-none flex items-center gap-1.5"
+              >
+                <Send size={12} /> Dispatch Stock Request
               </button>
             </div>
           </div>

@@ -56,6 +56,18 @@ const ProductSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
+  fabric: {
+    type: String,
+    default: "Cotton Blend"
+  },
+  pattern: {
+    type: String,
+    default: "Solid"
+  },
+  fit: {
+    type: String,
+    default: "Regular"
+  },
   vendor: {
     type: String,
     default: ""
@@ -63,6 +75,14 @@ const ProductSchema = new mongoose.Schema({
   vendorEmail: {
     type: String,
     default: ""
+  },
+  vendorAddress: {
+    type: String,
+    default: ""
+  },
+  vendorRating: {
+    type: Number,
+    default: 4.2
   },
   date: {
     type: Date,

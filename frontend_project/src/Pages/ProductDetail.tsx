@@ -241,7 +241,7 @@ export const ProductDetail: React.FC = () => {
 
   const handleCopyHighlights = () => {
     if (!product) return;
-    const textToCopy = `Product: ${product.name}\nPrice: ₹${selectedPrice}\nFabric: Cotton Blend\nColor: ${selectedColor}\nFit: Regular Fit\nAvailable at RamCart`;
+    const textToCopy = `Product: ${product.name}\nPrice: ₹${selectedPrice}\nFabric: ${product.fabric || "Cotton Blend"}\nColor: ${selectedColor}\nPattern: ${product.pattern || "Solid"}\nFit: ${product.fit || "Regular"}\nSeller: ${product.vendor || "RamCart Direct"}\nAvailable at RamCart`;
     navigator.clipboard.writeText(textToCopy);
     dispatch(addToast({ message: "Product details copied to clipboard!", type: "success" }));
   };
@@ -690,19 +690,19 @@ export const ProductDetail: React.FC = () => {
             <div className="rc-pdp-specs-grid">
               <div className="rc-pdp-spec-item">
                 <span className="rc-pdp-spec-label">Fabric</span>
-                <span className="rc-pdp-spec-val">Cotton Blend</span>
+                <span className="rc-pdp-spec-val">{product.fabric || "Cotton Blend"}</span>
               </div>
               <div className="rc-pdp-spec-item">
                 <span className="rc-pdp-spec-label">Color</span>
-                <span className="rc-pdp-spec-val">{selectedColor}</span>
+                <span className="rc-pdp-spec-val">{selectedColor || product.colors?.[0] || "Standard"}</span>
               </div>
               <div className="rc-pdp-spec-item">
                 <span className="rc-pdp-spec-label">Pattern</span>
-                <span className="rc-pdp-spec-val">Striped</span>
+                <span className="rc-pdp-spec-val">{product.pattern || "Solid"}</span>
               </div>
               <div className="rc-pdp-spec-item">
                 <span className="rc-pdp-spec-label">Fit/Shape</span>
-                <span className="rc-pdp-spec-val">Regular</span>
+                <span className="rc-pdp-spec-val">{product.fit || "Regular"}</span>
               </div>
             </div>
 
@@ -727,7 +727,7 @@ export const ProductDetail: React.FC = () => {
             )}
           </div>
 
-          {/* Sold By Card */}
+          {/* Sold By / Vendor Details Card */}
           <div className="rc-pdp-card">
             <div className="rc-pdp-seller-row">
               <div className="rc-pdp-seller-info">
@@ -735,10 +735,17 @@ export const ProductDetail: React.FC = () => {
                   <Store size={22} />
                 </div>
                 <div>
-                  <h4 className="rc-pdp-seller-name">RODIEZ STORE</h4>
+                  <h4 className="rc-pdp-seller-name">
+                    {product.vendor || (product.vendorEmail ? product.vendorEmail.split('@')[0] : "RamCart Direct")}
+                  </h4>
                   <div className="rc-pdp-seller-stats">
-                    <span className="rc-pdp-seller-badge">4.1 ★</span>
-                    <span>42 Products</span>
+                    <span className="rc-pdp-seller-badge">
+                      {product.vendorRating ? `${product.vendorRating} ★` : "4.2 ★"}
+                    </span>
+                    <span>{product.vendor && product.vendor !== "RamCart Direct" ? "Verified Vendor Store" : "RamCart In-House Quality"}</span>
+                    {product.vendorAddress && (
+                      <span className="text-[11px] text-zinc-500">📍 {product.vendorAddress}</span>
+                    )}
                   </div>
                 </div>
               </div>

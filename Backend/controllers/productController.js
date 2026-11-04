@@ -28,8 +28,13 @@ exports.addProduct = async (req, res) => {
       stockCount: variantsInput.length > 0 ? variantsInput.reduce((sum, v) => sum + Number(v.stock), 0) : Number(req.body.stockCount || 100),
       images: req.body.images || [],
       description: req.body.description || "",
+      fabric: req.body.fabric || "Cotton Blend",
+      pattern: req.body.pattern || "Solid",
+      fit: req.body.fit || "Regular",
       vendor: req.body.vendor || (req.user && req.user.role === "vendor" ? (req.user.vendorName || req.user.name) : "RamCart Direct"),
       vendorEmail: req.body.vendorEmail || (req.user ? req.user.email : ""),
+      vendorAddress: req.body.vendorAddress || (req.user?.vendorAddress || ""),
+      vendorRating: Number(req.body.vendorRating || 4.2),
     });
     
     await product.save();
