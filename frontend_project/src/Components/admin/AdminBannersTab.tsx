@@ -20,6 +20,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
 }) => {
   const [imageUrl, setImageUrl] = useState('');
   const [imagePreview, setImagePreview] = useState('');
+  const [imageSizeKb, setImageSizeKb] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
 
   const [description, setDescription] = useState('');
@@ -44,8 +45,10 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
   const [editDiscountValue, setEditDiscountValue] = useState('');
   const [editPage, setEditPage] = useState('home');
   const [editImageUrl, setEditImageUrl] = useState('');
+  const [editTargetProductId, setEditTargetProductId] = useState('');
+  const [editImageSizeKb, setEditImageSizeKb] = useState<number | null>(null);
 
-  const [products, setProducts] = useState<{ id: string; name: string }[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -58,7 +61,14 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
       .then(r => r.json())
       .then(data => {
         const list = Array.isArray(data) ? data : (data.products || []);
-        setProducts(list.map((p: any) => ({ id: String(p.id), name: p.name })));
+        setProducts(list.map((p: any) => ({
+          id: String(p.id),
+          name: p.name,
+          new_price: Number(p.new_price ?? p.newPrice ?? 0),
+          old_price: Number(p.old_price ?? p.oldPrice ?? 0),
+          image: p.image || '',
+          category: p.category || ''
+        })));
       })
       .catch(() => {})
       .finally(() => setLoadingProducts(false));
@@ -68,6 +78,59 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
     const val = e.target.value;
     setTargetProductId(val);
     setTargetLink(val ? `/product/${val}` : '');
+    if (!val) return;
+
+    const matched = products.find(p => p.id === val);
+    if (matched) {
+      const oldPrice = Number(matched.old_price) || 0;
+      const newPrice = Number(matched.new_price) || 0;
+      let calculatedPct = 0;
+      if (oldPrice > 0 && newPrice > 0 && oldPrice > newPrice) {
+        calculatedPct = Math.round(((oldPrice - newPrice) / oldPrice) * 100);
+      }
+
+      if (calculatedPct > 0) {
+        setDiscountType('percentage');
+        setDiscountValue(String(calculatedPct));
+        setTag(`FLAT ${calculatedPct}% OFF`);
+        setDescription(`Special Deal: ${matched.name} now at ₹${newPrice} (was ₹${oldPrice})`);
+      } else if (newPrice > 0) {
+        setDiscountType('none');
+        setDiscountValue('');
+        setDescription(`Featured Collection: ${matched.name} - Only ₹${newPrice}`);
+      }
+
+      if (matched.category) {
+        const cat = matched.category.toLowerCase();
+        if (cat === 'men' || cat === 'mens') setPage('men');
+        else if (cat === 'women' || cat === 'womens') setPage('women');
+        else if (cat === 'kid' || cat === 'kids') setPage('kids');
+      }
+
+      // Auto-preview product photo if banner is currently empty
+      if (!imageUrl && matched.image) {
+        setImageUrl(matched.image);
+        setImagePreview(matched.image);
+      }
+    }
+  };
+
+  const handleUseProductPhoto = (isEdit = false) => {
+    const pId = isEdit ? editTargetProductId : targetProductId;
+    const matched = products.find(p => p.id === pId);
+    if (!matched?.image) {
+      addToast('Please select a product first or product has no photo', 'warning');
+      return;
+    }
+    if (isEdit) {
+      setEditImageUrl(matched.image);
+      setEditImageSizeKb(null);
+    } else {
+      setImageUrl(matched.image);
+      setImagePreview(matched.image);
+      setImageSizeKb(null);
+    }
+    addToast('📸 Applied selected product image to banner', 'info');
   };
 
   const compressBannerImage = (file: File): Promise<string> => {
@@ -79,27 +142,36 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
         img.src = event.target?.result as string;
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const max_size = 1400;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > max_size) {
-              height *= max_size / width;
-              width = max_size;
-            }
-          } else {
-            if (height > max_size) {
-              width *= max_size / height;
-              height = max_size;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
+          // Standard widescreen 1280x600 banner format
+          const targetW = 1280;
+          const targetH = 600;
+          canvas.width = targetW;
+          canvas.height = targetH;
           const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0, width, height);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+          if (ctx) {
+            // Draw image covering 1280x600 container cleanly (object-fit: cover)
+            const imgAspect = img.width / img.height;
+            const targetAspect = targetW / targetH;
+            let renderW = targetW;
+            let renderH = targetH;
+            let offsetX = 0;
+            let offsetY = 0;
+
+            if (imgAspect > targetAspect) {
+              renderH = targetH;
+              renderW = targetH * imgAspect;
+              offsetX = (targetW - renderW) / 2;
+            } else {
+              renderW = targetW;
+              renderH = targetW / imgAspect;
+              offsetY = (targetH - renderH) / 2;
+            }
+
+            ctx.fillStyle = '#121214';
+            ctx.fillRect(0, 0, targetW, targetH);
+            ctx.drawImage(img, offsetX, offsetY, renderW, renderH);
+          }
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.76);
           resolve(dataUrl);
         };
         img.onerror = (err) => reject(err);
@@ -120,13 +192,16 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
     setUploading(true);
     try {
       const base64Data = await compressBannerImage(file);
+      const sizeKb = Math.round((base64Data.length * 3 / 4) / 1024);
       if (isEdit) {
         setEditImageUrl(base64Data);
+        setEditImageSizeKb(sizeKb);
       } else {
         setImageUrl(base64Data);
         setImagePreview(base64Data);
+        setImageSizeKb(sizeKb);
       }
-      addToast('🖼️ Banner image uploaded & compressed successfully', 'info');
+      addToast(`🖼️ Banner resized (1280x600) & compressed to ${sizeKb} KB!`, 'info');
     } catch (err) {
       console.error(err);
       addToast('Failed to process image file', 'error');
@@ -405,8 +480,13 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                       <span className="text-xs font-bold">Uploading file...</span>
                     </div>
                   ) : (imageUrl || imagePreview) ? (
-                    <div className="relative w-full h-24 rounded-lg overflow-hidden border border-[#e2e4ed]/40">
+                    <div className="relative w-full h-28 rounded-lg overflow-hidden border border-[#e2e4ed]/40">
                       <img src={imageUrl || imagePreview} alt="Banner uploader preview" className="w-full h-full object-cover" />
+                      {imageSizeKb && (
+                        <span className="absolute bottom-1 left-1 bg-black/75 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
+                          📁 {imageSizeKb} KB (Fast Load)
+                        </span>
+                      )}
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); clearImage(); }}
@@ -470,11 +550,22 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                   className="w-full h-10 px-3 text-xs rounded-xl border border-[#e2e4ed]/40 bg-[#ffffff] dark:bg-[#212030] outline-none cursor-pointer"
                   disabled={loadingProducts}
                 >
-                  <option value="">{loadingProducts ? 'Syncing Catalog...' : '— Select target product —'}</option>
+                  <option value="">{loadingProducts ? 'Syncing Catalog...' : '— Select target product (Auto-Calculates Real Discount) —'}</option>
                   {products.map(p => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
+                    <option key={p.id} value={p.id}>
+                      {p.name} {p.old_price && p.new_price && p.old_price > p.new_price ? `(${Math.round(((p.old_price - p.new_price) / p.old_price) * 100)}% OFF • ₹${p.new_price})` : `(₹${p.new_price || 0})`}
+                    </option>
                   ))}
                 </select>
+                {targetProductId && (
+                  <button
+                    type="button"
+                    onClick={() => handleUseProductPhoto(false)}
+                    className="self-start text-[11px] font-bold text-black dark:text-white bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 px-2.5 py-1 rounded-lg border border-zinc-300 dark:border-zinc-700 cursor-pointer flex items-center gap-1 transition-colors mt-1"
+                  >
+                    <span>📸 Use Selected Product's Photo as Banner</span>
+                  </button>
+                )}
               </div>
 
               {/* Placement */}
@@ -554,7 +645,14 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
               {/* Image */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold text-[#2e2f3e] dark:text-[#a7a9be]">Banner Image</label>
-                <img src={editImageUrl} alt="Edit preview" className="w-full h-28 object-cover rounded-xl border border-[#e2e4ed]/40 mb-2 bg-gray-100" />
+                <div className="relative w-full h-28 rounded-xl overflow-hidden border border-[#e2e4ed]/40 mb-2 bg-gray-100">
+                  <img src={editImageUrl} alt="Edit preview" className="w-full h-full object-cover" />
+                  {editImageSizeKb && (
+                    <span className="absolute bottom-1 left-1 bg-black/75 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
+                      📁 {editImageSizeKb} KB (Optimized)
+                    </span>
+                  )}
+                </div>
                 <button
                   type="button"
                   onClick={() => editFileInputRef.current?.click()}
@@ -598,6 +696,46 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                   placeholder="e.g. Instant Discount on Prepaid Orders*"
                   className="w-full h-9 px-3 rounded-lg border border-[#e2e4ed]/40 bg-[#ffffff] dark:bg-[#212030] outline-none text-xs"
                 />
+              </div>
+
+              {/* Target Product Selection */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-[#2e2f3e] dark:text-[#a7a9be]">Sync With Target Product</label>
+                <select
+                  value={editTargetProductId}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setEditTargetProductId(val);
+                    setEditTargetLink(val ? `/product/${val}` : '');
+                    const matched = products.find(p => p.id === val);
+                    if (matched) {
+                      const oldPrice = Number(matched.old_price) || 0;
+                      const newPrice = Number(matched.new_price) || 0;
+                      if (oldPrice > 0 && newPrice > 0 && oldPrice > newPrice) {
+                        const pct = Math.round(((oldPrice - newPrice) / oldPrice) * 100);
+                        setEditDiscountType('percentage');
+                        setEditDiscountValue(String(pct));
+                        setEditTag(`FLAT ${pct}% OFF`);
+                        setEditDescription(`Special Deal: ${matched.name} now at ₹${newPrice}`);
+                      }
+                    }
+                  }}
+                  className="w-full h-9 px-3 rounded-lg border border-[#e2e4ed]/40 bg-[#ffffff] dark:bg-[#212030] outline-none text-xs cursor-pointer"
+                >
+                  <option value="">— Select Product (Auto-Recalculate) —</option>
+                  {products.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+                {editTargetProductId && (
+                  <button
+                    type="button"
+                    onClick={() => handleUseProductPhoto(true)}
+                    className="self-start text-[10px] font-bold text-black dark:text-white bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 px-2 py-0.5 rounded border border-zinc-300 dark:border-zinc-700 cursor-pointer mt-1"
+                  >
+                    <span>📸 Use Selected Product's Photo</span>
+                  </button>
+                )}
               </div>
 
               {/* Target Redirect */}

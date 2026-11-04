@@ -94,10 +94,10 @@ const thirdColumn = testimonials.slice(6, 9);
 
 export function TestimonialsSection() {
   return (
-    <section className="relative py-10" style={{ margin: "40px 0" }}>
+    <section className="relative py-3" style={{ margin: "16px 0" }}>
       <div className="mx-auto max-w-5xl" style={{ padding: "0 16px" }}>
         {/* Header */}
-        <div style={{ textAlign: "center", marginBottom: 40 }}>
+        <div style={{ textAlign: "center", marginBottom: 16 }}>
           <span style={{ color: "var(--accent-pink)", fontSize: 11, fontWeight: 800, letterSpacing: 2, textTransform: "uppercase" }}>
             Customer Love
           </span>
@@ -156,13 +156,13 @@ function TestimonialCard({
   return (
     <figure
       className={cn(
-        "w-full max-w-xs rounded-2xl p-6",
+        "w-full max-w-xs rounded-none p-4",
         className
       )}
       style={{
         border: "1px solid var(--border-color)",
         background: "var(--bg-secondary)",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.06)"
+        boxShadow: "none"
       }}
       {...props}
     >
@@ -185,7 +185,7 @@ function TestimonialCard({
 
       {/* Author */}
       <figcaption style={{ marginTop: 16, display: "flex", alignItems: "center", gap: 10 }}>
-        <Avatar className="size-9 rounded-full">
+        <Avatar className="size-9 rounded-none border border-zinc-200 dark:border-zinc-700">
           <AvatarImage alt={`${name}'s profile picture`} src={image} />
           <AvatarFallback>{name.charAt(0)}</AvatarFallback>
         </Avatar>

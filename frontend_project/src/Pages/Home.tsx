@@ -199,12 +199,12 @@ export const Home: React.FC = () => {
       />
 
       {/* ── Double-Bezel Floating Trust Capsule (Hardware-grade aesthetic) ── */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 my-6 sm:my-8">
-        <div className="p-1 sm:p-1.5 rounded-md bg-black/[0.02] dark:bg-white/[0.03] ring-1 ring-black/5 dark:ring-white/10 shadow-sm">
-          <div className="rounded-md bg-white/95 dark:bg-[#171622]/95 backdrop-blur-xl border border-black/5 dark:border-white/5 p-2.5 sm:p-5 flex items-center justify-between sm:justify-around gap-3 sm:gap-4 overflow-x-auto no-scrollbar">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 my-2.5 sm:my-3">
+        <div className="p-0 rounded-none bg-transparent">
+          <div className="rounded-none bg-white dark:bg-[#171622] border border-zinc-200 dark:border-zinc-800 p-2 sm:p-3 flex items-center justify-between sm:justify-around gap-2 sm:gap-4 overflow-x-auto no-scrollbar">
             
             <div className="group flex items-center gap-3 shrink-0">
-              <div className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-[#ff8906]/10 dark:bg-[#ff8906]/20 flex items-center justify-center text-[#ff8906] transition-transform duration-300 group-hover:scale-110 shrink-0">
+              <div className="w-8 sm:w-9 h-8 sm:h-9 rounded-none border border-[#ff8906]/20 bg-[#ff8906]/10 dark:bg-[#ff8906]/20 flex items-center justify-center text-[#ff8906] transition-transform duration-300 group-hover:scale-110 shrink-0">
                 <Truck size={18} />
               </div>
               <div>
@@ -220,7 +220,7 @@ export const Home: React.FC = () => {
             <div className="hidden sm:block w-px h-8 bg-black/5 dark:bg-white/10 shrink-0" />
 
             <div className="group flex items-center gap-3 shrink-0">
-              <div className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-[#ff8906]/10 dark:bg-[#ff8906]/20 flex items-center justify-center text-[#ff8906] transition-transform duration-300 group-hover:scale-110 shrink-0">
+              <div className="w-8 sm:w-9 h-8 sm:h-9 rounded-none border border-[#ff8906]/20 bg-[#ff8906]/10 dark:bg-[#ff8906]/20 flex items-center justify-center text-[#ff8906] transition-transform duration-300 group-hover:scale-110 shrink-0">
                 <RotateCcw size={18} />
               </div>
               <div>
@@ -236,7 +236,7 @@ export const Home: React.FC = () => {
             <div className="hidden sm:block w-px h-8 bg-black/5 dark:bg-white/10 shrink-0" />
 
             <div className="group flex items-center gap-3 shrink-0">
-              <div className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-[#ff8906]/10 dark:bg-[#ff8906]/20 flex items-center justify-center text-[#ff8906] transition-transform duration-300 group-hover:scale-110 shrink-0">
+              <div className="w-8 sm:w-9 h-8 sm:h-9 rounded-none border border-[#ff8906]/20 bg-[#ff8906]/10 dark:bg-[#ff8906]/20 flex items-center justify-center text-[#ff8906] transition-transform duration-300 group-hover:scale-110 shrink-0">
                 <Shield size={18} />
               </div>
               <div>
@@ -252,7 +252,7 @@ export const Home: React.FC = () => {
             <div className="hidden sm:block w-px h-8 bg-black/5 dark:bg-white/10 shrink-0" />
 
             <div className="group flex items-center gap-3 shrink-0">
-              <div className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-[#ff8906]/10 dark:bg-[#ff8906]/20 flex items-center justify-center text-[#ff8906] transition-transform duration-300 group-hover:scale-110 shrink-0">
+              <div className="w-8 sm:w-9 h-8 sm:h-9 rounded-none border border-[#ff8906]/20 bg-[#ff8906]/10 dark:bg-[#ff8906]/20 flex items-center justify-center text-[#ff8906] transition-transform duration-300 group-hover:scale-110 shrink-0">
                 <Tag size={18} />
               </div>
               <div>
@@ -275,9 +275,9 @@ export const Home: React.FC = () => {
         )}
 
         {/* ── 2. Curated Wardrobe Lookbook (Dynamic & Responsive Categories) ── */}
-        <section aria-labelledby="cat-heading" className="my-10 sm:my-14">
-          <div className="text-center mb-8">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] uppercase tracking-[0.2em] font-extrabold bg-[#ff8906]/10 text-[#ff8906] border border-[#ff8906]/20 dark:bg-[#ff8906]/15 dark:border-[#ff8906]/30 mb-2.5">
+        <section aria-labelledby="cat-heading" className="my-4 sm:my-6">
+          <div className="text-center mb-4">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-none text-[10px] uppercase tracking-[0.2em] font-extrabold bg-[#ff8906]/10 text-[#ff8906] border border-[#ff8906]/30 dark:bg-[#ff8906]/15 dark:border-[#ff8906]/30 mb-1.5 px-2 py-0.5">
               CURATED EDITIONS
             </span>
             <h2 id="cat-heading" className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0f0e17] dark:text-[#fffffe]">
@@ -293,7 +293,7 @@ export const Home: React.FC = () => {
               <Link
                 key={card.categoryKey}
                 to={card.link || (card.categoryKey === 'women' ? '/womens' : card.categoryKey === 'men' ? '/mens' : '/kids')}
-                className="group relative w-full aspect-[4/5] max-h-[380px] min-h-[290px] sm:min-h-[340px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-sm border border-black/5 dark:border-white/10 flex flex-col justify-between p-4 sm:p-6 transition-all duration-500 hover:shadow-xl hover:-translate-y-1 cursor-pointer"
+                className="group relative w-full aspect-[4/5] max-h-[380px] min-h-[290px] sm:min-h-[340px] rounded-none overflow-hidden shadow-none border border-zinc-300 dark:border-zinc-800 flex flex-col justify-between p-4 sm:p-6 transition-all duration-500 hover:shadow-xl hover:-translate-y-1 cursor-pointer"
               >
                 {/* Responsive Image with Object Containment & Top Alignment */}
                 <img

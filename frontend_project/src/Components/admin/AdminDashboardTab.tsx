@@ -237,7 +237,7 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
           <h1 style={{ margin: 0, fontSize: '1.85rem', fontWeight: '800', letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>Admin Console</h1>
           <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Manage Catalog, Accounts, and Shop Status</p>
         </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
           <button 
             type="button"
             onClick={handleExportBusinessReport}
@@ -245,62 +245,62 @@ export const AdminDashboardTab: React.FC<AdminDashboardTabProps> = ({
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '10px 18px',
+              gap: '6px',
+              padding: '6px 13px',
               backgroundColor: 'var(--bg-tertiary)',
               color: 'var(--text-primary)',
               border: '1px solid var(--border-color)',
-              borderRadius: 'var(--border-radius-sm)',
-              fontSize: '0.85rem',
+              borderRadius: '6px',
+              fontSize: '0.75rem',
               fontWeight: '700',
               cursor: 'pointer',
-              transition: 'background-color 0.2s'
+              transition: 'all 0.2s ease'
             }}
           >
-            <Download size={16} /> Export Report (CSV)
+            <Download size={14} /> Export Report (CSV)
           </button>
           <button 
             onClick={fetchAllAdminData}
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '10px 18px',
+              gap: '6px',
+              padding: '6px 13px',
               backgroundColor: 'var(--bg-tertiary)',
               color: 'var(--text-primary)',
               border: '1px solid var(--border-color)',
-              borderRadius: 'var(--border-radius-sm)',
-              fontSize: '0.85rem',
+              borderRadius: '6px',
+              fontSize: '0.75rem',
               fontWeight: '700',
               cursor: 'pointer',
-              transition: 'background-color 0.2s'
+              transition: 'all 0.2s ease'
             }}
             onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--border-color)'}
             onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)'}
           >
-            <Activity size={16} /> Sync Live Data
+            <Activity size={14} /> Sync Live Data
           </button>
           <button 
             onClick={() => setActiveTab("add")}
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              padding: '10px 18px',
+              gap: '6px',
+              padding: '6px 13px',
               backgroundColor: 'var(--btn-primary)',
               color: 'var(--btn-text)',
               border: 'none',
-              borderRadius: 'var(--border-radius-sm)',
-              fontSize: '0.85rem',
+              borderRadius: '6px',
+              fontSize: '0.75rem',
               fontWeight: '700',
               cursor: 'pointer',
-              transition: 'background-color 0.2s',
+              transition: 'all 0.2s ease',
               boxShadow: 'var(--shadow-sm)'
             }}
             onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--btn-hover)'}
             onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'var(--btn-primary)'}
           >
-            <Plus size={16} /> New Entry
+            <Plus size={14} /> New Entry
           </button>
         </div>
       </div>

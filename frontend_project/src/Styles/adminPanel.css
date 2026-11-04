@@ -2158,9 +2158,17 @@
 
 /* ── Admin Notifications Dropdown (Fixed width on laptop, responsive on mobile) ── */
 .admin-notifications-dropdown {
+  position: absolute !important;
   width: 420px !important;
-  min-width: 380px !important;
-  max-width: calc(100vw - 24px) !important;
+  min-width: 360px !important;
+  max-width: min(440px, calc(100vw - 24px)) !important;
+  right: -50px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+  box-sizing: border-box !important;
+  z-index: 1000 !important;
 }
 
 @media (max-width: 640px) {

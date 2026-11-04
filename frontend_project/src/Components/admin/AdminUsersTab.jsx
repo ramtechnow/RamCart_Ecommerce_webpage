@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { User, ShoppingCart, Shield, Trash2, ChevronDown, ChevronUp, UserCheck, AlertTriangle, Store } from 'lucide-react';
+import { User, ShoppingCart, Shield, Trash2, ChevronDown, ChevronUp, UserCheck, AlertTriangle, Store, X } from 'lucide-react';
 import { adminApi } from '../../Utils/adminApi';
 
 export const AdminUsersTab = ({ 
@@ -113,8 +113,10 @@ export const AdminUsersTab = ({
       let roleMatch = true;
       if (roleFilter === 'admin') {
         roleMatch = u.isAdmin === true;
+      } else if (roleFilter === 'vendor') {
+        roleMatch = u.role === 'vendor';
       } else if (roleFilter === 'customer') {
-        roleMatch = !u.isAdmin;
+        roleMatch = !u.isAdmin && u.role !== 'vendor';
       }
 
       let cartMatch = true;
@@ -284,13 +286,19 @@ export const AdminUsersTab = ({
               <div className="p-4 flex-1 flex flex-col gap-3">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-semibold text-[#717388]">Role Profile</span>
-                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                    u.isAdmin 
-                      ? "bg-black text-white dark:bg-white dark:text-black border border-transparent" 
-                      : "bg-[#eff0f6] dark:bg-[#212030] text-[#2e2f3e] dark:text-[#a7a9be] border border-gray-200 dark:border-gray-700"
-                  }`}>
-                    {u.isAdmin ? "Super Admin" : "Customer"}
-                  </span>
+                  {u.role === 'vendor' ? (
+                    <span className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                      <Store size={10} /> Vendor: {u.vendorName || u.name}
+                    </span>
+                  ) : (
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                      u.isAdmin 
+                        ? "bg-black text-white dark:bg-white dark:text-black border border-transparent" 
+                        : "bg-[#eff0f6] dark:bg-[#212030] text-[#2e2f3e] dark:text-[#a7a9be] border border-gray-200 dark:border-gray-700"
+                    }`}>
+                      {u.isAdmin ? "Super Admin" : "Customer"}
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex justify-between items-center text-xs">
@@ -353,27 +361,59 @@ export const AdminUsersTab = ({
               </div>
 
               {/* Card Footer Actions */}
-              <div className="p-3 bg-zinc-50 dark:bg-zinc-900/40 border-t border-zinc-200 dark:border-zinc-800 flex gap-1.5 justify-end">
+              <div className="p-3 bg-zinc-50 dark:bg-zinc-900/40 border-t border-zinc-200 dark:border-zinc-800 flex flex-wrap gap-1.5 justify-end">
                 <button 
                   type="button"
                   onClick={() => setExpandedUserEmail(isExpanded ? null : u.email)}
-                  className="px-2.5 py-1.5 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-[11px] font-bold rounded-xl flex items-center gap-1 transition-all cursor-pointer bg-white dark:bg-zinc-900"
+                  className="px-2 py-1 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all cursor-pointer bg-white dark:bg-zinc-900"
                 >
                   {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                  <span>Inspect Cart</span>
+                  <span>Cart</span>
                 </button>
+                {u.role === 'vendor' ? (
+                  <>
+                    <button 
+                      type="button"
+                      onClick={() => handleOpenVendorModal(u)}
+                      className="px-2 py-1 border border-amber-500/40 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all cursor-pointer"
+                      title="Edit Vendor Brand Name"
+                    >
+                      <Store size={12} />
+                      <span>Edit Vendor Name</span>
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => handleRevokeVendor(u)}
+                      className="px-2 py-1 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all cursor-pointer bg-white dark:bg-zinc-900"
+                      title="Revoke vendor status"
+                    >
+                      <AlertTriangle size={12} />
+                      <span>Revoke Vendor</span>
+                    </button>
+                  </>
+                ) : !u.isAdmin ? (
+                  <button 
+                    type="button"
+                    onClick={() => handleOpenVendorModal(u)}
+                    className="px-2 py-1 border border-amber-500/40 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all cursor-pointer"
+                    title="Promote customer to Vendor"
+                  >
+                    <Store size={12} />
+                    <span>Make Vendor</span>
+                  </button>
+                ) : null}
                 <button 
                   type="button"
                   onClick={() => handleToggleRole(u)}
-                  className="px-2.5 py-1.5 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-[11px] font-bold rounded-xl flex items-center gap-1 transition-all cursor-pointer bg-white dark:bg-zinc-900"
+                  className="px-2 py-1 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-900 dark:text-zinc-100 text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all cursor-pointer bg-white dark:bg-zinc-900"
                 >
                   <UserCheck size={12} />
-                  <span>{u.isAdmin ? "Demote" : "Promote"}</span>
+                  <span>{u.isAdmin ? "Demote" : "Admin"}</span>
                 </button>
                 <button 
                   type="button"
                   onClick={() => handleDeleteUser(u)}
-                  className="px-2.5 py-1.5 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 text-[11px] font-bold rounded-xl flex items-center gap-1 transition-all cursor-pointer border-none"
+                  className="px-2 py-1 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 text-[11px] font-bold rounded-lg flex items-center gap-1 transition-all cursor-pointer border-none"
                 >
                   <Trash2 size={12} />
                   <span>Delete</span>
@@ -388,6 +428,62 @@ export const AdminUsersTab = ({
           </div>
         )}
       </div>
+
+      {/* Vendor Promotion / Edit Modal */}
+      {vendorModal.isOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#171622] border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-md w-full p-6 shadow-2xl flex flex-col gap-4 animate-scale-up">
+            <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Store size={18} className="text-amber-500" />
+                <h3 className="text-sm font-extrabold text-zinc-900 dark:text-zinc-100">
+                  {vendorModal.user?.role === 'vendor' ? 'Edit Vendor Business Details' : 'Promote User to Vendor'}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setVendorModal({ isOpen: false, user: null, vendorName: "" })}
+                className="text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 bg-transparent border-none cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                Official Vendor / Brand Name
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Ramesh Silks & Handlooms, Elite Trends"
+                value={vendorModal.vendorName}
+                onChange={(e) => setVendorModal(prev => ({ ...prev, vendorName: e.target.value }))}
+                className="h-10 px-3 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-xs font-medium text-zinc-900 dark:text-zinc-100 outline-none"
+              />
+              <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                This brand name will be stamped on products uploaded by this vendor account.
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-zinc-200 dark:border-zinc-800">
+              <button
+                type="button"
+                onClick={() => setVendorModal({ isOpen: false, user: null, vendorName: "" })}
+                className="px-4 py-2 text-xs font-bold rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveVendorPromotion}
+                className="px-4 py-2 text-xs font-bold rounded-xl bg-black text-white dark:bg-white dark:text-black cursor-pointer shadow-xs border-none"
+              >
+                Save Vendor
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

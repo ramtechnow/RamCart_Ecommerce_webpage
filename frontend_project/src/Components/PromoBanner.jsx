@@ -107,7 +107,11 @@ export const PromoBanner = ({ page = "home" }) => {
       }
 
       if (isMounted) {
-        setBanners((prev) => (prev.length > 0 ? prev : DEFAULT_FALLBACK_BANNERS));
+        if (page === "home") {
+          setBanners((prev) => (prev.length > 0 ? prev : DEFAULT_FALLBACK_BANNERS));
+        } else {
+          setBanners((prev) => prev);
+        }
         setLoading(false);
 
         if (attempt === 1) {
@@ -126,7 +130,10 @@ export const PromoBanner = ({ page = "home" }) => {
     };
   }, [page]);
 
-  const activeSlides = banners.length > 0 ? banners : DEFAULT_FALLBACK_BANNERS;
+  const activeSlides = banners.length > 0 ? banners : (page === "home" ? DEFAULT_FALLBACK_BANNERS : []);
+  if (activeSlides.length === 0) {
+    return null;
+  }
   const totalSlides = activeSlides.length;
 
   const handleNext = useCallback(() => {

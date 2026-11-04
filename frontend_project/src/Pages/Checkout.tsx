@@ -767,6 +767,14 @@ export const Checkout: React.FC = () => {
                     </div>
                   </div>
 
+                  {/* Quick Tip for Test Mode & Switching to UPI */}
+                  <div className="p-2.5 mt-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-[11px] text-blue-900 dark:text-blue-200 leading-relaxed flex items-start gap-2">
+                    <Info size={14} className="shrink-0 mt-0.5 text-blue-600 dark:text-blue-400" />
+                    <span>
+                      <strong>UPI / Card Switch Tip:</strong> Inside Razorpay popup, click the <strong>&larr; Back arrow</strong> anytime to change payment mode back to UPI. In test mode, enter <code>success@razorpay</code> to approve instantly!
+                    </span>
+                  </div>
+
                   {/* Security Points */}
                   <div className="razorpay-trust-points">
                     <div className="razorpay-trust-item">
