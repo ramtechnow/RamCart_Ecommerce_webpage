@@ -28,7 +28,7 @@
 
 ---
 
-### 🛍️ 2. Product Detail, Cart & Mobile Experience
+### 🛍️ 2. Product Detail, Cart & Order Tracking
 
 | Product Details (Size Selection & Dynamic Pricing) | Shopping Cart & Price Breakdown |
 | :---: | :---: |
@@ -37,10 +37,6 @@
 | Customer Wishlist | Customer Orders & Live Status Tracking |
 | :---: | :---: |
 | ![Wishlist](Screenshots/09_customer_wishlist.png) | ![Customer Orders](Screenshots/10_customer_orders_tracking.png) |
-
-| Mobile Responsive Checkout & Address Selection | Mobile Product Detail View & Sticky Action Bar |
-| :---: | :---: |
-| ![Mobile Checkout](Screenshots/26_mobile_checkout_shipping_address.jpg) | ![Mobile PDP](Screenshots/27_mobile_product_detail_and_sticky_bar.jpg) |
 
 ---
 
@@ -62,9 +58,9 @@
 | :---: | :---: |
 | ![Seasonal Campaigns](Screenshots/20_admin_festive_seasonal.png) | ![User Management](Screenshots/21_admin_user_management.png) |
 
-| Real-Time Notification Bell & Drawer | Category Showcase Management |
-| :---: | :---: |
-| ![Notification Bell](Screenshots/25_admin_notification_bell_drawer.png) | ![Category Showcase](Screenshots/30_category_showcase_management.png) |
+| Category Showcase Management |
+| :---: |
+| ![Category Showcase](Screenshots/30_category_showcase_management.png) |
 
 ---
 
@@ -189,16 +185,14 @@
 
 ```plaintext
 D:\Ecommerce/
-├── Screenshots/                  # High-Resolution Application Screen Captures (31 Assets)
+├── Screenshots/                  # High-Resolution Application Screen Captures (28 Assets)
 │   ├── 01_storefront_home.png
 │   ├── 02_storefront_carousel.png
 │   ├── 03_storefront_dark_mode.png
 │   ├── 04_search_voice_filters.png
 │   ├── 05_catalog_grid.png
 │   ├── ...
-│   ├── 25_admin_notification_bell_drawer.png
-│   ├── 26_mobile_checkout_shipping_address.jpg
-│   ├── 27_mobile_product_detail_and_sticky_bar.jpg
+│   ├── 24_email_order_cancelled.png
 │   ├── 28_vendor_management_console_add_product.png
 │   ├── 29_crm_marketing_dispatcher.png
 │   ├── 30_category_showcase_management.png

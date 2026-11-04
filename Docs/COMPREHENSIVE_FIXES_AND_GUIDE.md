@@ -126,9 +126,6 @@
 ---
 
 ## 12. Complete Visual Screenshots Directory
-- `Screenshots/25_admin_notification_bell_drawer.png`: Admin Real-Time Notification Bell & Drawer Dropdown.
-- `Screenshots/26_mobile_checkout_shipping_address.jpg`: Mobile Responsive Checkout, Address Selector & Shipping Details.
-- `Screenshots/27_mobile_product_detail_and_sticky_bar.jpg`: Mobile Product Detail Page with Clean Sticky Bottom Bar (Add to Cart / Buy Now) & Size Selection.
 - `Screenshots/28_vendor_management_console_add_product.png`: RamCart Vendor Management Console with Product Listing & Access Isolation.
 - `Screenshots/29_crm_marketing_dispatcher.png`: CRM & Email / WhatsApp Broadcast Campaign Dispatcher.
 - `Screenshots/30_category_showcase_management.png`: Visual Category Cards & Sub-banner Promotion Manager.
