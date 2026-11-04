@@ -10,7 +10,9 @@ export const AdminTopbar = ({
   onMarkSingleRead, 
   onClearAll,
   onProcessOrder,
-  onToggleMobileSidebar
+  onToggleMobileSidebar,
+  isVendor = false,
+  onRestock
 }) => {
   const navigate = useNavigate();
   const themeCtx = useContext(ThemeContext);
@@ -40,9 +42,9 @@ export const AdminTopbar = ({
               className="text-sm font-black tracking-wider uppercase m-0 leading-none flex items-center gap-1.5"
               style={{ color: 'var(--text-primary)' }}
             >
-              <span>ADMIN CONSOLE</span>
+              <span>{isVendor ? "RamCart Vendor Management Console" : "ADMIN CONSOLE"}</span>
               <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-md bg-black text-white dark:bg-white dark:text-black">
-                Live
+                {isVendor ? 'Vendor Portal' : 'Live'}
               </span>
             </h2>
           </div>
@@ -50,7 +52,7 @@ export const AdminTopbar = ({
             className="text-[11px] font-medium hidden sm:inline-block mt-1"
             style={{ color: 'var(--text-secondary)' }}
           >
-            Manage Catalog, Accounts, and Real-Time Orders
+            {isVendor ? "Manage your uploaded products, monitor stock inventory, and review admin restock requests" : "Manage Catalog, Accounts, and Real-Time Orders"}
           </span>
         </div>
       </div>
@@ -208,6 +210,20 @@ export const AdminTopbar = ({
                           Process &amp; Ship <ArrowRight size={10} />
                         </button>
                       )}
+
+                      {n.isStockRequest && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onMarkSingleRead && onMarkSingleRead(n.id);
+                            setShowNotifications(false);
+                            onRestock && onRestock(n.productId, n.requestedUnits);
+                          }}
+                          className="self-end px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-bold rounded-lg flex items-center gap-1 cursor-pointer border-none shadow-xs transition-all"
+                        >
+                          Restock +{n.requestedUnits} Units <ArrowRight size={10} />
+                        </button>
+                      )}
                     </div>
                   ))
                 )}
@@ -230,7 +246,7 @@ export const AdminTopbar = ({
                   {displayName}
                 </span>
                 <span className="text-[9px] font-bold uppercase tracking-wider text-orange-600 dark:text-orange-400 leading-none mt-0.5">
-                  {adminUser?.role === 'admin' ? 'Root Admin' : 'Admin'}
+                  {isVendor ? "Verified Vendor" : (adminUser?.role === 'admin' ? 'Root Admin' : 'Admin')}
                 </span>
               </div>
             </div>

@@ -144,14 +144,14 @@ export const AdminSidebar = ({
               >
                 <span>RamCart</span>
                 <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-black text-white dark:bg-white dark:text-black uppercase tracking-wider">
-                  Admin
+                  {isVendor ? "Vendor" : "Admin"}
                 </span>
               </h1>
               <span 
                 className="text-[10px] font-bold uppercase tracking-wider block mt-0.5"
                 style={{ color: 'var(--text-secondary)' }}
               >
-                Management Console
+                {isVendor ? "Vendor Console" : "Management Console"}
               </span>
             </div>
           </div>
@@ -232,7 +232,7 @@ export const AdminSidebar = ({
             </div>
             <div className="flex flex-col min-w-0 flex-1">
               <span className="text-xs font-black truncate text-zinc-900 dark:text-zinc-100">
-                {user?.name || 'Admin'}
+                {isVendor ? (vendorName || user?.vendorName || user?.name || 'Vendor') : (user?.name || 'Admin')}
               </span>
               <div className="flex items-center gap-1">
                 <ShieldCheck
@@ -240,7 +240,7 @@ export const AdminSidebar = ({
                   className="text-zinc-600 dark:text-zinc-400 shrink-0"
                 />
                 <span className="text-[10px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-wider truncate">
-                  {user?.role === 'admin' ? 'Root Admin' : 'Admin'}
+                  {isVendor ? 'Verified Vendor' : (user?.role === 'admin' ? 'Root Admin' : 'Admin')}
                 </span>
               </div>
             </div>
@@ -253,7 +253,7 @@ export const AdminSidebar = ({
             className="w-full flex items-center justify-center gap-1.5 py-2 px-4 bg-black hover:bg-zinc-800 text-white dark:bg-white dark:text-black dark:hover:bg-zinc-200 rounded-xl transition-all duration-150 text-xs font-bold cursor-pointer border-none shadow-xs"
           >
             <Zap size={13} className="fill-current" />
-            Add product
+            {isVendor ? '+ Add Vendor Product' : 'Add product'}
           </button>
 
           {/* Logout Button */}

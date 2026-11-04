@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAppSelector } from "../store/hooks";
 import { adminApi } from "../Utils/adminApi";
@@ -45,11 +45,16 @@ export const AdminPanel: React.FC = () => {
 
   useEffect(() => {
     if (queryTab) {
-      setActiveTab(queryTab);
-    } else if (isVendor && activeTab === "dashboard") {
-      setActiveTab("add");
+      if (isVendor && !["list", "add"].includes(queryTab)) {
+        setActiveTab("list");
+      } else {
+        setActiveTab(queryTab);
+      }
+    } else if (isVendor && !["list", "add"].includes(activeTab)) {
+      setActiveTab("list");
     }
-  }, [queryTab, isVendor]);
+  }, [queryTab, isVendor, activeTab]);
+
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // 3. Database State
@@ -58,6 +63,16 @@ export const AdminPanel: React.FC = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [coupons, setCoupons] = useState<any[]>([]);
   const [banners, setBanners] = useState<any[]>([]);
+
+  // Filter vendor specific products for sidebar counter
+  const vendorSpecificProducts = useMemo(() => {
+    if (!isVendor) return products;
+    const vName = (user?.vendorName || user?.name || "").toLowerCase().trim();
+    return products.filter((p: any) => {
+      const pv = (p.vendor || "").toLowerCase().trim();
+      return pv && (pv.includes(vName) || vName.includes(pv));
+    });
+  }, [products, isVendor, user]);
 
   // Fetch Loaders and Error triggers
   const [fetchingData, setFetchingData] = useState(false);
@@ -156,6 +171,39 @@ export const AdminPanel: React.FC = () => {
     dispatch(addToast({ message: `📦 Processing Order #${orderId ? orderId.substring(0, 8).toUpperCase() : 'RC'}`, type: "info" }));
   };
 
+  const handleVendorRestock = async (productId: any, requestedUnits: number) => {
+    try {
+      const prodToUpdate = products.find((p: any) => String(p.id) === String(productId));
+      if (!prodToUpdate) {
+        setActiveTab("list");
+        dispatch(addToast({ message: "Product located in Catalog for restock", type: "info" }));
+        return;
+      }
+      
+      const addUnits = requestedUnits || 50;
+      const newStock = (prodToUpdate.stockCount || 0) + addUnits;
+      await adminApi.updateProduct({
+        ...prodToUpdate,
+        id: String(productId),
+        stockCount: newStock
+      });
+
+      // Mark request as resolved in storage
+      try {
+        const savedRequests = JSON.parse(localStorage.getItem('ramcart_stock_requests') || '[]');
+        const updatedReqs = savedRequests.map((r: any) => 
+          String(r.productId) === String(productId) ? { ...r, status: 'resolved' } : r
+        );
+        localStorage.setItem('ramcart_stock_requests', JSON.stringify(updatedReqs));
+      } catch (e) {}
+
+      dispatch(addToast({ message: `🎉 Restocked +${addUnits} units for "${prodToUpdate.name}"!`, type: "success" }));
+      fetchAllAdminData();
+    } catch (err: any) {
+      dispatch(addToast({ message: err.message || "Failed to update stock", type: "error" }));
+    }
+  };
+
   // Load Admin Data from Firestore / Backend
   const fetchAllAdminData = useCallback(async () => {
     setFetchingData(true);
@@ -167,6 +215,65 @@ export const AdminPanel: React.FC = () => {
           const freshProds = await adminApi.fetchProducts();
           const prodsList = Array.isArray(freshProds) ? freshProds : (freshProds as any)?.products || [];
           setProducts(prodsList);
+
+          // Build Vendor-specific notifications
+          const vName = (user?.vendorName || user?.name || "").toLowerCase().trim();
+          const myProds = prodsList.filter((p: any) => {
+            const pv = (p.vendor || "").toLowerCase().trim();
+            return pv && (pv.includes(vName) || vName.includes(pv));
+          });
+
+          // 1. Read Admin Restock Requests from localStorage
+          let savedRequests: any[] = [];
+          try {
+            savedRequests = JSON.parse(localStorage.getItem('ramcart_stock_requests') || '[]');
+          } catch (e) {}
+
+          const vendorNotifs: any[] = [];
+
+          // Add restock requests from Admin (high priority alerts)
+          savedRequests.forEach((req: any) => {
+            vendorNotifs.push({
+              id: req.id,
+              title: `📢 Admin Restock Request: +${req.requestedUnits} Units`,
+              message: `Store Admin requested stock for "${req.productName}". Note: "${req.note}"`,
+              time: req.createdAt ? new Date(req.createdAt).toLocaleDateString() : "Pending",
+              type: "alert",
+              unread: req.status === "pending",
+              isStockRequest: true,
+              productId: req.productId,
+              requestedUnits: req.requestedUnits
+            });
+          });
+
+          // Add Low Stock warnings for vendor's products (< 15 units)
+          myProds.filter((p: any) => (p.stockCount ?? 0) < 15).forEach((p: any) => {
+            vendorNotifs.push({
+              id: `stock-${p.id}`,
+              title: `⚠️ Low Inventory: ${p.name}`,
+              message: `Only ${p.stockCount ?? 0} units left in stock. Consider replenishing.`,
+              time: "Stock Alert",
+              type: "alert",
+              unread: true,
+              productId: p.id
+            });
+          });
+
+          // Add Active listing confirmations
+          myProds.slice(0, 5).forEach((p: any) => {
+            vendorNotifs.push({
+              id: `vprod-${p.id}`,
+              title: `✅ Active Listing: ${p.name}`,
+              message: `Listed in ${p.category} with ${p.stockCount ?? 0} units stock at ₹${p.newPrice || p.new_price}.`,
+              time: "Live on Storefront",
+              type: "product",
+              unread: false,
+              productId: p.id
+            });
+          });
+
+          setAdminNotifications(vendorNotifs);
+
         } catch (err: any) {
           console.warn("Could not fetch catalog products for vendor:", err);
         }
@@ -368,11 +475,13 @@ export const AdminPanel: React.FC = () => {
       <AdminSidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab}
-        productsCount={products.length}
+        productsCount={isVendor ? vendorSpecificProducts.length : products.length}
         usersCount={users.length}
         ordersCount={orders.length}
         couponsCount={coupons.length}
         bannersCount={banners.length}
+        isVendor={isVendor}
+        vendorName={user?.vendorName || user?.name || ''}
         isMobileOpen={mobileSidebarOpen}
         onCloseMobile={() => setMobileSidebarOpen(false)}
       />
@@ -389,6 +498,8 @@ export const AdminPanel: React.FC = () => {
           onClearAll={handleClearAllNotifications}
           onProcessOrder={handleProcessOrder}
           onToggleMobileSidebar={() => setMobileSidebarOpen(prev => !prev)}
+          isVendor={isVendor}
+          onRestock={handleVendorRestock}
         />
 
         {/* 3. Tab Body Panel */}
@@ -430,7 +541,7 @@ export const AdminPanel: React.FC = () => {
           )}
 
           {/* Render Active Tab */}
-          {activeTab === "dashboard" && (
+          {activeTab === "dashboard" && !isVendor && (
             <AdminDashboardTab 
               products={products as any}
               users={users as any}
@@ -465,7 +576,7 @@ export const AdminPanel: React.FC = () => {
             />
           )}
 
-          {activeTab === "users" && (
+          {activeTab === "users" && !isVendor && (
             <AdminUsersTab 
               users={users as any}
               products={products as any}
@@ -476,7 +587,7 @@ export const AdminPanel: React.FC = () => {
             />
           )}
 
-          {activeTab === "orders" && (
+          {activeTab === "orders" && !isVendor && (
             <AdminOrdersTab 
               orders={orders as any}
               products={products as any}
@@ -487,7 +598,7 @@ export const AdminPanel: React.FC = () => {
             />
           )}
 
-          {activeTab === "marketing" && (
+          {activeTab === "marketing" && !isVendor && (
             <AdminMarketingCRMTab 
               users={users as any}
               orders={orders as any}
@@ -497,7 +608,7 @@ export const AdminPanel: React.FC = () => {
             />
           )}
 
-          {activeTab === "coupons" && (
+          {activeTab === "coupons" && !isVendor && (
             <AdminCouponsTab 
               coupons={coupons as any}
               onRefreshCoupons={fetchAllAdminData as any}
@@ -507,7 +618,7 @@ export const AdminPanel: React.FC = () => {
             />
           )}
 
-          {activeTab === "banners" && (
+          {activeTab === "banners" && !isVendor && (
             <AdminBannersTab 
               banners={banners as any}
               onRefreshBanners={fetchAllAdminData as any}
@@ -517,7 +628,7 @@ export const AdminPanel: React.FC = () => {
             />
           )}
 
-          {activeTab === "categories" && (
+          {activeTab === "categories" && !isVendor && (
             <AdminCategoriesTab
               addToast={triggerToast}
               triggerConfirm={triggerConfirm}
@@ -525,7 +636,7 @@ export const AdminPanel: React.FC = () => {
             />
           )}
 
-          {activeTab === "seasonal" && (
+          {activeTab === "seasonal" && !isVendor && (
             <AdminSeasonalTab 
               addToast={triggerToast}
               logAction={logAction}
