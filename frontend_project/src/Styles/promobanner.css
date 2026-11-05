@@ -247,6 +247,22 @@
   color: #000000;
   letter-spacing: 1px;
 }
+
+.coupon-copied-badge {
+  font-size: 9px;
+  font-weight: 900;
+  color: #059669;
+  background-color: rgba(5, 150, 105, 0.15);
+  padding: 2px 6px;
+  border-radius: 2px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.dark .coupon-copied-badge {
+  color: #34d399;
+  background-color: rgba(52, 211, 153, 0.25);
+}
 .dark .coupon-code {
   color: #ffffff;
 }

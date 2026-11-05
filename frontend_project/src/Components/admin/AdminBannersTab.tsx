@@ -30,6 +30,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
   const [targetProductId, setTargetProductId] = useState('');
   const [discountType, setDiscountType] = useState<string>('none');
   const [discountValue, setDiscountValue] = useState<string>('');
+  const [couponCode, setCouponCode] = useState<string>('');
   const [page, setPage] = useState<string>('home');
 
   const [saving, setSaving] = useState(false);
@@ -43,6 +44,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
   const [editTargetLink, setEditTargetLink] = useState('');
   const [editDiscountType, setEditDiscountType] = useState('none');
   const [editDiscountValue, setEditDiscountValue] = useState('');
+  const [editCouponCode, setEditCouponCode] = useState('');
   const [editPage, setEditPage] = useState('home');
   const [editImageUrl, setEditImageUrl] = useState('');
   const [editTargetProductId, setEditTargetProductId] = useState('');
@@ -244,6 +246,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
         bankOfferText: bankOfferText.trim() || 'Instant Discount on Prepaid Orders*',
         discountType: discountType === 'none' ? null : discountType,
         discountValue: discountType === 'none' ? 0 : Number(discountValue || 0),
+        couponCode: couponCode.trim().toUpperCase(),
         page
       });
 
@@ -258,6 +261,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
       setTargetProductId('');
       setDiscountType('none');
       setDiscountValue('');
+      setCouponCode('');
       setPage('home');
 
       onRefreshBanners();
@@ -277,6 +281,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
     setEditTargetLink(b.targetLink || '');
     setEditDiscountType(b.discountType || 'none');
     setEditDiscountValue(b.discountValue ? String(b.discountValue) : '');
+    setEditCouponCode(b.couponCode || '');
     setEditPage(b.page || 'home');
     setEditImageUrl(b.image || '');
   };
@@ -293,6 +298,7 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
         bankOfferText: editBankOfferText.trim() || 'Instant Discount on Prepaid Orders*',
         discountType: editDiscountType === 'none' ? null : editDiscountType,
         discountValue: editDiscountType === 'none' ? 0 : Number(editDiscountValue || 0),
+        couponCode: editCouponCode.trim().toUpperCase(),
         page: editPage
       });
 
@@ -399,6 +405,11 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                       {b.discountType && (
                         <span className="bg-[#eff0f6] text-[#e53170] text-[9px] font-black px-2 py-0.5 rounded-full">
                           {b.discountType === 'percentage' ? `${b.discountValue}% OFF` : `₹${b.discountValue} OFF`}
+                        </span>
+                      )}
+                      {b.couponCode && (
+                        <span className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[9px] font-black px-2 py-0.5 rounded-full border border-emerald-500/20 font-mono">
+                          🏷️ {b.couponCode}
                         </span>
                       )}
                     </div>
@@ -613,6 +624,21 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                 </div>
               )}
 
+              {/* Promo Coupon Code Field */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-bold text-[#2e2f3e] dark:text-[#a7a9be] flex items-center justify-between">
+                  <span>Carousel Coupon Code</span>
+                  <span className="text-[10px] font-normal text-[#717388]">Optional (e.g. DIWALI50, SAVE20)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter custom coupon code (leave empty for none)"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  className="w-full h-10 px-3 text-xs font-mono font-bold tracking-wider uppercase rounded-xl border border-[#e2e4ed]/40 bg-[#ffffff] dark:bg-[#212030] outline-none"
+                />
+              </div>
+
               {/* Submit CTA */}
               <button
                 type="submit"
@@ -792,6 +818,21 @@ export const AdminBannersTab: React.FC<AdminBannersTabProps> = ({
                   />
                 </div>
               )}
+
+              {/* Edit Promo Coupon Code Field */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-bold text-[#2e2f3e] dark:text-[#a7a9be] flex items-center justify-between">
+                  <span>Carousel Coupon Code</span>
+                  <span className="text-[10px] font-normal text-[#717388]">Editable (e.g. DIWALI50, SAVE20)</span>
+                </label>
+                <input 
+                  type="text" 
+                  placeholder="Enter custom coupon code (leave empty for none)"
+                  value={editCouponCode} 
+                  onChange={(e) => setEditCouponCode(e.target.value.toUpperCase())} 
+                  className="w-full h-9 px-3 uppercase font-mono font-bold tracking-wider rounded-lg border border-[#e2e4ed]/40 bg-[#ffffff] dark:bg-[#212030] outline-none text-xs"
+                />
+              </div>
 
               {/* Modal controls */}
               <div className="flex gap-3 mt-4 border-t border-[#e2e4ed]/20 dark:border-white/5 pt-4">

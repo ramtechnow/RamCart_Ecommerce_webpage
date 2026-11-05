@@ -90,6 +90,7 @@ export const PromoBanner = ({ page = "home" }) => {
   const [loading, setLoading] = useState(() => banners.length === 0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [copiedNotice, setCopiedNotice] = useState(false);
 
   // Touch swipe handling
   const touchStartX = useRef(0);
@@ -121,7 +122,7 @@ export const PromoBanner = ({ page = "home" }) => {
               discountBadge: b.discountValue 
                 ? (b.discountType === "percentage" ? `${b.discountValue}% OFF` : `₹${b.discountValue} OFF`) 
                 : "SPECIAL DEAL",
-              couponCode: b.couponCode || "FESTIVE10",
+              couponCode: (b.couponCode !== undefined && b.couponCode !== null) ? b.couponCode : "",
               targetLink: b.targetLink || "/catalog",
               themeClass: DEFAULT_FALLBACK_BANNERS[idx % 4].themeClass,
               accent: DEFAULT_FALLBACK_BANNERS[idx % 4].accent
@@ -291,11 +292,14 @@ export const PromoBanner = ({ page = "home" }) => {
                 className="editorial-coupon-box"
                 onClick={() => {
                   navigator.clipboard.writeText(currentSlide.couponCode);
+                  setCopiedNotice(true);
+                  setTimeout(() => setCopiedNotice(false), 2000);
                 }}
                 title="Click to copy coupon code"
               >
                 <span className="coupon-prefix">CODE:</span>
                 <span className="coupon-code">{currentSlide.couponCode}</span>
+                {copiedNotice && <span className="coupon-copied-badge">COPIED!</span>}
               </div>
             )}
           </div>
