@@ -6,7 +6,7 @@ import ProductCard from "../Components/ProductCard";
 import ProcessSteps from "../Components/ProcessSteps";
 import Newsletter from "../Components/Newsletter";
 import { TestimonialsSection } from "../Components/ui/testimonials-6";
-import { fetchProducts } from "../features/catalog/services/productService";
+import { fetchProducts, getCachedProducts } from "../features/catalog/services/productService";
 import { Product } from "../features/catalog/types/productTypes";
 import { Truck, RotateCcw, Shield, Tag } from "lucide-react";
 import { fetchActivePromo } from "../features/catalog/services/promoService";
@@ -125,8 +125,9 @@ const DEFAULT_CATEGORY_CARDS: CategoryCardItem[] = [
 ];
 
 export const Home: React.FC = () => {
-  const [productsList, setProductsList] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Instant 0ms cached products initialization
+  const [productsList, setProductsList] = useState<Product[]>(() => getCachedProducts());
+  const [loading, setLoading] = useState(() => getCachedProducts().length === 0);
   const [retryCount, setRetryCount] = useState(0);
     const [activePromo, setActivePromo] = useState<SeasonalPromo | null>(null);
   const [categoryCards, setCategoryCards] = useState<CategoryCardItem[]>(DEFAULT_CATEGORY_CARDS);

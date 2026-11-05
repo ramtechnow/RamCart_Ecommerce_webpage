@@ -16,6 +16,7 @@ import { fetchActivePromo } from "./features/catalog/services/promoService";
 import { SeasonalPromo } from "./features/catalog/types/promoTypes";
 import AnnouncementMarquee from "./Components/AnnouncementMarquee";
 import FestiveParticles from "./Components/FestiveParticles";
+import { BACKEND_URL } from "./config";
 
 // Lazy load pages for code splitting and optimized bundles
 const Home = lazy(() => import("./Pages/Home"));
@@ -96,6 +97,9 @@ export const App: React.FC = () => {
 
     // Load active seasonal settings on mount
     fetchActivePromo().then(setActivePromo).catch(() => {});
+
+    // Silent background ping to wake up or prime Render backend
+    fetch(`${BACKEND_URL}/health`, { mode: 'no-cors' }).catch(() => {});
 
     return () => unsubscribe();
   }, [dispatch]);

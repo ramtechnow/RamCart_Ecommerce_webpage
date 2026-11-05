@@ -65,7 +65,26 @@ const mapRawProduct = (p: any): Product => {
   };
 };
 
-// Fetch all available products — NO dummy fallback, only real MongoDB data
+export const PRODUCT_CACHE_KEY = 'ramcart_products_cache_v1';
+
+// Instant synchronous cache reader for 0ms page rendering
+export const getCachedProducts = (category?: string): Product[] => {
+  try {
+    const raw = sessionStorage.getItem(PRODUCT_CACHE_KEY) || localStorage.getItem(PRODUCT_CACHE_KEY);
+    if (raw) {
+      const parsed: Product[] = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        if (!category) return parsed;
+        const target = category.toLowerCase().trim();
+        const normalizedTarget = (target === "kid" || target === "kids") ? "kids" : target;
+        return parsed.filter((p) => p.category.toLowerCase() === normalizedTarget);
+      }
+    }
+  } catch (e) {}
+  return [];
+};
+
+// Fetch all available products — Real MongoDB data with stale-while-revalidate caching
 export const fetchProducts = async (category?: string): Promise<Product[]> => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout for cold starts
@@ -75,14 +94,23 @@ export const fetchProducts = async (category?: string): Promise<Product[]> => {
     clearTimeout(timeoutId);
 
     if (!res.ok) {
+      const cached = getCachedProducts(category);
+      if (cached.length > 0) return cached;
       throw new Error("Failed to fetch products from backend");
     }
     const data = await res.json();
     if (!Array.isArray(data) || data.length === 0) {
-      return []; // Empty catalog — no fake data
+      const cached = getCachedProducts(category);
+      return cached.length > 0 ? cached : [];
     }
 
     const list: Product[] = data.map(mapRawProduct);
+
+    // Save to cache for instant subsequent loads
+    try {
+      sessionStorage.setItem(PRODUCT_CACHE_KEY, JSON.stringify(list));
+      localStorage.setItem(PRODUCT_CACHE_KEY, JSON.stringify(list));
+    } catch (e) {}
 
     if (category) {
       const target = category.toLowerCase().trim();
@@ -93,8 +121,9 @@ export const fetchProducts = async (category?: string): Promise<Product[]> => {
     return list;
   } catch (err) {
     clearTimeout(timeoutId);
-    console.warn("fetchProducts: Backend unavailable or cold-starting. Returning empty catalog.", err);
-    return []; // No dummy data — skeleton/loading state will show instead
+    console.warn("fetchProducts: Backend unavailable or cold-starting. Returning cached catalog if available.", err);
+    const cached = getCachedProducts(category);
+    return cached;
   }
 };
 

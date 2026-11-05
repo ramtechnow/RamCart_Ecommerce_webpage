@@ -459,6 +459,9 @@ export const ProductDetail: React.FC = () => {
                 src={activeImage || galleryImages[0]} 
                 alt={product.name} 
                 className="rc-pdp-main-image"
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
               />
 
               {/* Wishlist Button */}

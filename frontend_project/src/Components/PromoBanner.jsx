@@ -55,10 +55,39 @@ const DEFAULT_FALLBACK_BANNERS = [
   }
 ];
 
+const CACHE_KEY_PREFIX = "ramcart_cached_banners_";
+
+// Helper to eagerly preload banner image into browser memory
+const preloadBannerImages = (bannerList) => {
+  if (!Array.isArray(bannerList)) return;
+  bannerList.slice(0, 3).forEach((b) => {
+    if (b && b.image) {
+      const img = new Image();
+      img.src = b.image;
+    }
+  });
+};
+
 export const PromoBanner = ({ page = "home" }) => {
   const navigate = useNavigate();
-  const [banners, setBanners] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const cacheKey = `${CACHE_KEY_PREFIX}${page}`;
+
+  // Instant 0ms cache initial state: avoids blank flash and prevents fallback duplicate image
+  const [banners, setBanners] = useState(() => {
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          preloadBannerImages(parsed);
+          return parsed;
+        }
+      }
+    } catch (e) {}
+    return [];
+  });
+
+  const [loading, setLoading] = useState(() => banners.length === 0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -66,7 +95,7 @@ export const PromoBanner = ({ page = "home" }) => {
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
-  // Fetch active banners from backend or fallback
+  // Fetch active banners from backend with stale-while-revalidate
   useEffect(() => {
     let isMounted = true;
     let retryTimer = null;
@@ -74,7 +103,7 @@ export const PromoBanner = ({ page = "home" }) => {
     const fetchActiveBanners = async (attempt = 1) => {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s timeout for cold start resiliency
 
         const res = await fetch(`${BACKEND_URL}/banners/active?page=${page}`, { signal: controller.signal });
         clearTimeout(timeoutId);
@@ -97,27 +126,33 @@ export const PromoBanner = ({ page = "home" }) => {
               themeClass: DEFAULT_FALLBACK_BANNERS[idx % 4].themeClass,
               accent: DEFAULT_FALLBACK_BANNERS[idx % 4].accent
             }));
+
             setBanners(formatted);
             setLoading(false);
+            preloadBannerImages(formatted);
+
+            try {
+              localStorage.setItem(cacheKey, JSON.stringify(formatted));
+            } catch (e) {}
             return;
           }
         }
       } catch (err) {
-        // Fallback to editorial defaults
+        // Network or cold-start error
       }
 
       if (isMounted) {
-        if (page === "home") {
-          setBanners((prev) => (prev.length > 0 ? prev : DEFAULT_FALLBACK_BANNERS));
-        } else {
-          setBanners((prev) => prev);
-        }
+        // If we already had cached banners from localStorage, KEEP them! Never overwrite with dummy Unsplash duplicates!
+        setBanners((prev) => {
+          if (prev && prev.length > 0) return prev;
+          return page === "home" ? DEFAULT_FALLBACK_BANNERS : [];
+        });
         setLoading(false);
 
         if (attempt === 1) {
           retryTimer = setTimeout(() => {
             if (isMounted) fetchActiveBanners(2);
-          }, 4000);
+          }, 3500);
         }
       }
     };
@@ -128,7 +163,7 @@ export const PromoBanner = ({ page = "home" }) => {
       isMounted = false;
       if (retryTimer) clearTimeout(retryTimer);
     };
-  }, [page]);
+  }, [page, cacheKey]);
 
   const activeSlides = banners.length > 0 ? banners : (page === "home" ? DEFAULT_FALLBACK_BANNERS : []);
   if (activeSlides.length === 0) {
@@ -309,6 +344,7 @@ export const PromoBanner = ({ page = "home" }) => {
             className="editorial-hero-image"
             loading="eager"
             decoding="async"
+            fetchpriority="high"
           />
 
           {/* Crisp square tag in the image corner */}
