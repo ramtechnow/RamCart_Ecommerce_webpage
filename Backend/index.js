@@ -31,11 +31,23 @@ app.set('trust proxy', 1);
 app.use(cors({
   origin(origin, callback) {
     // Server-to-server calls and configured browser origins are allowed.
+    if (!origin) return callback(null, true);
+
     const allowedOrigins = (process.env.CORS_ORIGINS || '')
       .split(',')
       .map(value => value.trim())
       .filter(Boolean);
-    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+
+    // Allow configured origins, localhost, Firebase domains, and all Vercel deployments (*.vercel.app)
+    if (
+      allowedOrigins.length === 0 ||
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.vercel.app') ||
+      origin.endsWith('.web.app') ||
+      origin.endsWith('.firebaseapp.com') ||
+      origin.includes('localhost') ||
+      origin.includes('127.0.0.1')
+    ) {
       return callback(null, true);
     }
     return callback(new Error('Origin not allowed by CORS'));
