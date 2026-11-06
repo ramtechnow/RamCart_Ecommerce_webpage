@@ -57,6 +57,7 @@ export const Checkout: React.FC = () => {
     register,
     handleSubmit,
     setValue,
+    getValues,
     formState: { errors }
   } = useForm<CheckoutValues>({
     resolver: zodResolver(checkoutSchema),
@@ -359,14 +360,30 @@ export const Checkout: React.FC = () => {
 
   const handleYoupiSubmitUtr = async (utr: string, customerVpa?: string) => {
     if (!youpiSession) return;
-    setProcessingMessage("Validating 12-digit UTR with bank records...");
+    setProcessingMessage("Confirming payment and finalizing your order...");
     setIsProcessing(true);
+
+    const orderItems = checkoutItems.map((item) => ({
+      productId: Number(item.productId) || 1,
+      name: item.name,
+      image: item.image,
+      size: item.size,
+      color: item.color,
+      quantity: item.quantity,
+      price: item.price
+    }));
+
+    const currentAddress = getValues("address");
 
     try {
       const response = await submitYoupiUtr({
         orderId: youpiSession.orderId,
         utr,
-        customerVpa
+        customerVpa,
+        items: orderItems,
+        address: currentAddress,
+        amount: finalPayable,
+        couponCode: couponCode || undefined
       });
 
       setIsProcessing(false);
@@ -379,9 +396,9 @@ export const Checkout: React.FC = () => {
         if (!buyNow) {
           await clearCart();
         }
-        dispatch(addToast({ message: "Payment verified successfully via YouPI!", type: "success" }));
+        dispatch(addToast({ message: "Payment confirmed! Order placed successfully.", type: "success" }));
       } else {
-        throw new Error(response.message || "UTR validation failed.");
+        throw new Error(response.message || "Payment confirmation failed.");
       }
     } catch (err: any) {
       setIsProcessing(false);

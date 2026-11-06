@@ -66,6 +66,17 @@ export const YoupiPaymentModal: React.FC<YoupiPaymentModalProps> = ({
     }
   }, [upiUri]);
 
+  // Lock body scroll to prevent mobile background/footer overlapping
+  useEffect(() => {
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow || 'unset';
+      };
+    }
+  }, [isOpen]);
+
   // Security countdown timer
   useEffect(() => {
     if (!isOpen) return;
@@ -103,13 +114,13 @@ export const YoupiPaymentModal: React.FC<YoupiPaymentModalProps> = ({
     e.preventDefault();
     setUtrError('');
 
-    const clean = utrInput.trim();
+    const clean = utrInput.trim().replace(/[^a-zA-Z0-9]/g, '');
     if (!clean) {
-      setUtrError('Please enter the 12-digit UPI UTR number from your payment receipt');
+      setUtrError('Please enter your Transaction / Reference ID or tap "I Have Paid (Confirm Order Instantly)"');
       return;
     }
-    if (!/^\d{12}$/.test(clean)) {
-      setUtrError('UTR must be exactly 12 numeric digits (e.g. 412356789012)');
+    if (clean.length < 5) {
+      setUtrError('Transaction reference must be at least 6 characters (e.g. Amazon Pay / Bank Reference ID)');
       return;
     }
 
@@ -123,9 +134,13 @@ export const YoupiPaymentModal: React.FC<YoupiPaymentModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
+    <div 
+      className="fixed inset-0 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in"
+      style={{ zIndex: 999999, position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+    >
       <div 
-        className="relative w-full max-w-lg bg-white dark:bg-[#15141e] rounded-2xl shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden flex flex-col max-h-[92vh]"
+        className="relative w-full max-w-lg bg-white dark:bg-[#15141e] rounded-2xl shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden flex flex-col max-h-[88vh]"
+        style={{ zIndex: 1000000 }}
         role="dialog"
         aria-modal="true"
       >
@@ -289,31 +304,30 @@ export const YoupiPaymentModal: React.FC<YoupiPaymentModalProps> = ({
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                12-Digit UPI Reference (UTR) Number <span className="text-red-500">*</span>
+                UPI Reference / UTR / Transaction ID <span className="text-slate-400 font-normal">(Amazon Pay / GPay / PhonePe)</span>
               </label>
               <input
                 type="text"
-                maxLength={12}
-                placeholder="e.g. 412356789012"
+                placeholder="e.g. 412356789012 or Amazon Pay Ref No"
                 value={utrInput}
                 onChange={(e) => {
-                  setUtrInput(e.target.value.replace(/\D/g, ''));
+                  setUtrInput(e.target.value.replace(/[^a-zA-Z0-9]/g, ''));
                   setUtrError('');
                 }}
-                className="w-full h-11 px-3 text-sm font-mono font-bold tracking-widest rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-[#1d1c2b] text-slate-900 dark:text-white outline-none focus:border-emerald-500 transition-colors"
+                className="w-full h-11 px-3 text-sm font-mono font-bold tracking-wider rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-[#1d1c2b] text-slate-900 dark:text-white outline-none focus:border-emerald-500 transition-colors"
               />
               <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 block">
-                {utrInput.length}/12 Digits entered
+                {utrInput.length} Characters entered
               </span>
             </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Your Paying UPI ID <span className="text-slate-400 font-normal">(For 1-click refund if cancelled)</span>
+                Your Paying UPI ID <span className="text-slate-400 font-normal">(Optional &bull; For 1-click refund if cancelled)</span>
               </label>
               <input
                 type="text"
-                placeholder="e.g. yourname@okhdfcbank"
+                placeholder="e.g. yourname@okhdfcbank or yourname@apl"
                 value={customerVpaInput}
                 onChange={(e) => setCustomerVpaInput(e.target.value)}
                 className="w-full h-10 px-3 text-xs font-mono rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-[#1d1c2b] text-slate-900 dark:text-white outline-none focus:border-emerald-500 transition-colors"
@@ -329,18 +343,18 @@ export const YoupiPaymentModal: React.FC<YoupiPaymentModalProps> = ({
 
             <button
               type="submit"
-              disabled={isSubmitting || utrInput.length !== 12 || timeLeft === 0}
+              disabled={isSubmitting || utrInput.trim().length < 5 || timeLeft === 0}
               className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed border-none"
             >
               {isSubmitting ? (
                 <>
                   <Loader2 size={16} className="animate-spin" />
-                  <span>Verifying Transaction with Bank...</span>
+                  <span>Confirming Order...</span>
                 </>
               ) : (
                 <>
                   <CheckCircle2 size={16} />
-                  <span>Confirm Payment with 12-Digit UTR</span>
+                  <span>Confirm Payment with Transaction ID</span>
                 </>
               )}
             </button>
@@ -365,13 +379,13 @@ export const YoupiPaymentModal: React.FC<YoupiPaymentModalProps> = ({
                     setUtrError(err.message || "Failed to confirm payment.");
                   }
                 }}
-                className="w-full mt-1.5 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-slate-300 dark:border-white/10"
+                className="w-full mt-1.5 py-3 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-center gap-1.5 shadow-md cursor-pointer border-none transition-transform active:scale-95"
               >
-                <Zap size={14} className="text-amber-500 shrink-0" />
+                <Zap size={14} className="text-yellow-200" />
                 <span>I Have Paid in App (Confirm Order Instantly)</span>
               </button>
               <p className="text-[10px] text-slate-400 text-center mt-1 m-0">
-                Payment sent from GPay/PhonePe? Tap above to confirm without typing UTR!
+                Payment sent from Amazon Pay / GPay / PhonePe? Tap above to confirm without typing UTR!
               </p>
             </div>
           </form>

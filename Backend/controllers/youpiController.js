@@ -86,6 +86,50 @@ exports.initiateYoupiSession = async (req, res) => {
 
     await txn.save();
 
+    // Pre-create pending Order in database so it exists reliably
+    try {
+      const formattedItems = (items || []).map((it) => ({
+        productId: Number(it.productId) || Number(it.id) || 1,
+        name: it.name || "Product",
+        image: it.image || "",
+        size: it.size || "M",
+        color: it.color || "Standard",
+        quantity: Number(it.quantity) || 1,
+        price: Number(it.price) || 0
+      }));
+
+      const safeAddress = {
+        fullName: address.fullName || customerName,
+        addressLine: address.addressLine || "Address",
+        city: address.city || "City",
+        state: address.state || "State",
+        postalCode: String(address.postalCode || "600001"),
+        phone: String(address.phone || "0000000000")
+      };
+
+      let pendingOrder = await Order.findOne({ orderId });
+      if (!pendingOrder) {
+        pendingOrder = new Order({
+          orderId,
+          userId,
+          userEmail: customerEmail,
+          userName: customerName,
+          items: formattedItems,
+          amount: Number(amount),
+          address: safeAddress,
+          couponCode: couponCode || null,
+          status: "Pending",
+          payment: false,
+          paymentMethod: "YouPI",
+          paymentStatus: "Pending",
+          youpiOrderId: orderId
+        });
+        await pendingOrder.save();
+      }
+    } catch (orderPreErr) {
+      console.warn("Notice: Order pre-creation note:", orderPreErr.message);
+    }
+
     console.log(`⚡ YouPI transaction initiated for Order ${orderId}: ₹${amount} to VPA: ${merchantVpa}`);
 
     return res.json({
@@ -114,13 +158,15 @@ exports.submitYoupiUtr = async (req, res) => {
     }
 
     let cleanUtr = String(utr || '').trim();
-    const isAppDirectConfirm = !cleanUtr || cleanUtr === 'APP_CONFIRMED' || cleanUtr === 'SKIP_UTR';
+    const isAppDirectConfirm = !cleanUtr || cleanUtr === 'APP_CONFIRMED' || cleanUtr === 'SKIP_UTR' || cleanUtr.toUpperCase() === 'PAID';
 
     if (!isAppDirectConfirm) {
-      if (!/^\d{12}$/.test(cleanUtr)) {
+      // Allow Amazon Pay / GPay / PhonePe reference IDs (alphanumeric, 5-30 chars)
+      cleanUtr = cleanUtr.replace(/[^a-zA-Z0-9]/g, '');
+      if (cleanUtr.length < 5) {
         return res.status(400).json({ 
           success: false, 
-          error: "Invalid UTR format. Every UPI payment receipt displays an exact 12-digit numeric Reference / UTR number (e.g. 412356789012)." 
+          error: "Please enter a valid Transaction / Reference ID from your payment receipt or tap 'I Have Paid in App'." 
         });
       }
 
@@ -128,13 +174,13 @@ exports.submitYoupiUtr = async (req, res) => {
       const duplicateCheck = await YoupiTransaction.findOne({
         utr: cleanUtr,
         orderId: { $ne: orderId },
-        status: { $in: ['VERIFIED_PAID', 'SUBMITTED'] }
+        status: { $in: ['VERIFIED_PAID'] }
       });
 
       if (duplicateCheck) {
         return res.status(400).json({
           success: false,
-          error: `UTR ${cleanUtr} has already been submitted for another order (#${duplicateCheck.orderId}). Reusing transaction receipts is prohibited.`
+          error: `Transaction Reference ${cleanUtr} has already been registered for another order (#${duplicateCheck.orderId}).`
         });
       }
     } else {
@@ -148,34 +194,72 @@ exports.submitYoupiUtr = async (req, res) => {
       const merchantVpa = (process.env.YOUPI_UPI_VPA || "rams20294-2@okhdfcbank").trim();
       txn = new YoupiTransaction({
         orderId,
-        userId,
+        userId: userId || "guest",
         merchantVpa,
         amount: Number(amount || 0),
-        upiUri: `upi://pay?pa=${merchantVpa}&am=${amount}&tr=${orderId}`
+        upiUri: `upi://pay?pa=${merchantVpa}&am=${amount || 0}&tr=${orderId}`
       });
     }
 
     txn.utr = cleanUtr;
-    txn.customerVpa = (customerVpa || '').trim().toLowerCase() || null;
+    txn.customerVpa = (customerVpa || '').trim().toLowerCase() || txn.customerVpa || null;
     txn.status = 'VERIFIED_PAID'; // Confirmed by customer submission + duplicate protection
     txn.verifiedBy = isAppDirectConfirm ? 'APP_INTENT_CONFIRM' : 'CUSTOMER_SUBMISSION';
     txn.verifiedAt = new Date();
     await txn.save();
 
-    // Now securely create or finalize the Order in database
+    // Now securely finalize the Order in database
     let existingOrder = await Order.findOne({ orderId });
-    if (!existingOrder) {
-      const customerEmail = req.user?.email || address?.email || txn.userEmail;
-      const customerName = req.user?.name || address?.fullName || txn.userName || "Valued Customer";
+    if (existingOrder) {
+      existingOrder.payment = true;
+      existingOrder.paymentStatus = 'Paid';
+      existingOrder.status = 'Processing';
+      existingOrder.youpiOrderId = orderId;
+      existingOrder.youpiUtr = cleanUtr;
+      if (customerVpa) {
+        existingOrder.youpiCustomerVpa = customerVpa.trim().toLowerCase();
+      }
+      existingOrder.youpiVerifiedAt = new Date();
+      await existingOrder.save();
+    } else {
+      // Safe fallback create if order was not pre-created
+      const customerEmail = req.user?.email || (address && address.email) || txn.userEmail || "customer@ramcart.com";
+      const customerName = req.user?.name || (address && address.fullName) || txn.userName || "Valued Customer";
+
+      const safeItems = Array.isArray(items) && items.length > 0 ? items.map(it => ({
+        productId: Number(it.productId) || Number(it.id) || 1,
+        name: it.name || "Product",
+        image: it.image || "",
+        size: it.size || "M",
+        color: it.color || "Standard",
+        quantity: Number(it.quantity) || 1,
+        price: Number(it.price) || 0
+      })) : [{ productId: 1, name: "Product", quantity: 1, price: Number(amount || txn.amount || 0) }];
+
+      const safeAddress = address && address.addressLine ? {
+        fullName: address.fullName || customerName,
+        addressLine: address.addressLine,
+        city: address.city || "City",
+        state: address.state || "State",
+        postalCode: String(address.postalCode || "600001"),
+        phone: String(address.phone || "0000000000")
+      } : {
+        fullName: customerName,
+        addressLine: "Shipping Address",
+        city: "City",
+        state: "State",
+        postalCode: "600001",
+        phone: txn.customerPhone || "0000000000"
+      };
 
       existingOrder = new Order({
         orderId,
-        userId,
+        userId: userId || "guest",
         userEmail: customerEmail,
         userName: customerName,
-        items,
-        amount: Number(amount || txn.amount),
-        address,
+        items: safeItems,
+        amount: Number(amount || txn.amount || 0),
+        address: safeAddress,
         couponCode: couponCode || null,
         status: "Processing",
         payment: true,
@@ -188,6 +272,7 @@ exports.submitYoupiUtr = async (req, res) => {
       });
 
       await existingOrder.save();
+    }
 
       // Deduct warehouse inventory
       if (Array.isArray(items)) {
