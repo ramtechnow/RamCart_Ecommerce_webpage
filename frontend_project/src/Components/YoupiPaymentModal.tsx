@@ -12,7 +12,8 @@ import {
   Check, 
   ExternalLink, 
   X,
-  HelpCircle
+  HelpCircle,
+  Zap
 } from 'lucide-react';
 
 interface YoupiPaymentModalProps {
@@ -339,10 +340,40 @@ export const YoupiPaymentModal: React.FC<YoupiPaymentModalProps> = ({
               ) : (
                 <>
                   <CheckCircle2 size={16} />
-                  <span>Confirm Payment & Place Order</span>
+                  <span>Confirm Payment with 12-Digit UTR</span>
                 </>
               )}
             </button>
+
+            {/* Alternative 1-Tap Confirmation for users who don't know UTR */}
+            <div className="pt-1">
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-slate-200 dark:border-white/10"></div>
+                <span className="flex-shrink mx-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                  Don't know where UTR is?
+                </span>
+                <div className="flex-grow border-t border-slate-200 dark:border-white/10"></div>
+              </div>
+
+              <button
+                type="button"
+                disabled={isSubmitting || timeLeft === 0}
+                onClick={async () => {
+                  try {
+                    await onSubmitUtr("APP_CONFIRMED", customerVpaInput.trim());
+                  } catch (err: any) {
+                    setUtrError(err.message || "Failed to confirm payment.");
+                  }
+                }}
+                className="w-full mt-1.5 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 text-slate-800 dark:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-slate-300 dark:border-white/10"
+              >
+                <Zap size={14} className="text-amber-500 shrink-0" />
+                <span>I Have Paid in App (Confirm Order Instantly)</span>
+              </button>
+              <p className="text-[10px] text-slate-400 text-center mt-1 m-0">
+                Payment sent from GPay/PhonePe? Tap above to confirm without typing UTR!
+              </p>
+            </div>
           </form>
         </div>
 

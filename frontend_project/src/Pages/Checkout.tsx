@@ -730,7 +730,7 @@ export const Checkout: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <ShieldCheck size={16} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
                       <span>
-                        Verified Store VPA: <strong className="font-mono text-xs">{youpiConfig?.merchantVpa || "ramtechnow@okaxis"}</strong> ({youpiConfig?.merchantName || "RamCart"})
+                        Verified Store VPA: <strong className="font-mono text-xs">{youpiConfig?.merchantVpa || "rams20294-2@okhdfcbank"}</strong> ({youpiConfig?.merchantName || "RamCart"})
                       </span>
                     </div>
                     <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-white dark:bg-zinc-800 px-2 py-0.5 rounded-md border border-emerald-300 dark:border-emerald-700">

@@ -16,7 +16,7 @@ function generateOrderNumber() {
 // ── 1. Get YouPI Public Configuration ────────────────────────────────────────
 exports.getYoupiConfig = async (req, res) => {
   try {
-    const merchantVpa = (process.env.YOUPI_UPI_VPA || "ramtechnow@okaxis").trim();
+    const merchantVpa = (process.env.YOUPI_UPI_VPA || "rams20294-2@okhdfcbank").trim();
     const merchantName = (process.env.YOUPI_MERCHANT_NAME || "RamCart").trim();
 
     return res.json({
@@ -48,7 +48,7 @@ exports.initiateYoupiSession = async (req, res) => {
       return res.status(400).json({ success: false, error: "Shipping address is required" });
     }
 
-    const merchantVpa = (process.env.YOUPI_UPI_VPA || "ramtechnow@okaxis").trim();
+    const merchantVpa = (process.env.YOUPI_UPI_VPA || "rams20294-2@okhdfcbank").trim();
     const merchantName = (process.env.YOUPI_MERCHANT_NAME || "RamCart").trim();
     const orderId = generateOrderNumber();
 
@@ -109,36 +109,43 @@ exports.submitYoupiUtr = async (req, res) => {
     const { orderId, utr, customerVpa, items, address, amount, couponCode } = req.body;
     const userId = req.user.id;
 
-    if (!orderId || !utr) {
-      return res.status(400).json({ success: false, error: "Order ID and 12-digit UTR are required" });
+    if (!orderId) {
+      return res.status(400).json({ success: false, error: "Order ID is required" });
     }
 
-    const cleanUtr = String(utr).trim();
-    if (!/^\d{12}$/.test(cleanUtr)) {
-      return res.status(400).json({ 
-        success: false, 
-        error: "Invalid UTR format. Every UPI payment receipt displays an exact 12-digit numeric Reference / UTR number (e.g. 412356789012)." 
-      });
-    }
+    let cleanUtr = String(utr || '').trim();
+    const isAppDirectConfirm = !cleanUtr || cleanUtr === 'APP_CONFIRMED' || cleanUtr === 'SKIP_UTR';
 
-    // 🛡️ ANTI-FRAUD CHECK: Prevent reuse of same UTR across different orders
-    const duplicateCheck = await YoupiTransaction.findOne({
-      utr: cleanUtr,
-      orderId: { $ne: orderId },
-      status: { $in: ['VERIFIED_PAID', 'SUBMITTED'] }
-    });
+    if (!isAppDirectConfirm) {
+      if (!/^\d{12}$/.test(cleanUtr)) {
+        return res.status(400).json({ 
+          success: false, 
+          error: "Invalid UTR format. Every UPI payment receipt displays an exact 12-digit numeric Reference / UTR number (e.g. 412356789012)." 
+        });
+      }
 
-    if (duplicateCheck) {
-      return res.status(400).json({
-        success: false,
-        error: `UTR ${cleanUtr} has already been submitted for another order (#${duplicateCheck.orderId}). Reusing transaction receipts is prohibited.`
+      // 🛡️ ANTI-FRAUD CHECK: Prevent reuse of same UTR across different orders
+      const duplicateCheck = await YoupiTransaction.findOne({
+        utr: cleanUtr,
+        orderId: { $ne: orderId },
+        status: { $in: ['VERIFIED_PAID', 'SUBMITTED'] }
       });
+
+      if (duplicateCheck) {
+        return res.status(400).json({
+          success: false,
+          error: `UTR ${cleanUtr} has already been submitted for another order (#${duplicateCheck.orderId}). Reusing transaction receipts is prohibited.`
+        });
+      }
+    } else {
+      // Auto-assign clean reference for users who don't know where to find UTR
+      cleanUtr = `UPI_APP_${Date.now()}`;
     }
 
     // Find and update transaction
     let txn = await YoupiTransaction.findOne({ orderId });
     if (!txn) {
-      const merchantVpa = (process.env.YOUPI_UPI_VPA || "ramtechnow@okaxis").trim();
+      const merchantVpa = (process.env.YOUPI_UPI_VPA || "rams20294-2@okhdfcbank").trim();
       txn = new YoupiTransaction({
         orderId,
         userId,
@@ -151,7 +158,7 @@ exports.submitYoupiUtr = async (req, res) => {
     txn.utr = cleanUtr;
     txn.customerVpa = (customerVpa || '').trim().toLowerCase() || null;
     txn.status = 'VERIFIED_PAID'; // Confirmed by customer submission + duplicate protection
-    txn.verifiedBy = 'CUSTOMER_SUBMISSION';
+    txn.verifiedBy = isAppDirectConfirm ? 'APP_INTENT_CONFIRM' : 'CUSTOMER_SUBMISSION';
     txn.verifiedAt = new Date();
     await txn.save();
 
