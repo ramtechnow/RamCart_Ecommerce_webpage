@@ -6,6 +6,7 @@ const Product = require('../models/Product');
 const { incrementCouponUsage } = require('./couponController');
 const { sendEmail } = require('./userController');
 const { getOrderPlacedTemplate } = require('../utils/emailTemplates');
+const { notifyDualAdminsNewOrder, notifyDualAdminsRefundCompleted } = require('../utils/adminNotifier');
 
 // Helper to generate clean order reference
 function generateOrderNumber() {
@@ -210,9 +211,13 @@ exports.submitYoupiUtr = async (req, res) => {
 
     // Now securely finalize the Order in database
     let existingOrder = await Order.findOne({ orderId });
+    const customerEmail = req.user?.email || (address && address.email) || txn.userEmail || existingOrder?.userEmail || 'customer@ramcart.com';
+    const customerName = req.user?.name || (address && address.fullName) || txn.userName || existingOrder?.userName || 'Valued Customer';
+
     if (existingOrder) {
       existingOrder.payment = true;
       existingOrder.paymentStatus = 'Paid';
+      existingOrder.paymentMethod = 'YouPI';
       existingOrder.status = 'Processing';
       existingOrder.youpiOrderId = orderId;
       existingOrder.youpiUtr = cleanUtr;
@@ -223,48 +228,45 @@ exports.submitYoupiUtr = async (req, res) => {
       await existingOrder.save();
     } else {
       // Safe fallback create if order was not pre-created
-      const customerEmail = req.user?.email || (address && address.email) || txn.userEmail || "customer@ramcart.com";
-      const customerName = req.user?.name || (address && address.fullName) || txn.userName || "Valued Customer";
-
       const safeItems = Array.isArray(items) && items.length > 0 ? items.map(it => ({
         productId: Number(it.productId) || Number(it.id) || 1,
-        name: it.name || "Product",
-        image: it.image || "",
-        size: it.size || "M",
-        color: it.color || "Standard",
+        name: it.name || 'Product',
+        image: it.image || '',
+        size: it.size || 'M',
+        color: it.color || 'Standard',
         quantity: Number(it.quantity) || 1,
         price: Number(it.price) || 0
-      })) : [{ productId: 1, name: "Product", quantity: 1, price: Number(amount || txn.amount || 0) }];
+      })) : [{ productId: 1, name: 'Product', quantity: 1, price: Number(amount || txn.amount || 0) }];
 
       const safeAddress = address && address.addressLine ? {
         fullName: address.fullName || customerName,
         addressLine: address.addressLine,
-        city: address.city || "City",
-        state: address.state || "State",
-        postalCode: String(address.postalCode || "600001"),
-        phone: String(address.phone || "0000000000")
+        city: address.city || 'City',
+        state: address.state || 'State',
+        postalCode: String(address.postalCode || '600001'),
+        phone: String(address.phone || '0000000000')
       } : {
         fullName: customerName,
-        addressLine: "Shipping Address",
-        city: "City",
-        state: "State",
-        postalCode: "600001",
-        phone: txn.customerPhone || "0000000000"
+        addressLine: 'Shipping Address',
+        city: 'City',
+        state: 'State',
+        postalCode: '600001',
+        phone: txn.customerPhone || '0000000000'
       };
 
       existingOrder = new Order({
         orderId,
-        userId: userId || "guest",
+        userId: userId || 'guest',
         userEmail: customerEmail,
         userName: customerName,
         items: safeItems,
         amount: Number(amount || txn.amount || 0),
         address: safeAddress,
         couponCode: couponCode || null,
-        status: "Processing",
+        status: 'Processing',
         payment: true,
-        paymentMethod: "YouPI",
-        paymentStatus: "Paid",
+        paymentMethod: 'YouPI',
+        paymentStatus: 'Paid',
         youpiOrderId: orderId,
         youpiUtr: cleanUtr,
         youpiCustomerVpa: (customerVpa || '').trim().toLowerCase() || null,
@@ -274,75 +276,75 @@ exports.submitYoupiUtr = async (req, res) => {
       await existingOrder.save();
     }
 
-      // Deduct warehouse inventory
-      if (Array.isArray(items)) {
-        for (const item of items) {
-          const prodId = item.id || item.productId;
-          const qty = Number(item.quantity) || 1;
-          const color = item.color;
-          const size = item.size;
+    // Deduct warehouse inventory
+    const orderItems = (existingOrder.items && existingOrder.items.length > 0) ? existingOrder.items : (Array.isArray(items) ? items : []);
+    for (const item of orderItems) {
+      const prodId = item.productId || item.id;
+      const qty = Number(item.quantity) || 1;
+      const color = item.color;
+      const size = item.size;
 
-          try {
-            const query = isNaN(Number(prodId)) ? { _id: prodId } : { $or: [{ id: Number(prodId) }, { _id: prodId }] };
-            const product = await Product.findOne(query);
+      try {
+        const query = isNaN(Number(prodId)) ? { _id: prodId } : { $or: [{ id: Number(prodId) }, { _id: prodId }] };
+        const product = await Product.findOne(query);
 
-            if (product) {
-              product.stockCount = Math.max(0, (product.stockCount || 0) - qty);
-              if (Array.isArray(product.variants) && product.variants.length > 0) {
-                product.variants = product.variants.map(v => {
-                  const vObj = v.toObject ? v.toObject() : v;
-                  const matchColor = !color || (vObj.color && vObj.color.toLowerCase() === String(color).toLowerCase());
-                  const matchSize = !size || (vObj.size && vObj.size.toLowerCase() === String(size).toLowerCase());
-                  if (matchColor && matchSize) {
-                    return { ...vObj, stock: Math.max(0, (vObj.stock || 0) - qty) };
-                  }
-                  return vObj;
-                });
+        if (product) {
+          product.stockCount = Math.max(0, (product.stockCount || 0) - qty);
+          if (Array.isArray(product.variants) && product.variants.length > 0) {
+            product.variants = product.variants.map(v => {
+              const vObj = v.toObject ? v.toObject() : v;
+              const matchColor = !color || (vObj.color && vObj.color.toLowerCase() === String(color).toLowerCase());
+              const matchSize = !size || (vObj.size && vObj.size.toLowerCase() === String(size).toLowerCase());
+              if (matchColor && matchSize) {
+                return { ...vObj, stock: Math.max(0, (vObj.stock || 0) - qty) };
               }
-              await product.save();
-            }
-          } catch (stkErr) {
-            console.warn("Stock decrement warning:", stkErr.message);
+              return vObj;
+            });
           }
+          await product.save();
         }
+      } catch (stkErr) {
+        console.warn('Stock decrement warning:', stkErr.message);
       }
-
-      // If coupon used, increment count
-      if (couponCode) {
-        await incrementCouponUsage(couponCode);
-      }
-
-      // Clear customer shopping cart
-      await User.findByIdAndUpdate(userId, { $set: { cartData: {} } });
-
-      // Dispatch Order Confirmation Email
-      if (customerEmail) {
-        try {
-          const emailHtml = getOrderPlacedTemplate({
-            orderId: existingOrder.orderId,
-            rawId: existingOrder._id,
-            customerName,
-            items: existingOrder.items,
-            totalAmount: existingOrder.amount,
-            address: existingOrder.address,
-            orderDate: existingOrder.date || new Date()
-          });
-          sendEmail(
-            customerEmail,
-            `RamCart — Order Confirmed! (Paid via YouPI UPI: ${cleanUtr}) #${existingOrder.orderId}`,
-            emailHtml
-          ).catch(() => {});
-        } catch (e) {}
-      }
-    } else {
-      existingOrder.paymentMethod = "YouPI";
-      existingOrder.paymentStatus = "Paid";
-      existingOrder.youpiUtr = cleanUtr;
-      existingOrder.youpiCustomerVpa = (customerVpa || '').trim().toLowerCase() || null;
-      existingOrder.youpiVerifiedAt = new Date();
-      existingOrder.status = "Processing";
-      await existingOrder.save();
     }
+
+    // If coupon used, increment count
+    if (couponCode || existingOrder.couponCode) {
+      await incrementCouponUsage(couponCode || existingOrder.couponCode);
+    }
+
+    // Clear customer shopping cart
+    if (userId && userId !== 'guest') {
+      await User.findByIdAndUpdate(userId, { $set: { cartData: {} } });
+    }
+
+    // Dispatch Order Confirmation Email to Customer
+    if (customerEmail) {
+      try {
+        const emailHtml = getOrderPlacedTemplate({
+          orderId: existingOrder.orderId,
+          rawId: existingOrder._id,
+          customerName,
+          items: existingOrder.items,
+          totalAmount: existingOrder.amount,
+          address: existingOrder.address,
+          orderDate: existingOrder.date || new Date()
+        });
+        sendEmail(
+          customerEmail,
+          `RamCart — Order Confirmed! (Paid via YouPI UPI: ${cleanUtr}) #${existingOrder.orderId}`,
+          emailHtml
+        ).catch(() => {});
+      } catch (e) {}
+    }
+
+    // Notify Dual Admins (bvhss20@gmail.com & ramtechnow@gmail.com)
+    notifyDualAdminsNewOrder({
+      order: existingOrder,
+      paymentMethod: 'YouPI UPI',
+      utr: cleanUtr,
+      customerVpa: customerVpa || existingOrder.youpiCustomerVpa
+    }).catch(err => console.error('Dual admin YouPI alert error:', err.message));
 
     console.log(`✅ Order ${orderId} verified via YouPI! UTR: ${cleanUtr}, Customer VPA: ${customerVpa || 'N/A'}`);
 
@@ -478,13 +480,13 @@ exports.adminRefundPayment = async (req, res) => {
   try {
     const { orderId, refundUtr, refundReason } = req.body;
 
-    if (!orderId || !refundUtr) {
-      return res.status(400).json({ success: false, error: "Order ID and 12-digit Refund UTR are required" });
+    if (!orderId) {
+      return res.status(400).json({ success: false, error: "Order ID is required" });
     }
 
-    const cleanRefundUtr = String(refundUtr).trim();
-    if (!/^\d{12}$/.test(cleanRefundUtr)) {
-      return res.status(400).json({ success: false, error: "Refund UTR must be an exact 12-digit numeric bank reference number" });
+    let cleanRefundUtr = refundUtr ? String(refundUtr).trim() : '';
+    if (!cleanRefundUtr || cleanRefundUtr.length < 3) {
+      cleanRefundUtr = `UPI_REF_${Date.now()}`;
     }
 
     const order = await Order.findOne({ $or: [{ orderId }, { _id: orderId }] });
@@ -537,6 +539,13 @@ exports.adminRefundPayment = async (req, res) => {
         emailContent
       ).catch(() => {});
     }
+
+    // Notify Dual Admins (bvhss20@gmail.com & ramtechnow@gmail.com)
+    notifyDualAdminsRefundCompleted({
+      order,
+      refundUtr: cleanRefundUtr,
+      refundAmount: order.amount
+    }).catch(err => console.error('Dual admin refund completed alert error:', err.message));
 
     console.log(`💸 Refund processed for Order ${order.orderId || order._id}: ₹${order.amount} with UTR ${cleanRefundUtr}`);
 

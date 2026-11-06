@@ -11,6 +11,10 @@ const Product = require('../models/Product');
 const { incrementCouponUsage } = require('./couponController');
 const { sendEmail } = require('./userController');
 const {
+  notifyDualAdminsNewOrder,
+  notifyDualAdminsOrderCancelled
+} = require('../utils/adminNotifier');
+const {
   getOrderPlacedTemplate,
   getOrderDeliveredTemplate,
   getOrderCancelledTemplate
@@ -170,6 +174,14 @@ exports.placeOrder = async (req, res) => {
       console.warn("⚠️ No recipient email available for placed order:", newOrder._id);
     }
 
+    // Dispatch real-time alert to dual store administrators (bvhss20@gmail.com & ramtechnow@gmail.com)
+    notifyDualAdminsNewOrder({
+      order: newOrder,
+      paymentMethod: newOrder.paymentMethod || "Cash on Delivery",
+      utr: null,
+      customerVpa: null
+    });
+
     console.log(`Order placed successfully by user ${userId}. Order ID: ${newOrder._id}, Email: ${customerEmail}`);
     res.json({ success: true, message: "Order placed successfully!", orderId: newOrder._id });
   } catch (error) {
@@ -318,6 +330,13 @@ exports.cancelUserOrder = async (req, res) => {
       console.warn("⚠️ No recipient email available for cancelled order:", order._id);
     }
 
+    // Send real-time refund action alert to dual admins (bvhss20@gmail.com with CC: ramtechnow@gmail.com)
+    notifyDualAdminsOrderCancelled({
+      order,
+      reason: order.cancellationReason,
+      cancelledBy: customerName
+    });
+
     console.log(`🛑 Order #${order._id} successfully cancelled by user ${userId}`);
     res.json({ success: true, message: "Order cancelled successfully.", order });
   } catch (error) {
@@ -383,6 +402,13 @@ exports.updateOrderStatus = async (req, res) => {
       } catch (cEmailErr) {
         console.error("⚠️ Admin cancel email error:", cEmailErr.message);
       }
+
+      // Notify dual admins about cancellation and pending refund
+      notifyDualAdminsOrderCancelled({
+        order: updatedOrder,
+        reason: updatedOrder.cancellationReason || "Status changed to Cancelled in admin panel",
+        cancelledBy: "Admin Console"
+      });
     }
 
     // 2. If order status changed to Delivered and was not Delivered before, send Delivered email

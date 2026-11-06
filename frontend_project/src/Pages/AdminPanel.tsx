@@ -153,16 +153,47 @@ export const AdminPanel: React.FC = () => {
     }
   }, [knownOrderIds]);
 
+  const getStoredReadIds = (): Set<string> => {
+    try {
+      const raw = localStorage.getItem("admin_read_notif_ids");
+      return raw ? new Set(JSON.parse(raw)) : new Set();
+    } catch (e) {
+      return new Set();
+    }
+  };
+
+  const getStoredClearedIds = (): Set<string> => {
+    try {
+      const raw = localStorage.getItem("admin_cleared_notif_ids");
+      return raw ? new Set(JSON.parse(raw)) : new Set();
+    } catch (e) {
+      return new Set();
+    }
+  };
+
   const handleMarkAllNotificationsRead = () => {
-    setAdminNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+    setAdminNotifications(prev => {
+      const readSet = getStoredReadIds();
+      prev.forEach(n => readSet.add(n.id));
+      localStorage.setItem("admin_read_notif_ids", JSON.stringify(Array.from(readSet)));
+      return prev.map(n => ({ ...n, unread: false }));
+    });
   };
 
   const handleClearAllNotifications = () => {
-    setAdminNotifications([]);
+    setAdminNotifications(prev => {
+      const clearedSet = getStoredClearedIds();
+      prev.forEach(n => clearedSet.add(n.id));
+      localStorage.setItem("admin_cleared_notif_ids", JSON.stringify(Array.from(clearedSet)));
+      return [];
+    });
     dispatch(addToast({ message: "Cleared all admin notifications", type: "info" }));
   };
 
   const handleMarkSingleNotificationRead = (id: any) => {
+    const readSet = getStoredReadIds();
+    readSet.add(id);
+    localStorage.setItem("admin_read_notif_ids", JSON.stringify(Array.from(readSet)));
     setAdminNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
   };
 
@@ -300,66 +331,81 @@ export const AdminPanel: React.FC = () => {
         const freshOrders = ordersData.value;
         setOrders(freshOrders);
 
-        // Populate rich admin notifications: Cancelled orders, Vendor products, Orders
+        // Populate rich admin notifications: Cancelled orders, Refunds, Orders, Stock
         const freshProds: any[] = prodData.status === "fulfilled" 
           ? (Array.isArray(prodData.value) ? prodData.value : (prodData.value as any)?.products || []) 
           : [];
+
+        const readSet = getStoredReadIds();
+        const clearedSet = getStoredClearedIds();
+
         setAdminNotifications(() => {
           const notifs: any[] = [];
 
-          // A. Cancelled Orders Needing Refund Action
-          const cancelledOrders = freshOrders.filter((o: any) => o.status === "Cancelled");
-          cancelledOrders.slice(0, 5).forEach((o: any) => {
+          // A. Cancelled Orders & Refunds
+          const cancelledOrders = freshOrders.filter((o: any) => o.status === "Cancelled" || o.paymentStatus === "Refunded");
+          cancelledOrders.slice(0, 8).forEach((o: any) => {
             const oId = String(o.orderId || o.id || o._id || "");
-            notifs.push({
-              id: `cancel-${oId}`,
-              title: `⚠️ Order #${oId.substring(0, 8).toUpperCase()} Cancelled`,
-              message: `Cancelled by ${o.userName || o.userEmail || "Customer"} (₹${o.amount}) • Refund Action Required`,
-              time: o.date ? new Date(o.date).toLocaleDateString() : "Recent",
-              type: "alert",
-              unread: true,
-              orderId: oId
-            });
+            const isRefundDone = Boolean(o.youpiRefundUtr || o.paymentStatus === 'Refunded');
+            const notifId = isRefundDone ? `refund-done-${oId}` : `cancel-pending-${oId}`;
+
+            if (!clearedSet.has(notifId)) {
+              if (isRefundDone) {
+                notifs.push({
+                  id: notifId,
+                  title: `✅ Refund Done: #${o.orderId || oId.substring(0, 8).toUpperCase()}`,
+                  message: `Refund of ₹${o.amount} sent via UPI (${o.youpiRefundUtr || 'Confirmed'}). Customer: ${o.userName || 'Customer'}`,
+                  time: o.youpiRefundedAt ? new Date(o.youpiRefundedAt).toLocaleDateString() : (o.date ? new Date(o.date).toLocaleDateString() : "Refunded"),
+                  type: "success",
+                  unread: !readSet.has(notifId),
+                  orderId: oId
+                });
+              } else {
+                notifs.push({
+                  id: notifId,
+                  title: `⚠️ Refund Required: #${o.orderId || oId.substring(0, 8).toUpperCase()}`,
+                  message: `Cancelled by ${o.userName || o.userEmail || "Customer"} (₹${o.amount}) • Action Required`,
+                  time: o.date ? new Date(o.date).toLocaleDateString() : "Recent",
+                  type: "alert",
+                  unread: !readSet.has(notifId),
+                  orderId: oId
+                });
+              }
+            }
           });
 
-          // B. Vendor Uploaded Products
-          const vendorProds = freshProds.filter((p: any) => p.vendor && p.vendor !== "RamCart Direct");
-          vendorProds.slice(0, 5).forEach((p: any) => {
-            notifs.push({
-              id: `vprod-${p.id}`,
-              title: `📦 Vendor Product: ${p.vendor}`,
-              message: `"${p.name}" (ID #${p.id}) added in ${p.category}. Stock: ${p.stockCount ?? 0} units`,
-              time: "Vendor Upload",
-              type: "product",
-              unread: false
-            });
+          // B. Recent Orders (COD vs YouPI)
+          freshOrders.slice(0, 8).forEach((o: any) => {
+            const oId = String(o.orderId || o.id || o._id || "");
+            if (o.status !== "Cancelled" && o.paymentStatus !== "Refunded") {
+              const notifId = `order-${oId}`;
+              if (!clearedSet.has(notifId)) {
+                const isCod = o.paymentMethod === 'COD' || !o.payment;
+                notifs.push({
+                  id: notifId,
+                  title: isCod ? `🚚 COD Order #${o.orderId || oId.substring(0, 8).toUpperCase()}` : `💳 UPI Order #${o.orderId || oId.substring(0, 8).toUpperCase()}`,
+                  message: `${o.userName || o.userEmail || "Customer"} (₹${o.amount}) • ${isCod ? 'Cash on Delivery' : 'Paid via YouPI UPI'} • ${o.status || 'Ordered'}`,
+                  time: o.date ? new Date(o.date).toLocaleDateString() : "Recent",
+                  type: "order",
+                  unread: !readSet.has(notifId),
+                  orderId: oId
+                });
+              }
+            }
           });
 
           // C. Low Stock Warnings
-          const lowStockProds = freshProds.filter((p: any) => p.stockCount !== undefined && p.stockCount < 15);
+          const lowStockProds = freshProds.filter((p: any) => p.stockCount !== undefined && p.stockCount < 10);
           lowStockProds.slice(0, 4).forEach((p: any) => {
-            notifs.push({
-              id: `stock-${p.id}`,
-              title: `⚠️ Low Stock: ${p.name}`,
-              message: `Only ${p.stockCount} units remaining in stock. Please restock or request vendor!`,
-              time: "Stock Alert",
-              type: "alert",
-              unread: true
-            });
-          });
-
-          // D. Recent Orders
-          freshOrders.slice(0, 6).forEach((o: any) => {
-            const oId = String(o.orderId || o.id || o._id || "");
-            if (o.status !== "Cancelled") {
+            const notifId = `stock-${p.id}`;
+            if (!clearedSet.has(notifId)) {
               notifs.push({
-                id: `order-${oId}`,
-                title: `Order #${o.orderId || oId.substring(0, 8).toUpperCase()}`,
-                message: `Placed by ${o.userName || o.userEmail || "Customer"} (₹${o.amount}) • Status: ${o.status || 'Ordered'}`,
-                time: o.date ? new Date(o.date).toLocaleDateString() : "Recent",
-                type: "order",
-                unread: false,
-                orderId: oId
+                id: notifId,
+                title: `⚠️ Low Stock: ${p.name}`,
+                message: `Only ${p.stockCount} units remaining in stock. Please restock!`,
+                time: "Stock Alert",
+                type: "alert",
+                unread: !readSet.has(notifId)
               });
             }
           });

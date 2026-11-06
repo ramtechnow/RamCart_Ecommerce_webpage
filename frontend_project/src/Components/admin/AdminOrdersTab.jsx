@@ -73,11 +73,7 @@ export const AdminOrdersTab = ({
 
   const handleConfirmRefund = async () => {
     if (!refundModalOrder) return;
-    const cleanUtr = refundUtrInput.trim();
-    if (!/^\d{12}$/.test(cleanUtr)) {
-      addToast("Please enter a valid 12-digit numeric Bank Refund UTR.", "warning");
-      return;
-    }
+    const cleanUtr = refundUtrInput.trim() || `UPI_REF_${Date.now()}`;
 
     setIsRefunding(true);
     try {
@@ -889,18 +885,17 @@ export const AdminOrdersTab = ({
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
-                  Bank Refund 12-Digit UTR <span className="text-rose-500">*</span>
+                  Bank Refund Reference / UTR <span className="text-zinc-400 font-normal">(Optional if paid via UPI App)</span>
                 </label>
                 <input
                   type="text"
-                  maxLength={12}
-                  placeholder="e.g. 512345678901 (from debited SMS/app)"
+                  placeholder="e.g. 512345678901 or leave blank if paid via app"
                   value={refundUtrInput}
-                  onChange={(e) => setRefundUtrInput(e.target.value.replace(/\D/g, "").slice(0, 12))}
+                  onChange={(e) => setRefundUtrInput(e.target.value)}
                   className="w-full px-3.5 py-2.5 text-xs font-mono font-bold rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 outline-none focus:border-rose-500"
                 />
                 <span className="text-[10px] text-zinc-400 mt-1 block">
-                  {refundUtrInput.length}/12 digits entered
+                  Leave blank to auto-generate reference ID after completing payment in your UPI app.
                 </span>
               </div>
 
@@ -929,7 +924,7 @@ export const AdminOrdersTab = ({
               </button>
               <button
                 type="button"
-                disabled={isRefunding || refundUtrInput.trim().length !== 12}
+                disabled={isRefunding}
                 onClick={handleConfirmRefund}
                 className="px-5 py-2 text-xs font-extrabold rounded-xl bg-rose-600 hover:bg-rose-500 text-white flex items-center gap-1.5 shadow-md cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >

@@ -391,7 +391,7 @@ async function sendSMS(phone, otp) {
 }
 
 // Transactional Email sender helper using Nodemailer
-async function sendEmail(email, subject, html) {
+async function sendEmail(email, subject, html, cc = null) {
   const host = process.env.SMTP_HOST || process.env.SMTP_SERVER || 'smtp.gmail.com';
   const port = parseInt(process.env.SMTP_PORT) || 465;
   const user = process.env.SMTP_USER || 'bvhss20@gmail.com';
@@ -412,6 +412,7 @@ async function sendEmail(email, subject, html) {
         redirect: 'follow',
         body: JSON.stringify({
           to: email,
+          cc: cc || undefined,
           subject: subject,
           html: html,
           from: user,
@@ -419,7 +420,7 @@ async function sendEmail(email, subject, html) {
         })
       });
       if (resp.ok) {
-        console.log(`✉️ Email successfully dispatched via HTTPS Relay to ${email}`);
+        console.log(`✉️ Email successfully dispatched via HTTPS Relay to ${email} (CC: ${cc || 'none'})`);
         return { success: true, messageId: 'https-relay-ok' };
       }
     } catch (relayErr) {
@@ -440,13 +441,14 @@ async function sendEmail(email, subject, html) {
         body: JSON.stringify({
           from: process.env.RESEND_FROM || `RamCart <onboarding@resend.dev>`,
           to: [email],
+          cc: cc ? (Array.isArray(cc) ? cc : [cc]) : undefined,
           subject: subject,
           html: html
         })
       });
       const data = await resp.json();
       if (resp.ok && data.id) {
-        console.log(`✉️ Email successfully dispatched via Resend HTTPS API to ${email}. ID: ${data.id}`);
+        console.log(`✉️ Email successfully dispatched via Resend HTTPS API to ${email} (CC: ${cc || 'none'}). ID: ${data.id}`);
         return { success: true, messageId: data.id };
       }
     } catch (resendErr) {
@@ -467,13 +469,14 @@ async function sendEmail(email, subject, html) {
         body: JSON.stringify({
           sender: { name: 'RamCart Support', email: process.env.BREVO_SENDER || user },
           to: [{ email: email }],
+          cc: cc ? [{ email: cc }] : undefined,
           subject: subject,
           htmlContent: html
         })
       });
       const data = await resp.json();
       if (resp.ok && data.messageId) {
-        console.log(`✉️ Email successfully dispatched via Brevo HTTPS API to ${email}. ID: ${data.messageId}`);
+        console.log(`✉️ Email successfully dispatched via Brevo HTTPS API to ${email} (CC: ${cc || 'none'}). ID: ${data.messageId}`);
         return { success: true, messageId: data.messageId };
       }
     } catch (brevoErr) {
@@ -516,10 +519,11 @@ async function sendEmail(email, subject, html) {
     const info = await transporter.sendMail({
       from: `"RamCart Support" <${user}>`,
       to: email,
+      cc: cc || undefined,
       subject: subject,
       html: html
     });
-    console.log(`✉️ Email successfully sent to ${email}. ID: ${info.messageId}`);
+    console.log(`✉️ Email successfully sent to ${email} (CC: ${cc || 'none'}). ID: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
   } catch (primaryErr) {
     console.warn(`⚠️ Primary SMTP delivery failed on port ${port}:`, primaryErr.message);
@@ -532,16 +536,20 @@ async function sendEmail(email, subject, html) {
         const info = await fallbackTransporter.sendMail({
           from: `"RamCart Support" <${user}>`,
           to: email,
+          cc: cc || undefined,
           subject: subject,
           html: html
         });
-        console.log(`✉️ Email successfully sent to ${email} via fallback port 587. ID: ${info.messageId}`);
+        console.log(`✉️ Email successfully sent to ${email} (CC: ${cc || 'none'}) via fallback port 587. ID: ${info.messageId}`);
         return { success: true, messageId: info.messageId };
       } catch (fallbackErr) {
         console.error(`❌ Fallback SMTP delivery also failed on port 587:`, fallbackErr.message);
         return { success: false, error: fallbackErr.message };
       }
     }
+    return { success: false, error: primaryErr.message };
+  }
+}
 
     return { success: false, error: primaryErr.message };
   }

@@ -19,7 +19,9 @@ import {
   ChevronRight,
   Smartphone,
   QrCode,
-  Zap
+  Zap,
+  Banknote,
+  Truck
 } from "lucide-react";
 
 import { useCart } from "../features/checkout/hooks/useCart";
@@ -113,6 +115,7 @@ export const Checkout: React.FC = () => {
   const [transactionError, setTransactionError] = useState<string | null>(null);
 
   // YouPI Gateway State
+  const [paymentMethod, setPaymentMethod] = useState<"YOUPI" | "COD">("YOUPI");
   const [youpiConfig, setYoupiConfig] = useState<YoupiConfig | null>(null);
   const [showYoupiModal, setShowYoupiModal] = useState(false);
   const [youpiSession, setYoupiSession] = useState<{
@@ -304,7 +307,7 @@ export const Checkout: React.FC = () => {
     }
   };
 
-  // ── Main YouPI Direct UPI Checkout Flow ─────────────────────────────────────
+  // ── Main Checkout Flow (YouPI UPI or Cash on Delivery) ────────────────────
   const onSubmitCheckout = async (data: CheckoutValues) => {
     if (!user) {
       dispatch(addToast({ message: "Please sign in to place an order.", type: "error" }));
@@ -317,10 +320,6 @@ export const Checkout: React.FC = () => {
       return;
     }
 
-    setIsProcessing(true);
-    setTransactionError(null);
-    setProcessingMessage("Generating secure dynamic YouPI UPI QR & Intent...");
-
     // Format order items
     const orderItems = checkoutItems.map((item) => ({
       productId: String(item.productId),
@@ -331,6 +330,48 @@ export const Checkout: React.FC = () => {
       quantity: item.quantity,
       price: item.price
     }));
+
+    // Flow 1: Cash on Delivery (COD)
+    if (paymentMethod === "COD") {
+      setIsProcessing(true);
+      setTransactionError(null);
+      setProcessingMessage("Placing Cash on Delivery order...");
+
+      try {
+        const result = await placeOrderTransaction(
+          user.uid,
+          orderItems,
+          data.address,
+          couponCode,
+          finalPayable
+        );
+
+        setIsProcessing(false);
+        if (result.success && result.orderId) {
+          setCreatedOrderId(result.orderId);
+          setVerifiedPaymentId("CASH_ON_DELIVERY");
+          setIsSuccess(true);
+          if (!buyNow) {
+            await clearCart();
+          }
+          dispatch(addToast({ message: "Order placed successfully with Cash on Delivery!", type: "success" }));
+        } else {
+          setTransactionError(result.error || "Failed to complete Cash on Delivery order.");
+          dispatch(addToast({ message: result.error || "Order placement failed.", type: "error" }));
+        }
+      } catch (err: any) {
+        setIsProcessing(false);
+        const errMsg = err.message || "Failed to place Cash on Delivery order.";
+        setTransactionError(errMsg);
+        dispatch(addToast({ message: errMsg, type: "error" }));
+      }
+      return;
+    }
+
+    // Flow 2: YouPI Direct UPI Gateway
+    setIsProcessing(true);
+    setTransactionError(null);
+    setProcessingMessage("Generating secure dynamic YouPI UPI QR & Intent...");
 
     try {
       const session = await initiateYoupiPayment({
@@ -689,28 +730,44 @@ export const Checkout: React.FC = () => {
                 </AnimatePresence>
               </div>
 
-              {/* Step 2: Payment Method (YouPI Zero-Fee Direct UPI) */}
+              {/* Step 2: Payment Method Selection (YouPI UPI or Cash on Delivery) */}
               <div className="checkout-section-card">
                 <h3 className="section-card-title">
                   <CreditCard className="title-icon text-accent-pink" size={18} />
-                  2. Payment Method
+                  2. Select Payment Method
                 </h3>
 
-                {/* YouPI Gateway Card */}
-                <div className="razorpay-method-card border-2 border-emerald-500/30 dark:border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 via-transparent to-emerald-500/5">
+                {/* Payment Option 1: YouPI Direct UPI */}
+                <div 
+                  onClick={() => setPaymentMethod("YOUPI")}
+                  className={`razorpay-method-card cursor-pointer transition-all mb-4 border-2 ${
+                    paymentMethod === "YOUPI" 
+                      ? "border-emerald-500 bg-emerald-500/5 ring-2 ring-emerald-500/20" 
+                      : "border-border hover:border-emerald-500/40 opacity-80"
+                  }`}
+                >
                   <div className="razorpay-method-header">
                     <div className="razorpay-brand-wrap">
-                      <span className="razorpay-logo-badge bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold px-3 py-1 rounded-lg flex items-center gap-1.5 shadow-sm">
-                        <Zap size={14} className="animate-pulse" /> YouPI Gateway
-                      </span>
-                      <div className="razorpay-title-group">
+                      <div className="flex items-center gap-3">
+                        <input 
+                          type="radio" 
+                          name="paymentMethod" 
+                          checked={paymentMethod === "YOUPI"} 
+                          onChange={() => setPaymentMethod("YOUPI")}
+                          className="w-4 h-4 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                        />
+                        <span className="razorpay-logo-badge bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold px-3 py-1 rounded-lg flex items-center gap-1.5 shadow-sm text-xs">
+                          <Zap size={14} className="animate-pulse" /> YouPI Direct UPI
+                        </span>
+                      </div>
+                      <div className="razorpay-title-group ml-7">
                         <h4 className="flex items-center gap-2">
-                          Direct Bank UPI Transfer
+                          Instant Bank UPI Transfer
                           <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">
                             0% Extra Charges
                           </span>
                         </h4>
-                        <p>Instant credit straight to merchant bank account via Google Pay, PhonePe, Paytm, or BHIM</p>
+                        <p>Pay instantly with Google Pay, PhonePe, Paytm, Amazon Pay or scan dynamic QR</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -719,7 +776,7 @@ export const Checkout: React.FC = () => {
                   </div>
 
                   {/* Payment Methods Visual Badges */}
-                  <div className="payment-options-grid">
+                  <div className="payment-options-grid ml-7">
                     <div className="payment-option-pill active border-emerald-500/30">
                       <Smartphone size={16} className="text-emerald-500" />
                       <span>Google Pay</span>
@@ -734,7 +791,7 @@ export const Checkout: React.FC = () => {
                     </div>
                     <div className="payment-option-pill active border-amber-500/30">
                       <Smartphone size={16} className="text-amber-500" />
-                      <span>BHIM UPI</span>
+                      <span>Amazon Pay</span>
                     </div>
                     <div className="payment-option-pill active border-cyan-500/30">
                       <QrCode size={16} className="text-cyan-500" />
@@ -743,28 +800,60 @@ export const Checkout: React.FC = () => {
                   </div>
 
                   {/* Merchant VPA info badge */}
-                  <div className="p-3 mt-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 text-[11px] text-emerald-900 dark:text-emerald-200 leading-relaxed flex items-center justify-between">
+                  <div className="p-3 mt-3 ml-7 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 text-[11px] text-emerald-900 dark:text-emerald-200 leading-relaxed flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <ShieldCheck size={16} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
                       <span>
-                        Verified Store VPA: <strong className="font-mono text-xs">{youpiConfig?.merchantVpa || "rams20294-2@okhdfcbank"}</strong> ({youpiConfig?.merchantName || "RamCart"})
+                        Store VPA: <strong className="font-mono text-xs">{youpiConfig?.merchantVpa || "rams20294-2@okhdfcbank"}</strong>
                       </span>
                     </div>
                     <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-white dark:bg-zinc-800 px-2 py-0.5 rounded-md border border-emerald-300 dark:border-emerald-700">
-                      Instant Settlement
+                      Direct Credit
                     </span>
                   </div>
+                </div>
 
-                  {/* Security Points */}
-                  <div className="razorpay-trust-points">
-                    <div className="razorpay-trust-item">
-                      <ShieldCheck size={14} className="text-emerald-600" />
-                      <span>NPCI Verified UPI Protocol &bull; 100% Peer-to-Bank Encrypted</span>
+                {/* Payment Option 2: Cash on Delivery (COD) */}
+                <div 
+                  onClick={() => setPaymentMethod("COD")}
+                  className={`razorpay-method-card cursor-pointer transition-all border-2 ${
+                    paymentMethod === "COD" 
+                      ? "border-amber-500 bg-amber-500/5 ring-2 ring-amber-500/20" 
+                      : "border-border hover:border-amber-500/40 opacity-80"
+                  }`}
+                >
+                  <div className="razorpay-method-header">
+                    <div className="razorpay-brand-wrap">
+                      <div className="flex items-center gap-3">
+                        <input 
+                          type="radio" 
+                          name="paymentMethod" 
+                          checked={paymentMethod === "COD"} 
+                          onChange={() => setPaymentMethod("COD")}
+                          className="w-4 h-4 text-amber-600 focus:ring-amber-500 cursor-pointer"
+                        />
+                        <span className="razorpay-logo-badge bg-gradient-to-r from-amber-600 to-orange-600 text-white font-extrabold px-3 py-1 rounded-lg flex items-center gap-1.5 shadow-sm text-xs">
+                          <Banknote size={14} /> Cash on Delivery (COD)
+                        </span>
+                      </div>
+                      <div className="razorpay-title-group ml-7">
+                        <h4 className="flex items-center gap-2">
+                          Pay Cash at Doorstep
+                          <span className="text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded-full border border-amber-500/20">
+                            Doorstep Collection
+                          </span>
+                        </h4>
+                        <p>Pay with cash or scanning delivery agent's UPI QR when package arrives at your home</p>
+                      </div>
                     </div>
-                    <div className="razorpay-trust-item">
-                      <CheckCircle2 size={14} className="text-emerald-600" />
-                      <span>Auto-verification with 12-digit Bank UTR &bull; 1-click refund protection</span>
+                    <div className="flex items-center gap-2">
+                      <span className="recommended-pill bg-amber-600 text-white">No Advance Needed</span>
                     </div>
+                  </div>
+
+                  <div className="p-3 mt-3 ml-7 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 text-[11px] text-amber-900 dark:text-amber-200 leading-relaxed flex items-center gap-2">
+                    <Truck size={16} className="shrink-0 text-amber-600 dark:text-amber-400" />
+                    <span>Courier will contact your phone (<strong>{getValues("address.phone") || "provided phone"}</strong>) prior to delivery.</span>
                   </div>
                 </div>
               </div>
@@ -778,8 +867,17 @@ export const Checkout: React.FC = () => {
                 {savings > 0 && (
                   <span className="savings-badge">Saving ₹{savings.toFixed(2)}</span>
                 )}
-                <Lock size={16} />
-                Proceed to Pay ₹{finalPayable.toFixed(2)} via YouPI UPI
+                {paymentMethod === "COD" ? (
+                  <>
+                    <Truck size={16} />
+                    Place Order via Cash on Delivery (₹{finalPayable.toFixed(2)})
+                  </>
+                ) : (
+                  <>
+                    <Lock size={16} />
+                    Proceed to Pay ₹{finalPayable.toFixed(2)} via YouPI UPI
+                  </>
+                )}
               </button>
             </form>
           </div>
