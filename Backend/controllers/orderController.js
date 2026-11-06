@@ -308,11 +308,14 @@ exports.cancelUserOrder = async (req, res) => {
     if (customerEmail) {
       try {
         const cancelHtml = getOrderCancelledTemplate({
-          orderId: order._id,
+          orderId: order.orderId || order._id,
           customerName,
           items: order.items,
           totalAmount: order.amount,
-          reason: order.cancellationReason
+          reason: order.cancellationReason,
+          paymentMethod: order.paymentMethod,
+          utr: order.youpiUtr,
+          customerVpa: order.youpiCustomerVpa
         });
         sendEmail(
           customerEmail,
@@ -386,11 +389,14 @@ exports.updateOrderStatus = async (req, res) => {
         const customerName = updatedOrder.userName || user?.name || updatedOrder.address?.fullName || "Customer";
         if (customerEmail) {
           const cancelHtml = getOrderCancelledTemplate({
-            orderId: updatedOrder._id,
+            orderId: updatedOrder.orderId || updatedOrder._id,
             customerName,
             items: updatedOrder.items,
             totalAmount: updatedOrder.amount,
-            reason: "Cancelled by store administrator"
+            reason: "Cancelled by store administrator",
+            paymentMethod: updatedOrder.paymentMethod,
+            utr: updatedOrder.youpiUtr,
+            customerVpa: updatedOrder.youpiCustomerVpa
           });
           sendEmail(
             customerEmail,

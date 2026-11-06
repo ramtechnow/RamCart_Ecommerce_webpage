@@ -328,7 +328,10 @@ exports.submitYoupiUtr = async (req, res) => {
           items: existingOrder.items,
           totalAmount: existingOrder.amount,
           address: existingOrder.address,
-          orderDate: existingOrder.date || new Date()
+          orderDate: existingOrder.date || new Date(),
+          paymentMethod: 'YouPI Direct UPI',
+          utr: cleanUtr,
+          customerVpa: customerVpa || existingOrder.youpiCustomerVpa
         });
         sendEmail(
           customerEmail,

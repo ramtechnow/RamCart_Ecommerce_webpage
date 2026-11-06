@@ -66,8 +66,9 @@ export const AdminOrdersTab = ({
   // Compute dynamic UPI URI for refunding customer
   const refundAmountNum = Number(refundModalOrder?.amount || 0);
   const activeRefundVpa = refundModalVpa.trim();
+  // Clean P2P intent URI (without commercial tn parameter that causes bank limit filters)
   const refundUpiUri = (refundModalOrder && activeRefundVpa)
-    ? `upi://pay?pa=${encodeURIComponent(activeRefundVpa)}&pn=${encodeURIComponent(refundModalOrder.userName || refundModalOrder.address?.fullName || "Customer")}&am=${encodeURIComponent(refundAmountNum.toFixed(2))}&cu=INR&tn=${encodeURIComponent('Refund for RamCart Order #' + (refundModalOrder.orderId || String(refundModalOrder._id).slice(-8)))}`
+    ? `upi://pay?pa=${encodeURIComponent(activeRefundVpa)}&pn=${encodeURIComponent(refundModalOrder.userName || refundModalOrder.address?.fullName || "Customer")}&am=${encodeURIComponent(refundAmountNum.toFixed(2))}&cu=INR`
     : "";
 
   useEffect(() => {
@@ -931,48 +932,87 @@ export const AdminOrdersTab = ({
                 )}
               </div>
 
-              {/* Step 2: Transfer Payment from Admin Bank to Customer */}
-              <div className="p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl space-y-3">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-400">
-                  <Zap size={15} />
-                  <span>Step 2: Transfer ₹{refundAmountNum.toFixed(2)} to Customer</span>
+              {/* Step 2: 100% Guaranteed Bank Transfer Method (Zero Limit Block) */}
+              <div className="p-4 bg-amber-500/10 border-2 border-amber-500/30 rounded-xl space-y-3">
+                <div className="flex items-center gap-2 text-xs font-black text-amber-800 dark:text-amber-200">
+                  <ShieldCheck size={16} className="text-amber-600" />
+                  <span>Step 2: Transfer ₹{refundAmountNum.toFixed(2)} to Customer (Guaranteed 100% Success)</span>
                 </div>
 
-                {activeRefundVpa ? (
-                  <div className="flex flex-col items-center justify-center space-y-3">
-                    {/* Desktop/Tablet QR Code */}
-                    <div className="p-2 bg-white rounded-xl shadow-md border border-zinc-200">
-                      {refundQrUrl ? (
+                <div className="text-[11px] text-amber-900/90 dark:text-amber-200/90 bg-amber-50 dark:bg-amber-950/40 p-2.5 rounded-lg border border-amber-200 dark:border-amber-800 leading-relaxed">
+                  ⚠️ <strong>Why direct links show "Exceeded limit" / "Suspended":</strong><br/>
+                  NPCI and Banks (Google Pay / PhonePe) automatically block external website links to personal UPI accounts.
+                  <strong>To pay without any bank limit or blocking:</strong>
+                </div>
+
+                {/* 2 Big Action Buttons */}
+                <div className="grid grid-cols-2 gap-2.5 pt-1">
+                  <button
+                    type="button"
+                    disabled={!activeRefundVpa}
+                    onClick={() => handleCopy(activeRefundVpa, "modal-vpa-btn")}
+                    className="p-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs flex flex-col items-center justify-center gap-1 shadow-md cursor-pointer transition-transform active:scale-95 disabled:opacity-40"
+                  >
+                    <span className="flex items-center gap-1.5 text-xs">
+                      <Copy size={14} />
+                      {copiedKey === "modal-vpa-btn" ? "✅ Copied UPI ID!" : "1. Copy Customer UPI ID"}
+                    </span>
+                    <span className="font-mono text-[10px] opacity-90 truncate max-w-full">
+                      {activeRefundVpa || "Enter UPI ID above"}
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(String(refundAmountNum.toFixed(2)), "modal-amt-btn")}
+                    className="p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-extrabold text-xs flex flex-col items-center justify-center gap-1 shadow-md cursor-pointer transition-transform active:scale-95"
+                  >
+                    <span className="flex items-center gap-1.5 text-xs">
+                      <Copy size={14} />
+                      {copiedKey === "modal-amt-btn" ? "✅ Copied Amount!" : "2. Copy Amount"}
+                    </span>
+                    <span className="font-mono text-xs text-amber-300 font-bold">
+                      ₹{refundAmountNum.toFixed(2)}
+                    </span>
+                  </button>
+                </div>
+
+                <div className="bg-white/80 dark:bg-zinc-900/80 p-3 rounded-xl border border-amber-200/60 dark:border-amber-800/60 text-xs text-zinc-800 dark:text-zinc-200 space-y-1">
+                  <p className="font-bold text-[11px] text-emerald-700 dark:text-emerald-400 m-0">
+                    ⚡ 3-Step Guaranteed Payment in Google Pay / PhonePe:
+                  </p>
+                  <ol className="list-decimal pl-4 text-[11px] space-y-1 m-0 pt-1">
+                    <li>Tap <strong>Copy Customer UPI ID</strong> above.</li>
+                    <li>Open <strong>Google Pay</strong> or <strong>PhonePe</strong> &rarr; Tap <strong>"Pay UPI ID or number"</strong> &rarr; Paste &amp; Send <strong>₹{refundAmountNum.toFixed(2)}</strong>.</li>
+                    <li>Enter your UPI PIN &bull; The money is transferred immediately from your bank account to the customer!</li>
+                  </ol>
+                </div>
+
+                {/* Optional App Launch / QR code */}
+                {activeRefundVpa && (
+                  <details className="pt-1 text-[11px] text-zinc-600 dark:text-zinc-400">
+                    <summary className="cursor-pointer font-bold text-zinc-700 dark:text-zinc-300 hover:underline">
+                      Optional: Or scan QR code / open app directly &darr;
+                    </summary>
+                    <div className="flex flex-col items-center justify-center p-3 mt-2 bg-white dark:bg-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-700 space-y-2">
+                      {refundQrUrl && (
                         <img 
                           src={refundQrUrl} 
                           alt="Scan to Refund via UPI" 
-                          className="w-44 h-44 object-contain block"
+                          className="w-36 h-36 object-contain block"
                         />
-                      ) : (
-                        <div className="w-44 h-44 flex items-center justify-center">
-                          <Loader2 className="animate-spin text-emerald-600" size={28} />
-                        </div>
                       )}
-                    </div>
-
-                    <p className="text-[11px] text-zinc-600 dark:text-zinc-300 text-center leading-relaxed max-w-sm m-0">
-                      📸 <strong>On Laptop/PC:</strong> Point your phone camera or Google Pay / PhonePe scanner at this QR code. It will automatically fill <strong>₹{refundAmountNum.toFixed(2)}</strong> and the customer UPI ID. Enter your UPI PIN to transfer!
-                    </p>
-
-                    {/* Mobile 1-Tap App Links */}
-                    <div className="w-full pt-1 space-y-1.5">
                       <a
                         href={refundUpiUri}
-                        className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-md text-center transition-all cursor-pointer"
+                        className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1 text-center"
                       >
-                        <ExternalLink size={14} /> Tap to Open UPI App on this Mobile
+                        <ExternalLink size={13} /> Open UPI App Directly
                       </a>
+                      <span className="text-[10px] text-zinc-400">
+                        (Note: If your bank app says "Bank limit reached", please use the 1-Tap Copy method above).
+                      </span>
                     </div>
-                  </div>
-                ) : (
-                  <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-800 dark:text-amber-200 text-xs text-center">
-                    ⚠️ Please enter or select the Customer Destination UPI ID above to generate the instant payment QR code and app link.
-                  </div>
+                  </details>
                 )}
               </div>
 

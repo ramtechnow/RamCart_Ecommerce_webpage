@@ -39,7 +39,7 @@ function calculateExpectedDelivery(orderDate) {
 /**
  * 1. Order Placed Confirmation Email
  */
-function getOrderPlacedTemplate({ orderId, customerName, items = [], totalAmount, address, orderDate }) {
+function getOrderPlacedTemplate({ orderId, customerName, items = [], totalAmount, address, orderDate, paymentMethod, utr, customerVpa }) {
   const gst = calculateGstBreakdown(totalAmount);
   const expectedDelivery = calculateExpectedDelivery(orderDate);
 
@@ -136,6 +136,29 @@ function getOrderPlacedTemplate({ orderId, customerName, items = [], totalAmount
             <td style="padding:8px 0 0;font-size:14px;font-weight:800;color:#111827;">Total Amount:</td>
             <td style="padding:8px 0 0;text-align:right;font-size:16px;font-weight:900;color:#e53170;">₹${gst.total}</td>
           </tr>
+        </table>
+      </div>
+
+      <!-- Payment & Transaction Details Card -->
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 18px;margin-bottom:20px;">
+        <span style="font-size:11px;font-weight:800;color:#166534;text-transform:uppercase;display:block;margin-bottom:6px;">💳 Payment Details</span>
+        <table style="width:100%;font-size:12px;color:#166534;">
+          <tr>
+            <td style="padding:3px 0;"><strong>Payment Method:</strong></td>
+            <td style="padding:3px 0;text-align:right;font-weight:700;">${paymentMethod || (utr ? 'YouPI Direct UPI' : 'Cash on Delivery (COD)')}</td>
+          </tr>
+          ${utr ? `
+          <tr>
+            <td style="padding:3px 0;"><strong>Bank Reference (UTR / Txn ID):</strong></td>
+            <td style="padding:3px 0;text-align:right;font-family:monospace;font-weight:bold;color:#0f172a;">${utr}</td>
+          </tr>
+          ` : ''}
+          ${customerVpa ? `
+          <tr>
+            <td style="padding:3px 0;"><strong>Paid from UPI ID:</strong></td>
+            <td style="padding:3px 0;text-align:right;font-family:monospace;font-weight:bold;color:#0284c7;">${customerVpa}</td>
+          </tr>
+          ` : ''}
         </table>
       </div>
 
@@ -252,7 +275,7 @@ function getOrderDeliveredTemplate({ orderId, customerName, items = [], address,
 /**
  * 3. Order Cancelled Confirmation Email
  */
-function getOrderCancelledTemplate({ orderId, customerName, items = [], totalAmount, reason }) {
+function getOrderCancelledTemplate({ orderId, customerName, items = [], totalAmount, reason, paymentMethod, utr, customerVpa }) {
   const cancelReasonText = reason || 'Requested by customer prior to dispatch';
 
   const itemsList = items.map(item => `
@@ -291,11 +314,35 @@ function getOrderCancelledTemplate({ orderId, customerName, items = [], totalAmo
         <p style="margin:0;font-size:13px;color:#7f1d1d;">${cancelReasonText}</p>
       </div>
 
-      <!-- Refund Notice -->
-      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:14px 18px;margin-bottom:20px;">
-        <h4 style="margin:0 0 6px;font-size:13px;font-weight:800;color:#111827;">Refund Information</h4>
-        <p style="margin:0;font-size:12px;color:#4b5563;line-height:1.6;">
-          If an online payment was processed for this order (₹${formatCurrency(totalAmount)}), your refund will be automatically credited back to your original payment method (Credit/Debit Card, UPI, or Net Banking) within <strong>3-5 business days</strong>.
+      <!-- Refund & Transaction Information -->
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 18px;margin-bottom:20px;">
+        <h4 style="margin:0 0 8px;font-size:13px;font-weight:800;color:#166534;">Refund &amp; Payment Details</h4>
+        <table style="width:100%;font-size:12px;color:#166534;">
+          <tr>
+            <td style="padding:3px 0;"><strong>Payment Method:</strong></td>
+            <td style="padding:3px 0;text-align:right;font-weight:700;">${paymentMethod || (utr ? 'YouPI UPI' : 'Cash on Delivery (COD)')}</td>
+          </tr>
+          ${utr ? `
+          <tr>
+            <td style="padding:3px 0;"><strong>Original Payment UTR:</strong></td>
+            <td style="padding:3px 0;text-align:right;font-family:monospace;font-weight:bold;color:#0f172a;">${utr}</td>
+          </tr>
+          ` : ''}
+          ${customerVpa ? `
+          <tr>
+            <td style="padding:3px 0;"><strong>Refund Destination UPI:</strong></td>
+            <td style="padding:3px 0;text-align:right;font-family:monospace;font-weight:bold;color:#0284c7;">${customerVpa}</td>
+          </tr>
+          ` : ''}
+          <tr>
+            <td style="padding:3px 0;"><strong>Refund Amount:</strong></td>
+            <td style="padding:3px 0;text-align:right;font-size:14px;font-weight:900;color:#059669;">₹${formatCurrency(totalAmount)}</td>
+          </tr>
+        </table>
+        <p style="margin:10px 0 0;font-size:12px;color:#15803d;line-height:1.5;">
+          ${(paymentMethod === 'COD') 
+            ? '✅ Since this was a Cash on Delivery order, no payment was collected, so no refund is needed.' 
+            : '✅ Your refund is being processed directly to your UPI bank account.'}
         </p>
       </div>
 

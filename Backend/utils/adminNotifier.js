@@ -1,3 +1,4 @@
+const YoupiTransaction = require('../models/YoupiTransaction');
 const { sendEmail } = require('../controllers/userController');
 
 const PRIMARY_ADMIN_EMAIL = 'bvhss20@gmail.com';
@@ -111,7 +112,20 @@ async function notifyDualAdminsOrderCancelled({ order, reason, cancelledBy }) {
   try {
     const oId = order.orderId || order._id;
     const isCod = order.paymentMethod === 'COD' || !order.payment;
-    const customerVpa = order.youpiCustomerVpa || order.customerVpa || '';
+    let customerVpa = order.youpiCustomerVpa || order.customerVpa || '';
+    let originalUtr = order.youpiUtr || '';
+
+    // Lookup transaction in database if customerVpa or UTR is missing on order
+    if (!customerVpa || !originalUtr) {
+      try {
+        const txn = await YoupiTransaction.findOne({ orderId: oId });
+        if (txn) {
+          if (!customerVpa && txn.customerVpa) customerVpa = txn.customerVpa;
+          if (!originalUtr && txn.utr) originalUtr = txn.utr;
+        }
+      } catch (tErr) {}
+    }
+
     const refundAmt = Number(order.amount || 0).toFixed(2);
 
     // If Cash on Delivery, no refund is needed because no money was collected
