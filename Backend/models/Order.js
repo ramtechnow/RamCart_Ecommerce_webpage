@@ -55,11 +55,35 @@ const OrderSchema = new mongoose.Schema({
   },
   paymentMethod: {
     type: String,
-    default: "Razorpay",
+    default: "YouPI", // "YouPI", "Razorpay", "COD"
   },
   paymentStatus: {
     type: String,
-    default: "Paid", // Paid, Pending, Failed
+    default: "Paid", // Paid, Pending, Failed, Refunded
+  },
+  youpiOrderId: {
+    type: String,
+    default: null,
+  },
+  youpiUtr: {
+    type: String,
+    default: null,
+  },
+  youpiCustomerVpa: {
+    type: String,
+    default: null,
+  },
+  youpiVerifiedAt: {
+    type: Date,
+    default: null,
+  },
+  youpiRefundUtr: {
+    type: String,
+    default: null,
+  },
+  youpiRefundedAt: {
+    type: Date,
+    default: null,
   },
   razorpayOrderId: {
     type: String,

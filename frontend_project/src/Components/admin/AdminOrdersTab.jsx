@@ -16,9 +16,16 @@ import {
   ShoppingCart, 
   Download, 
   Plus, 
-  AlertCircle 
+  AlertCircle,
+  Copy,
+  Check,
+  Zap,
+  ExternalLink,
+  ShieldCheck,
+  RotateCcw
 } from 'lucide-react';
 import { adminApi } from '../../Utils/adminApi';
+import { adminVerifyYoupiOrder, adminRefundYoupiOrder } from '../../features/checkout/services/youpiService';
 
 export const AdminOrdersTab = ({ 
   orders = [], 
@@ -32,6 +39,62 @@ export const AdminOrdersTab = ({
   const [updatingOrderId, setUpdatingOrderId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All"); // "All" | "Pending" | "Processing" | "Shipped" | "Delivered"
+
+  // YouPI Refund Modal & Verify States
+  const [refundModalOrder, setRefundModalOrder] = useState(null);
+  const [refundUtrInput, setRefundUtrInput] = useState("");
+  const [refundReasonInput, setRefundReasonInput] = useState("Customer requested cancellation");
+  const [isRefunding, setIsRefunding] = useState(false);
+  const [verifyingOrderId, setVerifyingOrderId] = useState(null);
+  const [copiedKey, setCopiedKey] = useState(null);
+
+  const handleCopy = (text, key) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    addToast(`Copied: ${text}`, "success");
+    setTimeout(() => setCopiedKey(null), 2500);
+  };
+
+  const handleVerifyYoupi = async (orderId) => {
+    setVerifyingOrderId(orderId);
+    try {
+      await adminVerifyYoupiOrder(orderId);
+      addToast(`Order #${orderId} payment verified & marked Paid!`, "success");
+      if (logAction) logAction(`Admin verified YouPI bank credit for order #${orderId}`);
+      if (onRefreshOrders) onRefreshOrders();
+    } catch (err) {
+      console.error("Verification error:", err);
+      addToast(err.message || "Failed to verify payment", "error");
+    } finally {
+      setVerifyingOrderId(null);
+    }
+  };
+
+  const handleConfirmRefund = async () => {
+    if (!refundModalOrder) return;
+    const cleanUtr = refundUtrInput.trim();
+    if (!/^\d{12}$/.test(cleanUtr)) {
+      addToast("Please enter a valid 12-digit numeric Bank Refund UTR.", "warning");
+      return;
+    }
+
+    setIsRefunding(true);
+    try {
+      const orderTargetId = refundModalOrder._id || refundModalOrder.orderId;
+      await adminRefundYoupiOrder(orderTargetId, cleanUtr, refundReasonInput);
+      addToast(`Refund of ₹${refundModalOrder.amount} recorded! Email sent to ${refundModalOrder.userEmail || "customer"}.`, "success");
+      if (logAction) logAction(`Processed UPI refund for order #${orderTargetId} (UTR: ${cleanUtr})`);
+      setRefundModalOrder(null);
+      setRefundUtrInput("");
+      if (onRefreshOrders) onRefreshOrders();
+    } catch (err) {
+      console.error("Refund error:", err);
+      addToast(err.message || "Failed to record refund.", "error");
+    } finally {
+      setIsRefunding(false);
+    }
+  };
 
   // ── Real Excel (CSV) Orders Exporter ─────────────────────────────────────────
   const handleExportOrdersToExcel = () => {
@@ -458,13 +521,25 @@ export const AdminOrdersTab = ({
 
                       {/* Payment Status badge */}
                       <td className="p-4 align-middle">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
-                          o.payment 
-                            ? "bg-emerald-50 dark:bg-emerald-950/20 text-[#388E3C] border-emerald-100" 
-                            : "bg-amber-50 dark:bg-amber-950/20 text-amber-600 border-amber-100"
-                        }`}>
-                          {o.payment ? "Paid" : "Pending"}
-                        </span>
+                        <div className="flex flex-col gap-1">
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                            o.payment 
+                              ? "bg-emerald-50 dark:bg-emerald-950/20 text-[#388E3C] border-emerald-100 dark:border-emerald-800" 
+                              : "bg-amber-50 dark:bg-amber-950/20 text-amber-600 border-amber-100 dark:border-amber-800"
+                          }`}>
+                            {o.payment ? "Paid" : "Pending"}
+                          </span>
+
+                          {o.paymentMethod === "YouPI" || o.youpiUtr ? (
+                            <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                              <Zap size={10} /> YouPI UPI
+                            </span>
+                          ) : (
+                            <span className="text-[9px] text-[#717388] font-medium">
+                              {o.paymentMethod || "Standard"}
+                            </span>
+                          )}
+                        </div>
                       </td>
 
                       {/* Fulfillment Status badge */}
@@ -604,6 +679,94 @@ export const AdminOrdersTab = ({
                               </div>
                             </div>
                           </div>
+
+                          {/* YouPI Payment & Refund Management */}
+                          <div className="p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-950/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-600 text-white flex items-center gap-1">
+                                  <Zap size={10} /> YouPI Direct UPI
+                                </span>
+                                {o.payment ? (
+                                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                                    <ShieldCheck size={14} /> Paid &amp; Credited to Bank
+                                  </span>
+                                ) : (
+                                  <span className="text-xs font-bold text-amber-600 dark:text-amber-400">
+                                    Awaiting Credit Confirmation
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-xs text-zinc-700 dark:text-zinc-300 flex flex-wrap gap-x-4 gap-y-1 pt-1 font-mono">
+                                {o.youpiUtr && (
+                                  <span>
+                                    <strong>Payment UTR:</strong> {o.youpiUtr}{" "}
+                                    <button
+                                      type="button"
+                                      onClick={() => handleCopy(o.youpiUtr, `utr-${o._id}`)}
+                                      className="text-emerald-600 hover:text-emerald-500 font-sans cursor-pointer underline text-[10px] ml-1"
+                                    >
+                                      {copiedKey === `utr-${o._id}` ? "Copied!" : "Copy"}
+                                    </button>
+                                  </span>
+                                )}
+                                {o.youpiCustomerVpa && (
+                                  <span>
+                                    <strong>Customer UPI ID:</strong> {o.youpiCustomerVpa}{" "}
+                                    <button
+                                      type="button"
+                                      onClick={() => handleCopy(o.youpiCustomerVpa, `vpa-${o._id}`)}
+                                      className="text-emerald-600 hover:text-emerald-500 font-sans cursor-pointer underline text-[10px] ml-1"
+                                    >
+                                      {copiedKey === `vpa-${o._id}` ? "Copied!" : "Copy"}
+                                    </button>
+                                  </span>
+                                )}
+                                {o.youpiRefundUtr && (
+                                  <span className="text-purple-600 dark:text-purple-400 font-bold">
+                                    <strong>Refund UTR:</strong> {o.youpiRefundUtr}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              {!o.payment && (
+                                <button
+                                  type="button"
+                                  disabled={verifyingOrderId === (o._id || o.orderId)}
+                                  onClick={() => handleVerifyYoupi(o._id || o.orderId)}
+                                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer disabled:opacity-50"
+                                >
+                                  {verifyingOrderId === (o._id || o.orderId) ? (
+                                    <Loader2 size={12} className="animate-spin" />
+                                  ) : (
+                                    <Check size={12} />
+                                  )}
+                                  Verify Bank Credit
+                                </button>
+                              )}
+
+                              {o.status === "Cancelled" && (
+                                o.youpiRefundUtr ? (
+                                  <span className="px-3 py-1 rounded-lg bg-purple-100 text-purple-900 dark:bg-purple-950 dark:text-purple-200 text-xs font-extrabold flex items-center gap-1 border border-purple-300 dark:border-purple-800">
+                                    <RotateCcw size={12} /> UPI Refund Complete
+                                  </span>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setRefundModalOrder(o);
+                                      setRefundUtrInput("");
+                                    }}
+                                    className="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-sm cursor-pointer"
+                                  >
+                                    <RotateCcw size={12} /> Issue UPI Refund (₹{Number(o.amount || 0).toFixed(2)})
+                                  </button>
+                                )
+                              )}
+                            </div>
+                          </div>
                         </div>
                         </td>
                       </tr>
@@ -622,6 +785,168 @@ export const AdminOrdersTab = ({
           </table>
         </div>
       </div>
+
+      {/* ── YouPI Refund Drawer / Modal ────────────────────────────────────── */}
+      {refundModalOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5">
+            <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-600 flex items-center justify-center">
+                  <RotateCcw size={18} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-zinc-900 dark:text-zinc-100">
+                    Issue Direct UPI Refund
+                  </h3>
+                  <p className="text-[11px] text-zinc-500">
+                    Order #{refundModalOrder.orderId || refundModalOrder._id?.slice(-8)}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setRefundModalOrder(null)}
+                className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 text-lg cursor-pointer"
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Refund Guidance Note */}
+            <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[11px] text-amber-800 dark:text-amber-200 leading-relaxed">
+              <strong>Safe Refund Procedure:</strong>
+              <ol className="list-decimal pl-4 mt-1 space-y-0.5 text-[10px]">
+                <li>Copy the customer UPI ID below or tap the direct payment link on mobile.</li>
+                <li>Send exactly <strong>₹{Number(refundModalOrder.amount || 0).toFixed(2)}</strong> from your business/personal UPI app.</li>
+                <li>Copy the <strong>12-digit UTR</strong> from your bank's debited confirmation screen and paste below.</li>
+                <li>Click <strong>Confirm Refund</strong>. The order will be locked as Refunded and an official receipt email will be automatically sent to the customer.</li>
+              </ol>
+            </div>
+
+            {/* Customer & Payment Info Pills */}
+            <div className="grid grid-cols-2 gap-3 text-xs bg-zinc-50 dark:bg-zinc-800/40 p-3.5 rounded-xl border border-zinc-200 dark:border-zinc-800">
+              <div>
+                <span className="text-[10px] text-zinc-400 block font-bold uppercase">Customer Name</span>
+                <span className="font-semibold text-zinc-800 dark:text-zinc-200 truncate block">
+                  {refundModalOrder.userName || refundModalOrder.address?.fullName || "Customer"}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] text-zinc-400 block font-bold uppercase">Customer Email</span>
+                <span className="font-semibold text-zinc-800 dark:text-zinc-200 truncate block">
+                  {refundModalOrder.userEmail || refundModalOrder.address?.email || "—"}
+                </span>
+              </div>
+
+              <div className="col-span-2 pt-2 border-t border-zinc-200/50 dark:border-zinc-700/50 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-zinc-400 block font-bold uppercase">Customer UPI ID (VPA)</span>
+                  <span className="font-mono font-bold text-xs text-emerald-600 dark:text-emerald-400">
+                    {refundModalOrder.youpiCustomerVpa || "Not specified (Check contact)"}
+                  </span>
+                </div>
+                {refundModalOrder.youpiCustomerVpa && (
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(refundModalOrder.youpiCustomerVpa, "modal-vpa")}
+                    className="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded text-[10px] font-bold cursor-pointer"
+                  >
+                    {copiedKey === "modal-vpa" ? "Copied!" : "Copy VPA"}
+                  </button>
+                )}
+              </div>
+
+              <div className="col-span-2 flex items-center justify-between pt-2 border-t border-zinc-200/50 dark:border-zinc-700/50">
+                <div>
+                  <span className="text-[10px] text-zinc-400 block font-bold uppercase">Refund Amount</span>
+                  <span className="font-extrabold text-sm text-zinc-900 dark:text-zinc-100">
+                    ₹{Number(refundModalOrder.amount || 0).toFixed(2)}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleCopy(String(refundModalOrder.amount), "modal-amt")}
+                  className="px-2.5 py-1 bg-zinc-200 dark:bg-zinc-700 rounded text-[10px] font-bold cursor-pointer"
+                >
+                  {copiedKey === "modal-amt" ? "Copied!" : "Copy Amount"}
+                </button>
+              </div>
+
+              {refundModalOrder.youpiCustomerVpa && (
+                <div className="col-span-2 pt-1">
+                  <a
+                    href={`upi://pay?pa=${encodeURIComponent(refundModalOrder.youpiCustomerVpa)}&pn=${encodeURIComponent(refundModalOrder.userName || "Customer")}&am=${encodeURIComponent(refundModalOrder.amount)}&cu=INR&tn=Refund for RamCart Order ${refundModalOrder.orderId || refundModalOrder._id}`}
+                    className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm text-center"
+                  >
+                    <ExternalLink size={14} /> Open UPI App on Mobile to Send Refund
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* Form Inputs */}
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+                  Bank Refund 12-Digit UTR <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  maxLength={12}
+                  placeholder="e.g. 512345678901 (from debited SMS/app)"
+                  value={refundUtrInput}
+                  onChange={(e) => setRefundUtrInput(e.target.value.replace(/\D/g, "").slice(0, 12))}
+                  className="w-full px-3.5 py-2.5 text-xs font-mono font-bold rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 outline-none focus:border-rose-500"
+                />
+                <span className="text-[10px] text-zinc-400 mt-1 block">
+                  {refundUtrInput.length}/12 digits entered
+                </span>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 mb-1">
+                  Refund Reason (included in customer email)
+                </label>
+                <input
+                  type="text"
+                  value={refundReasonInput}
+                  onChange={(e) => setRefundReasonInput(e.target.value)}
+                  placeholder="e.g. Customer requested cancellation / Out of stock"
+                  className="w-full px-3.5 py-2 text-xs rounded-xl border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 outline-none focus:border-rose-500"
+                />
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+              <button
+                type="button"
+                onClick={() => setRefundModalOrder(null)}
+                className="px-4 py-2 text-xs font-bold rounded-xl text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isRefunding || refundUtrInput.trim().length !== 12}
+                onClick={handleConfirmRefund}
+                className="px-5 py-2 text-xs font-extrabold rounded-xl bg-rose-600 hover:bg-rose-500 text-white flex items-center gap-1.5 shadow-md cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {isRefunding ? (
+                  <>
+                    <Loader2 size={12} className="animate-spin" /> Recording Refund...
+                  </>
+                ) : (
+                  <>
+                    <Check size={14} /> Confirm Refund &amp; Email Customer
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

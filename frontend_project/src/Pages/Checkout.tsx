@@ -19,10 +19,7 @@ import {
   ChevronRight,
   Smartphone,
   QrCode,
-  Building,
-  Wallet,
-  Zap,
-  Info
+  Zap
 } from "lucide-react";
 
 import { useCart } from "../features/checkout/hooks/useCart";
@@ -35,12 +32,13 @@ import {
   placeOrderTransaction, 
   validateCoupon 
 } from "../features/checkout/services/orderService";
+import YoupiPaymentModal from "../Components/YoupiPaymentModal";
 import {
-  loadRazorpayScript,
-  fetchPaymentConfig,
-  createRazorpayOrder,
-  verifyRazorpayPayment
-} from "../features/checkout/services/razorpayService";
+  fetchYoupiConfig,
+  initiateYoupiPayment,
+  submitYoupiUtr,
+  YoupiConfig
+} from "../features/checkout/services/youpiService";
 import { useAppDispatch } from "../store/hooks";
 import { addToast } from "../store/slices/toastSlice";
 import { fetchProductById } from "../features/catalog/services/productService";
@@ -95,17 +93,6 @@ export const Checkout: React.FC = () => {
   const checkoutTotal = buyNow && buyNowItem ? buyNowItem.price * buyNowItem.quantity : cartTotal;
   const checkoutCount = buyNow && buyNowItem ? buyNowItem.quantity : cartCount;
 
-  // ── Payment Gateway State ────────────────────────────────────────────────────
-  const [paymentConfig, setPaymentConfig] = useState<{
-    keyId: string;
-    isConfigured: boolean;
-    isTestMode: boolean;
-  }>({
-    keyId: "",
-    isConfigured: false,
-    isTestMode: true,
-  });
-
   const [couponInput, setCouponInput] = useState("");
   const [couponCode, setCouponCode] = useState<string | null>(null);
   const [couponResult, setCouponResult] = useState<{
@@ -118,11 +105,22 @@ export const Checkout: React.FC = () => {
   const [couponLoading, setCouponLoading] = useState(false);
 
   const [isProcessing, setIsProcessing] = useState(false);
-  const [processingMessage, setProcessingMessage] = useState("Initializing Razorpay Secure Gateway...");
+  const [processingMessage, setProcessingMessage] = useState("Initializing Secure UPI Gateway...");
   const [isSuccess, setIsSuccess] = useState(false);
   const [createdOrderId, setCreatedOrderId] = useState("");
   const [verifiedPaymentId, setVerifiedPaymentId] = useState("");
   const [transactionError, setTransactionError] = useState<string | null>(null);
+
+  // YouPI Gateway State
+  const [youpiConfig, setYoupiConfig] = useState<YoupiConfig | null>(null);
+  const [showYoupiModal, setShowYoupiModal] = useState(false);
+  const [youpiSession, setYoupiSession] = useState<{
+    orderId: string;
+    upiUri: string;
+    amount: number;
+    merchantVpa: string;
+    merchantName: string;
+  } | null>(null);
 
   // Billing address state
   const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
@@ -140,18 +138,16 @@ export const Checkout: React.FC = () => {
 
   // ── Effects ──────────────────────────────────────────────────────────────────
   useEffect(() => {
-    // Load Razorpay config from backend
+    // Load YouPI config from backend
     const initGateway = async () => {
-      const cfg = await fetchPaymentConfig();
-      if (cfg.success) {
-        setPaymentConfig({
-          keyId: cfg.keyId,
-          isConfigured: cfg.isConfigured,
-          isTestMode: cfg.isTestMode
-        });
+      try {
+        const yConfig = await fetchYoupiConfig();
+        if (yConfig.success) {
+          setYoupiConfig(yConfig);
+        }
+      } catch (e) {
+        console.warn("YouPI config fetch error:", e);
       }
-      // Pre-load Razorpay checkout script
-      loadRazorpayScript();
     };
     initGateway();
   }, []);
@@ -307,7 +303,7 @@ export const Checkout: React.FC = () => {
     }
   };
 
-  // ── Main Razorpay Standard Checkout Flow ────────────────────────────────────
+  // ── Main YouPI Direct UPI Checkout Flow ─────────────────────────────────────
   const onSubmitCheckout = async (data: CheckoutValues) => {
     if (!user) {
       dispatch(addToast({ message: "Please sign in to place an order.", type: "error" }));
@@ -322,7 +318,7 @@ export const Checkout: React.FC = () => {
 
     setIsProcessing(true);
     setTransactionError(null);
-    setProcessingMessage("Contacting Razorpay Secure Gateway...");
+    setProcessingMessage("Generating secure dynamic YouPI UPI QR & Intent...");
 
     // Format order items
     const orderItems = checkoutItems.map((item) => ({
@@ -335,99 +331,61 @@ export const Checkout: React.FC = () => {
       price: item.price
     }));
 
-    // Step 1: Ensure Razorpay SDK is loaded
-    const sdkLoaded = await loadRazorpayScript();
-    if (!sdkLoaded || typeof window.Razorpay === "undefined") {
-      setIsProcessing(false);
-      setTransactionError("Could not load Razorpay payment script. Please check your internet connection.");
-      dispatch(addToast({ message: "Payment SDK failed to load.", type: "error" }));
-      return;
-    }
-
-    // Step 2: Create Razorpay Order on Express Backend
-    setProcessingMessage("Generating secure payment token...");
-    const orderResponse = await createRazorpayOrder(finalPayable, "INR");
-
-    const keyId = orderResponse?.keyId || paymentConfig.keyId || "rzp_test_Tw3b1KNqwhhV6D";
-    const amountInPaise = orderResponse?.order?.amount || Math.round(finalPayable * 100);
-    const orderId = orderResponse?.order?.id; // Optional in direct test mode
-
-    // Step 3: Open Razorpay Standard Checkout Modal
-    setProcessingMessage("Waiting for payment completion in Razorpay window...");
-
-    const options: any = {
-      key: keyId,
-      amount: amountInPaise, // in paise
-      currency: "INR",
-      name: "RamCart Fashion",
-      description: `Purchase of ${checkoutCount} item${checkoutCount > 1 ? "s" : ""}`,
-      image: "/RamCart_brand_logo_v2.png",
-      prefill: {
-        name: data.address.fullName,
-        email: user.email || "",
-        contact: data.address.phone
-      },
-      notes: {
-        shipping_address: `${data.address.addressLine}, ${data.address.city}, ${data.address.state} - ${data.address.postalCode}`
-      },
-      ...(orderId ? { order_id: orderId } : {}),
-      theme: {
-        color: "#f23e70"
-      },
-      handler: async function (response: any) {
-        // Payment successful on Razorpay side, now verify signature on server!
-        setProcessingMessage("Confirming payment and placing your order...");
-        setIsProcessing(true);
-
-        if (response.razorpay_signature && response.razorpay_order_id) {
-          const verifyResponse = await verifyRazorpayPayment({
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature,
-            items: orderItems,
-            amount: finalPayable,
-            address: data.address,
-            couponCode: couponCode
-          });
-
-          if (verifyResponse.success && verifyResponse.orderId) {
-            setCreatedOrderId(verifyResponse.orderId);
-            setVerifiedPaymentId(response.razorpay_payment_id);
-            setIsSuccess(true);
-            if (!buyNow) {
-              await clearCart();
-            }
-            dispatch(addToast({ message: "Payment verified! Order confirmed.", type: "success" }));
-            return;
-          }
-        }
-
-        // Fallback order placement if signature verification not required in test mode
-        await handleDirectSimulationOrder(data.address);
-        setVerifiedPaymentId(response.razorpay_payment_id || `pay_${Date.now()}`);
-      },
-      modal: {
-        ondismiss: function () {
-          setIsProcessing(false);
-          dispatch(addToast({ message: "Payment window was closed. Cart items are safe.", type: "info" }));
-        }
-      }
-    };
-
     try {
-      const rzpInstance = new window.Razorpay(options);
-
-      rzpInstance.on("payment.failed", function (response: any) {
-        setIsProcessing(false);
-        const failReason = response?.error?.description || "Payment failed or was declined by bank.";
-        setTransactionError(`Payment Failed: ${failReason}`);
-        dispatch(addToast({ message: failReason, type: "error" }));
+      const session = await initiateYoupiPayment({
+        items: orderItems,
+        amount: finalPayable,
+        address: data.address,
+        couponCode: couponCode || undefined
       });
 
-      rzpInstance.open();
+      setIsProcessing(false);
+      setYoupiSession({
+        orderId: session.orderId,
+        upiUri: session.upiUri,
+        amount: session.amount,
+        merchantVpa: session.merchantVpa,
+        merchantName: session.merchantName
+      });
+      setShowYoupiModal(true);
     } catch (err: any) {
       setIsProcessing(false);
-      setTransactionError(err.message || "Failed to launch Razorpay popup.");
+      console.error("YouPI payment initiation error:", err);
+      const errMsg = err.message || "Failed to initiate YouPI payment session.";
+      setTransactionError(errMsg);
+      dispatch(addToast({ message: errMsg, type: "error" }));
+    }
+  };
+
+  const handleYoupiSubmitUtr = async (utr: string, customerVpa?: string) => {
+    if (!youpiSession) return;
+    setProcessingMessage("Validating 12-digit UTR with bank records...");
+    setIsProcessing(true);
+
+    try {
+      const response = await submitYoupiUtr({
+        orderId: youpiSession.orderId,
+        utr,
+        customerVpa
+      });
+
+      setIsProcessing(false);
+
+      if (response.success) {
+        setShowYoupiModal(false);
+        setCreatedOrderId(response.orderId);
+        setVerifiedPaymentId(utr);
+        setIsSuccess(true);
+        if (!buyNow) {
+          await clearCart();
+        }
+        dispatch(addToast({ message: "Payment verified successfully via YouPI!", type: "success" }));
+      } else {
+        throw new Error(response.message || "UTR validation failed.");
+      }
+    } catch (err: any) {
+      setIsProcessing(false);
+      throw err;
     }
   };
 
@@ -714,76 +672,81 @@ export const Checkout: React.FC = () => {
                 </AnimatePresence>
               </div>
 
-              {/* Step 2: Payment Method (Razorpay Integration) */}
+              {/* Step 2: Payment Method (YouPI Zero-Fee Direct UPI) */}
               <div className="checkout-section-card">
                 <h3 className="section-card-title">
                   <CreditCard className="title-icon text-accent-pink" size={18} />
                   2. Payment Method
                 </h3>
 
-                {/* Razorpay Gateway Card */}
-                <div className="razorpay-method-card">
+                {/* YouPI Gateway Card */}
+                <div className="razorpay-method-card border-2 border-emerald-500/30 dark:border-emerald-500/20 bg-gradient-to-br from-emerald-500/5 via-transparent to-emerald-500/5">
                   <div className="razorpay-method-header">
                     <div className="razorpay-brand-wrap">
-                      <span className="razorpay-logo-badge">
-                        <Zap size={14} /> Razorpay
+                      <span className="razorpay-logo-badge bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold px-3 py-1 rounded-lg flex items-center gap-1.5 shadow-sm">
+                        <Zap size={14} className="animate-pulse" /> YouPI Gateway
                       </span>
                       <div className="razorpay-title-group">
-                        <h4>Online Payment (Instant &amp; 100% Secure)</h4>
-                        <p>Pay smoothly via UPI, Cards, NetBanking, or Wallets</p>
+                        <h4 className="flex items-center gap-2">
+                          Direct Bank UPI Transfer
+                          <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                            0% Extra Charges
+                          </span>
+                        </h4>
+                        <p>Instant credit straight to merchant bank account via Google Pay, PhonePe, Paytm, or BHIM</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="recommended-pill">Recommended</span>
-                      {paymentConfig.isTestMode && (
-                        <span className="test-mode-pill">
-                          <Info size={12} /> Test Mode Active
-                        </span>
-                      )}
+                      <span className="recommended-pill bg-emerald-600 text-white">Recommended</span>
                     </div>
                   </div>
 
                   {/* Payment Methods Visual Badges */}
                   <div className="payment-options-grid">
-                    <div className="payment-option-pill active">
-                      <Smartphone size={16} className="text-green-500" />
-                      <span>UPI &amp; GPay</span>
+                    <div className="payment-option-pill active border-emerald-500/30">
+                      <Smartphone size={16} className="text-emerald-500" />
+                      <span>Google Pay</span>
                     </div>
-                    <div className="payment-option-pill active">
+                    <div className="payment-option-pill active border-purple-500/30">
+                      <Smartphone size={16} className="text-purple-500" />
+                      <span>PhonePe</span>
+                    </div>
+                    <div className="payment-option-pill active border-sky-500/30">
+                      <Smartphone size={16} className="text-sky-500" />
+                      <span>Paytm UPI</span>
+                    </div>
+                    <div className="payment-option-pill active border-amber-500/30">
+                      <Smartphone size={16} className="text-amber-500" />
+                      <span>BHIM UPI</span>
+                    </div>
+                    <div className="payment-option-pill active border-cyan-500/30">
                       <QrCode size={16} className="text-cyan-500" />
-                      <span>Scan QR Code</span>
-                    </div>
-                    <div className="payment-option-pill active">
-                      <CreditCard size={16} className="text-blue-500" />
-                      <span>All Bank Cards</span>
-                    </div>
-                    <div className="payment-option-pill active">
-                      <Building size={16} className="text-purple-500" />
-                      <span>NetBanking</span>
-                    </div>
-                    <div className="payment-option-pill active">
-                      <Wallet size={16} className="text-amber-500" />
-                      <span>Wallets</span>
+                      <span>Scan Dynamic QR</span>
                     </div>
                   </div>
 
-                  {/* Quick Tip for Test Mode & Switching to UPI */}
-                  <div className="p-2.5 mt-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-[11px] text-blue-900 dark:text-blue-200 leading-relaxed flex items-start gap-2">
-                    <Info size={14} className="shrink-0 mt-0.5 text-blue-600 dark:text-blue-400" />
-                    <span>
-                      <strong>UPI / Card Switch Tip:</strong> Inside Razorpay popup, click the <strong>&larr; Back arrow</strong> anytime to change payment mode back to UPI. In test mode, enter <code>success@razorpay</code> to approve instantly!
+                  {/* Merchant VPA info badge */}
+                  <div className="p-3 mt-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 text-[11px] text-emerald-900 dark:text-emerald-200 leading-relaxed flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck size={16} className="shrink-0 text-emerald-600 dark:text-emerald-400" />
+                      <span>
+                        Verified Store VPA: <strong className="font-mono text-xs">{youpiConfig?.merchantVpa || "ramtechnow@okaxis"}</strong> ({youpiConfig?.merchantName || "RamCart"})
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-white dark:bg-zinc-800 px-2 py-0.5 rounded-md border border-emerald-300 dark:border-emerald-700">
+                      Instant Settlement
                     </span>
                   </div>
 
                   {/* Security Points */}
                   <div className="razorpay-trust-points">
                     <div className="razorpay-trust-item">
-                      <ShieldCheck size={14} />
-                      <span>256-bit Bank Grade SSL Encryption | RBI Regulated Gateway</span>
+                      <ShieldCheck size={14} className="text-emerald-600" />
+                      <span>NPCI Verified UPI Protocol &bull; 100% Peer-to-Bank Encrypted</span>
                     </div>
                     <div className="razorpay-trust-item">
-                      <CheckCircle2 size={14} />
-                      <span>Instant automatic refunds if transaction is interrupted at any stage</span>
+                      <CheckCircle2 size={14} className="text-emerald-600" />
+                      <span>Auto-verification with 12-digit Bank UTR &bull; 1-click refund protection</span>
                     </div>
                   </div>
                 </div>
@@ -793,13 +756,13 @@ export const Checkout: React.FC = () => {
               <button 
                 type="submit" 
                 disabled={checkoutTotal === 0 || isProcessing}
-                className="checkout-submit-btn cursor-pointer py-4 hover:opacity-95 text-xs md:text-sm font-extrabold uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-accent-pink text-white rounded-xl shadow-lg"
+                className="checkout-submit-btn cursor-pointer py-4 hover:opacity-95 text-xs md:text-sm font-extrabold uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-gradient-to-r from-accent-pink to-rose-600 text-white rounded-xl shadow-lg transition-transform active:scale-[0.99]"
               >
                 {savings > 0 && (
                   <span className="savings-badge">Saving ₹{savings.toFixed(2)}</span>
                 )}
                 <Lock size={16} />
-                Proceed to Pay ₹{finalPayable.toFixed(2)} via Razorpay
+                Proceed to Pay ₹{finalPayable.toFixed(2)} via YouPI UPI
               </button>
             </form>
           </div>
@@ -895,12 +858,29 @@ export const Checkout: React.FC = () => {
 
               {/* Secure Checkout Trust Footer */}
               <div className="mt-4 pt-3 border-t border-border flex items-center justify-center gap-2 text-[10px] text-text-muted">
-                <ShieldCheck size={14} className="text-green-500" />
-                <span>Protected by Razorpay Checkout</span>
+                <ShieldCheck size={14} className="text-emerald-500" />
+                <span>Zero Fee UPI by YouPI Payment Gateway</span>
               </div>
             </div>
           </div>
         </div>
+      )}
+
+      {/* YouPI Payment Modal */}
+      {showYoupiModal && youpiSession && (
+        <YoupiPaymentModal
+          isOpen={showYoupiModal}
+          onClose={() => {
+            setShowYoupiModal(false);
+            dispatch(addToast({ message: "UPI Payment window closed. Items remain in cart.", type: "info" }));
+          }}
+          orderId={youpiSession.orderId}
+          amount={youpiSession.amount}
+          upiUri={youpiSession.upiUri}
+          merchantVpa={youpiSession.merchantVpa}
+          merchantName={youpiSession.merchantName}
+          onSubmitUtr={handleYoupiSubmitUtr}
+        />
       )}
 
       {/* Secure Checkout Processing Overlay / Modal */}
@@ -908,12 +888,12 @@ export const Checkout: React.FC = () => {
         {isProcessing && (
           <div className="checkout-overlay">
             <div className="processing-card max-w-sm w-full mx-4 text-center bg-bg-secondary p-6 rounded-2xl border border-border shadow-2xl">
-              <Loader2 className="animate-spin text-accent-pink mx-auto mb-4" size={44} />
-              <h3 className="font-extrabold text-base mb-2">Connecting to Razorpay</h3>
+              <Loader2 className="animate-spin text-emerald-500 mx-auto mb-4" size={44} />
+              <h3 className="font-extrabold text-base mb-2">Connecting to YouPI</h3>
               <p className="text-xs text-text-muted">{processingMessage}</p>
               <div className="pci-badge flex items-center justify-center gap-1.5 text-[10px] text-text-muted mt-4">
-                <ShieldCheck className="pci-icon text-green-500" size={14} />
-                256-Bit SSL Bank Grade Security
+                <ShieldCheck className="pci-icon text-emerald-500" size={14} />
+                NPCI Bank Grade UPI Security
               </div>
             </div>
           </div>
@@ -922,12 +902,12 @@ export const Checkout: React.FC = () => {
         {isSuccess && (
           <div className="checkout-overlay">
             <div className="success-card max-w-md w-full mx-4 text-center bg-bg-secondary p-6 rounded-2xl border border-border shadow-2xl">
-              <div className="success-icon-wrap text-green-500 mx-auto mb-4">
+              <div className="success-icon-wrap text-emerald-500 mx-auto mb-4">
                 <CheckCircle2 size={56} />
               </div>
-              <h2 className="text-xl font-black">Payment Verified &amp; Order Confirmed!</h2>
+              <h2 className="text-xl font-black">UPI Payment Verified &amp; Order Confirmed!</h2>
               <p className="text-xs text-text-muted mt-1">
-                Your payment was received successfully via Razorpay. We have sent an invoice to your registered email.
+                Your payment was received successfully via YouPI Direct UPI. Order confirmation and invoice sent to your registered email.
               </p>
 
               <div className="success-details w-full mt-4 p-4 bg-bg-primary border border-border rounded-xl text-left">
@@ -937,8 +917,8 @@ export const Checkout: React.FC = () => {
                 </div>
                 {verifiedPaymentId && (
                   <div className="success-row flex justify-between text-xs py-1.5 border-b border-border/10">
-                    <span className="text-text-muted">Razorpay Payment ID:</span>
-                    <strong className="text-green-400 font-mono text-[11px]">{verifiedPaymentId}</strong>
+                    <span className="text-text-muted">Verified Bank UTR:</span>
+                    <strong className="text-emerald-400 font-mono text-[11px] font-bold">{verifiedPaymentId}</strong>
                   </div>
                 )}
                 <div className="success-row flex justify-between text-xs py-1.5 border-b border-border/10">
@@ -947,7 +927,7 @@ export const Checkout: React.FC = () => {
                 </div>
                 <div className="success-row flex justify-between text-xs py-1.5">
                   <span className="text-text-muted">Payment Mode:</span>
-                  <strong className="text-accent-pink font-bold">Razorpay (UPI / Card)</strong>
+                  <strong className="text-emerald-500 font-bold">YouPI Direct UPI (0% Fee)</strong>
                 </div>
               </div>
 
