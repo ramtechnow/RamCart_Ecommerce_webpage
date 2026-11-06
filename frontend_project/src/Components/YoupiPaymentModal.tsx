@@ -323,15 +323,35 @@ export const YoupiPaymentModal: React.FC<YoupiPaymentModalProps> = ({
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Your Paying UPI ID <span className="text-slate-400 font-normal">(Optional &bull; For 1-click refund if cancelled)</span>
+                Your Paying UPI ID <span className="text-slate-400 font-normal">(Optional &bull; Destination for instant refund if cancelled)</span>
               </label>
               <input
                 type="text"
                 placeholder="e.g. yourname@okhdfcbank or yourname@apl"
                 value={customerVpaInput}
-                onChange={(e) => setCustomerVpaInput(e.target.value)}
+                onChange={(e) => setCustomerVpaInput(e.target.value.trim().toLowerCase())}
                 className="w-full h-10 px-3 text-xs font-mono rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-[#1d1c2b] text-slate-900 dark:text-white outline-none focus:border-emerald-500 transition-colors"
               />
+              <div className="flex flex-wrap gap-1 mt-1.5 items-center">
+                <span className="text-[10px] text-slate-400">Add handle:</span>
+                {['@okhdfcbank', '@ybl', '@paytm', '@apl', '@okaxis', '@oksbi'].map((handle) => (
+                  <button
+                    key={handle}
+                    type="button"
+                    onClick={() => {
+                      const prefix = customerVpaInput.split('@')[0] || '';
+                      if (prefix) {
+                        setCustomerVpaInput(prefix + handle);
+                      } else {
+                        setCustomerVpaInput(handle);
+                      }
+                    }}
+                    className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-emerald-500/10 hover:text-emerald-500 border border-slate-200 dark:border-white/10 cursor-pointer"
+                  >
+                    {handle}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {utrError && (

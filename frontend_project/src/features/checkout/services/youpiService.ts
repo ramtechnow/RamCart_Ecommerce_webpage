@@ -128,7 +128,8 @@ export const adminVerifyYoupiOrder = async (orderId: string): Promise<any> => {
 export const adminRefundYoupiOrder = async (
   orderId: string,
   refundUtr: string,
-  refundReason?: string
+  refundReason?: string,
+  customerVpa?: string
 ): Promise<any> => {
   const token = localStorage.getItem("auth-token");
   const res = await fetch(`${BACKEND_URL}/api/youpi/admin/refund`, {
@@ -137,7 +138,7 @@ export const adminRefundYoupiOrder = async (
       "Content-Type": "application/json",
       "auth-token": token || ""
     },
-    body: JSON.stringify({ orderId, refundUtr, refundReason })
+    body: JSON.stringify({ orderId, refundUtr, refundReason, customerVpa })
   });
   const data = await res.json();
   if (!res.ok || !data.success) {

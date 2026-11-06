@@ -478,7 +478,7 @@ exports.adminVerifyPayment = async (req, res) => {
 // ── 7. Admin Safe UPI Refund (With Customer UPI VPA & Refund UTR) ────────────
 exports.adminRefundPayment = async (req, res) => {
   try {
-    const { orderId, refundUtr, refundReason } = req.body;
+    const { orderId, refundUtr, refundReason, customerVpa } = req.body;
 
     if (!orderId) {
       return res.status(400).json({ success: false, error: "Order ID is required" });
@@ -499,6 +499,9 @@ exports.adminRefundPayment = async (req, res) => {
     order.youpiRefundUtr = cleanRefundUtr;
     order.youpiRefundedAt = new Date();
     order.cancellationReason = refundReason || 'Order refunded by Admin via direct UPI';
+    if (customerVpa && String(customerVpa).trim()) {
+      order.youpiCustomerVpa = String(customerVpa).trim().toLowerCase();
+    }
     await order.save();
 
     await YoupiTransaction.findOneAndUpdate(

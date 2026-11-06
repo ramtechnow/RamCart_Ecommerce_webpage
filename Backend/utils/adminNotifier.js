@@ -110,8 +110,65 @@ async function notifyDualAdminsNewOrder({ order, paymentMethod, utr, customerVpa
 async function notifyDualAdminsOrderCancelled({ order, reason, cancelledBy }) {
   try {
     const oId = order.orderId || order._id;
+    const isCod = order.paymentMethod === 'COD' || !order.payment;
     const customerVpa = order.youpiCustomerVpa || order.customerVpa || '';
     const refundAmt = Number(order.amount || 0).toFixed(2);
+
+    // If Cash on Delivery, no refund is needed because no money was collected
+    if (isCod) {
+      const codHtml = `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
+          <div style="background: linear-gradient(135deg, #475569 0%, #334155 100%); padding: 24px; text-align: center; color: #ffffff;">
+            <h1 style="margin: 0; font-size: 20px; font-weight: 900; letter-spacing: 0.5px;">🚚 COD ORDER CANCELLED</h1>
+            <p style="margin: 6px 0 0 0; font-size: 13px; color: #cbd5e1;">Order #${oId} Cancelled &bull; No Refund Required</p>
+          </div>
+          <div style="padding: 24px;">
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="font-size: 12px; color: #64748b; font-weight: bold;">CANCELLED ORDER:</td>
+                  <td style="font-size: 14px; font-weight: 900; color: #0f172a; text-align: right; font-family: monospace;">#${oId}</td>
+                </tr>
+                <tr>
+                  <td style="font-size: 12px; color: #64748b; font-weight: bold; padding-top: 8px;">ORDER AMOUNT:</td>
+                  <td style="font-size: 16px; font-weight: 900; color: #475569; text-align: right; padding-top: 8px;">₹${refundAmt}</td>
+                </tr>
+                <tr>
+                  <td style="font-size: 12px; color: #64748b; font-weight: bold; padding-top: 8px;">PAYMENT METHOD:</td>
+                  <td style="font-size: 12px; font-weight: bold; color: #ea580c; text-align: right; padding-top: 8px;">Cash on Delivery (COD)</td>
+                </tr>
+                <tr>
+                  <td style="font-size: 12px; color: #64748b; font-weight: bold; padding-top: 8px;">CANCELLED BY:</td>
+                  <td style="font-size: 12px; font-weight: bold; color: #475569; text-align: right; padding-top: 8px;">${cancelledBy || "Customer"}</td>
+                </tr>
+                <tr>
+                  <td style="font-size: 12px; color: #64748b; font-weight: bold; padding-top: 8px;">REASON:</td>
+                  <td style="font-size: 12px; color: #475569; text-align: right; padding-top: 8px;">${reason || "Customer requested cancellation"}</td>
+                </tr>
+              </table>
+            </div>
+            <div style="padding: 14px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 12px; color: #065f46; line-height: 1.5; text-align: center;">
+              ✅ <strong>No Refund Action Needed:</strong> Since this was a Cash on Delivery order, no advance money was collected from the customer. Reserved inventory has been automatically restocked in the warehouse.
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+              <a href="https://ecommerce-website-dfd55.web.app/admin" style="display: inline-block; background: #0f172a; color: #ffffff; padding: 11px 24px; font-size: 12px; font-weight: 800; text-decoration: none; border-radius: 10px;">
+                View Orders in Admin Console &rarr;
+              </a>
+            </div>
+          </div>
+          <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 12px; text-align: center; font-size: 11px; color: #94a3b8;">
+            Delivered to RamCart Store Admins (${PRIMARY_ADMIN_EMAIL} &amp; ${CC_ADMIN_EMAIL})
+          </div>
+        </div>
+      `;
+
+      return await sendEmail(
+        PRIMARY_ADMIN_EMAIL,
+        `ℹ️ [COD ORDER CANCELLED] Order #${oId} - Customer: ${order.userName || "Customer"} (No Refund Needed)`,
+        codHtml,
+        CC_ADMIN_EMAIL
+      );
+    }
 
     const upiPayLink = customerVpa 
       ? `upi://pay?pa=${encodeURIComponent(customerVpa)}&pn=${encodeURIComponent(order.userName || 'Customer')}&am=${encodeURIComponent(refundAmt)}&cu=INR&tn=${encodeURIComponent('Refund for RamCart Order ' + oId)}`
@@ -163,15 +220,17 @@ async function notifyDualAdminsOrderCancelled({ order, reason, cancelledBy }) {
             <strong>Customer:</strong> ${order.userName || order.address?.fullName || "Customer"} &bull; <strong>Email:</strong> ${order.userEmail || "N/A"} &bull; <strong>Phone:</strong> ${order.address?.phone || "N/A"}
           </div>
 
-          <!-- Direct UPI Refund 1-Click Button -->
+          <!-- Direct UPI Refund 1-Click Button & QR Code -->
           ${upiPayLink ? `
           <div style="text-align: center; margin-bottom: 18px; padding: 18px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px;">
             <p style="font-size: 13px; font-weight: bold; color: #065f46; margin: 0 0 12px 0;">
               ⚡ 1-Click Mobile Refund (Tap below on your phone to open GPay/PhonePe):
             </p>
-            <a href="${upiPayLink}" style="display: inline-block; background: #059669; color: #ffffff; padding: 14px 26px; font-size: 14px; font-weight: 900; text-decoration: none; border-radius: 10px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);">
+            <a href="${upiPayLink}" style="display: inline-block; background: #059669; color: #ffffff; padding: 14px 26px; font-size: 14px; font-weight: 900; text-decoration: none; border-radius: 10px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3); margin-bottom: 12px;">
               📲 Send ₹${refundAmt} Refund via UPI App
             </a>
+            <p style="font-size: 11px; color: #047857; margin: 8px 0 6px 0;">Or scan this QR code with Google Pay / PhonePe to send refund:</p>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(upiPayLink)}" alt="Scan to Refund" style="width: 180px; height: 180px; display: block; margin: 0 auto; border-radius: 8px; border: 1px solid #a7f3d0; background: #ffffff; padding: 6px;" />
           </div>
           ` : `
           <div style="text-align: center; margin-bottom: 18px; padding: 14px; background: #fffbeb; border: 1px solid #fef3c7; border-radius: 12px; font-size: 12px; color: #92400e;">
