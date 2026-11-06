@@ -550,10 +550,6 @@ async function sendEmail(email, subject, html, cc = null) {
     return { success: false, error: primaryErr.message };
   }
 }
-
-    return { success: false, error: primaryErr.message };
-  }
-}
 exports.sendEmail = sendEmail;
 
 // POST: Send OTP to Indian phone number for login/registration
